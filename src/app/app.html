@@ -1,0 +1,18 @@
+<!--
+  App Template - Template raíz de la aplicación
+
+  COMPONENTES:
+  - <p-toast>: Componente de PrimeNG que muestra notificaciones globales
+    - position="top-right": Las notificaciones aparecen arriba a la derecha
+    - Los toasts los dispara automáticamente el error.interceptor
+
+  - <router-outlet>: Aquí se renderizan los componentes según la ruta actual
+    - Similar a un {children} en React o <slot> en Vue
+    - Ejemplo: /login → LoginComponent se renderiza aquí
+-->
+
+<!-- ⭐ Toast global para notificaciones (errores, éxitos, warnings) -->
+<p-toast position="top-right"></p-toast>
+
+<!-- Outlet para las rutas de la aplicación -->
+<router-outlet></router-outlet>
