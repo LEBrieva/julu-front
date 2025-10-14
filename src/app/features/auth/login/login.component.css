@@ -1,0 +1,172 @@
+/* Container principal - centrado vertical y horizontal */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom right, #eff6ff, #e0e7ff);
+  padding: 1rem;
+}
+
+/* Wrapper del formulario */
+.login-wrapper {
+  width: 100%;
+  max-width: 28rem;
+}
+
+/* Header del formulario */
+.login-header {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.login-header i {
+  font-size: 3.75rem;
+  color: #4f46e5;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.login-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  color: #4b5563;
+}
+
+/* Formulario */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Campos del formulario */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-input {
+  width: 100%;
+}
+
+/*
+ * PrimeNG Password Component
+ *
+ * Usando la clase .p-password-fluid (oficial de PrimeNG 20)
+ * que hace que el input ocupe el 100% del ancho disponible.
+ *
+ * NO necesitamos !important ni hacks de CSS.
+ */
+
+/* Estados de validación para inputs */
+input.ng-invalid.ng-dirty,
+input.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+input.ng-valid.ng-dirty,
+input.ng-valid.ng-touched {
+  border-color: #22c55e;
+}
+
+/* Mensajes de error */
+:host ::ng-deep .p-message {
+  margin-top: 0.5rem;
+}
+
+:host ::ng-deep .p-message-error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Botón de submit */
+.form-actions {
+  padding-top: 0.5rem;
+}
+
+:host ::ng-deep .p-button {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+  transition: background-color 200ms, border-color 200ms;
+}
+
+:host ::ng-deep .p-button:hover {
+  background-color: #4338ca;
+  border-color: #4338ca;
+}
+
+:host ::ng-deep .p-button:disabled {
+  background-color: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Footer del formulario */
+.login-footer {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.login-footer p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.login-footer i {
+  color: #9ca3af;
+}
+
+/* Info de desarrollo */
+.dev-info {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Animación suave al cargar */
+.login-wrapper {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive - pantallas pequeñas */
+@media (max-width: 640px) {
+  .login-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-header i {
+    font-size: 3rem;
+  }
+}

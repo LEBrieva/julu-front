@@ -1,0 +1,89 @@
+<div class="login-container">
+  <div class="login-wrapper">
+    <!-- Card de PrimeNG para el formulario -->
+    <p-card>
+      <!-- Header del formulario -->
+      <ng-template pTemplate="header">
+        <div class="login-header">
+          <i class="pi pi-shopping-cart"></i>
+          <h1>E-Commerce</h1>
+          <p>Inicia sesión para continuar</p>
+        </div>
+      </ng-template>
+
+      <!-- Contenido: Formulario -->
+      <ng-template pTemplate="content">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- Campo Email -->
+          <div class="form-field">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              pInputText
+              formControlName="email"
+              placeholder="tu@email.com"
+              class="form-input"
+              [class.ng-invalid]="emailControl?.invalid && emailControl?.touched"
+              [class.ng-dirty]="emailControl?.touched"
+            />
+
+            <!-- Mensaje de error genérico usando el sistema centralizado -->
+            @if (getErrorMessage(emailControl)) {
+              <p-message severity="error" [text]="getErrorMessage(emailControl)!" />
+            }
+          </div>
+
+          <!-- Campo Password -->
+          <div class="form-field">
+            <label for="password" class="form-label">Contraseña</label>
+            <p-password
+              id="password"
+              formControlName="password"
+              placeholder="Tu contraseña"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="p-password-fluid"
+              [class.ng-invalid]="passwordControl?.invalid && passwordControl?.touched"
+              [class.ng-dirty]="passwordControl?.touched"
+            />
+
+            <!-- Mensaje de error genérico usando el sistema centralizado -->
+            @if (getErrorMessage(passwordControl)) {
+              <p-message severity="error" [text]="getErrorMessage(passwordControl)!" />
+            }
+          </div>
+
+          <!-- Botón de submit -->
+          <div class="form-actions">
+            <p-button
+              type="submit"
+              label="Iniciar Sesión"
+              icon="pi pi-sign-in"
+              [loading]="isLoading()"
+              [disabled]="loginForm.invalid"
+              styleClass="w-full"
+            />
+          </div>
+        </form>
+      </ng-template>
+
+      <!-- Footer del formulario -->
+      <ng-template pTemplate="footer">
+        <div class="login-footer">
+          <p class="text-sm text-gray-600">
+            <i class="pi pi-info-circle"></i>
+            Usa las credenciales de tu cuenta para acceder
+          </p>
+        </div>
+      </ng-template>
+    </p-card>
+
+    <!-- Información adicional (opcional - para desarrollo) -->
+    <div class="dev-info">
+      <p class="text-xs text-gray-500">
+        <strong>Desarrollo:</strong> Backend en http://localhost:3000
+      </p>
+    </div>
+  </div>
+</div>

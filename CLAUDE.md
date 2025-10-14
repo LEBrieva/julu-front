@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 2 completada (Core implementation) - Sistema de autenticación, interceptors y guards funcionales.
+**Estado actual**: FASE 3 completada (Login Component) - Sistema de autenticación funcional con formulario de login, validaciones centralizadas y redirección por rol.
 
 ---
 
@@ -52,21 +52,30 @@ src/app/
 │       └── auth.service.ts       # Autenticación con JWT + Signals
 │
 ├── features/                  # Módulos de funcionalidad (lazy loaded)
-│   ├── admin/                 # Panel de administración (PENDIENTE)
+│   ├── admin/                 # Panel de administración
 │   │   ├── dashboard/
-│   │   ├── products/
-│   │   ├── orders/
-│   │   └── users/
-│   ├── auth/                  # Login, registro (PENDIENTE)
+│   │   │   └── admin-dashboard.component.ts  # ✅ Dashboard admin (placeholder)
+│   │   ├── products/          # TODO FASE 5
+│   │   ├── orders/            # TODO FASE 6
+│   │   └── users/             # TODO FASE 7
+│   ├── auth/                  # Autenticación
 │   │   └── login/
-│   └── products/              # Catálogo público (PENDIENTE)
+│   │       ├── login.component.ts     # ✅ Componente de login
+│   │       ├── login.component.html   # ✅ Template con PrimeNG
+│   │       └── login.component.css    # ✅ Estilos con Tailwind
+│   └── products/
+│       └── product-list.component.ts  # ✅ Catálogo público (placeholder)
 │
-├── shared/                    # Componentes reutilizables (PENDIENTE)
-│   ├── components/
-│   └── pipes/
+├── shared/                    # Utilidades reutilizables
+│   ├── constants/
+│   │   └── validation-messages.ts     # ✅ Mensajes de validación centralizados
+│   ├── utils/
+│   │   └── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
+│   ├── components/            # TODO: Componentes reutilizables
+│   └── pipes/                 # TODO: Pipes personalizados
 │
 ├── app.config.ts              # Configuración global (providers, interceptors)
-├── app.routes.ts              # Definición de rutas (actualmente vacío)
+├── app.routes.ts              # ✅ Rutas configuradas (login, products, admin/*)
 ├── app.ts                     # Root component
 └── app.html                   # Root template (toast + router-outlet)
 ```

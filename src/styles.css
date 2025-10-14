@@ -1,8 +1,10 @@
-/* Tailwind CSS v4 - Import directives */
-@import "tailwindcss";
-
-/* PrimeIcons - Iconos de PrimeNG */
+/* PrimeIcons - Iconos de PrimeNG (debe ir primero) */
 @import "primeicons/primeicons.css";
+
+/* Tailwind CSS - Directivas */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Global styles */
 * {
