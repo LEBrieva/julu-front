@@ -7,19 +7,21 @@
 
 /**
  * Roles de usuario (debe coincidir con tu enum en backend)
+ * IMPORTANTE: Los valores deben ser lowercase para coincidir con el backend
  */
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN'
+  USER = 'user',
+  ADMIN = 'admin'
 }
 
 /**
  * Estados de usuario (debe coincidir con tu enum en backend)
+ * IMPORTANTE: Los valores deben ser lowercase para coincidir con el backend
  */
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED'
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended'
 }
 
 /**

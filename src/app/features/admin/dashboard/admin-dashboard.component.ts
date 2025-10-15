@@ -1,83 +1,191 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 
 /**
  * AdminDashboardComponent - Panel de administración
  *
- * PLACEHOLDER: Este componente será implementado en la FASE 4
- * Por ahora solo muestra un mensaje temporal y permite logout
+ * NOTA: Este componente se renderiza dentro del AdminLayoutComponent,
+ * por lo que NO necesita header ni logout (ya están en el layout)
+ *
+ * PLACEHOLDER: Contenido real será implementado en fases futuras
  */
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-gray-50">
-      <!-- Header simple -->
-      <header class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-gray-900">
-            <i class="pi pi-shield text-indigo-600"></i>
-            Panel de Administración
-          </h1>
-          <div class="flex items-center gap-4">
-            <p class="text-sm text-gray-600">
-              Bienvenido, <strong>{{ currentUser()?.email }}</strong>
-            </p>
-            <button
-              (click)="onLogout()"
-              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-            >
-              <i class="pi pi-sign-out"></i>
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+    <div class="dashboard-container">
+      <!-- Título de la página -->
+      <div class="page-header">
+        <h1 class="page-title">
+          <i class="pi pi-th-large"></i>
+          Dashboard
+        </h1>
+      </div>
 
       <!-- Contenido -->
-      <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div class="text-center py-12">
-          <i class="pi pi-cog text-6xl text-gray-400 mb-4"></i>
-          <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Admin</h2>
-          <p class="text-gray-600">Esta página será implementada en la FASE 4</p>
-          <p class="text-sm text-gray-500 mt-4">(Componente placeholder)</p>
-
-          <div class="mt-8 bg-white p-6 rounded-lg shadow max-w-md mx-auto">
-            <h3 class="text-lg font-semibold mb-4">Próximas implementaciones:</h3>
-            <ul class="text-left space-y-2 text-gray-700">
-              <li><i class="pi pi-check-circle text-green-500"></i> FASE 3: Login ✓</li>
-              <li><i class="pi pi-circle text-gray-400"></i> FASE 4: Admin Layout</li>
-              <li><i class="pi pi-circle text-gray-400"></i> FASE 5: CRUD Productos</li>
-              <li><i class="pi pi-circle text-gray-400"></i> FASE 6: Gestión Órdenes</li>
-              <li><i class="pi pi-circle text-gray-400"></i> FASE 7: Gestión Usuarios</li>
-            </ul>
-          </div>
+      <div class="dashboard-content">
+        <div class="placeholder-message">
+          <i class="pi pi-cog"></i>
+          <h2>Panel de Administración</h2>
+          <p>El contenido del dashboard será implementado en próximas fases</p>
         </div>
-      </main>
+
+        <div class="roadmap-card">
+          <h3>Roadmap de Desarrollo</h3>
+          <ul class="roadmap-list">
+            <li class="completed">
+              <i class="pi pi-check-circle"></i>
+              <span>FASE 3: Sistema de Login</span>
+            </li>
+            <li class="completed">
+              <i class="pi pi-check-circle"></i>
+              <span>FASE 4: Admin Layout</span>
+            </li>
+            <li>
+              <i class="pi pi-circle"></i>
+              <span>FASE 5: CRUD Productos</span>
+            </li>
+            <li>
+              <i class="pi pi-circle"></i>
+              <span>FASE 6: Gestión de Órdenes</span>
+            </li>
+            <li>
+              <i class="pi pi-circle"></i>
+              <span>FASE 7: Gestión de Usuarios</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
-  `
+  `,
+  styles: [`
+    .dashboard-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #212529;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0;
+    }
+
+    .page-title i {
+      color: var(--p-primary-color);
+    }
+
+    .dashboard-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .placeholder-message {
+      text-align: center;
+      padding: 3rem 1rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .placeholder-message i {
+      font-size: 4rem;
+      color: #adb5bd;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .placeholder-message h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #212529;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .placeholder-message p {
+      color: #6c757d;
+      margin: 0;
+    }
+
+    .roadmap-card {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .roadmap-card h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 1rem 0;
+    }
+
+    .roadmap-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .roadmap-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #495057;
+    }
+
+    .roadmap-list li i {
+      font-size: 1.25rem;
+    }
+
+    .roadmap-list li.completed {
+      color: #198754;
+    }
+
+    .roadmap-list li.completed i {
+      color: #198754;
+    }
+
+    .roadmap-list li:not(.completed) i {
+      color: #adb5bd;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .placeholder-message {
+        padding: 2rem 1rem;
+      }
+
+      .placeholder-message i {
+        font-size: 3rem;
+      }
+
+      .placeholder-message h2 {
+        font-size: 1.25rem;
+      }
+    }
+  `]
 })
 export class AdminDashboardComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
-
-  // Exponer currentUser para el template
-  currentUser = this.authService.currentUser;
-
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        console.log('✅ Logout exitoso');
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        console.error('❌ Error en logout:', error);
-        // Aunque falle, redirigir al login (clearSession ya se ejecutó)
-        this.router.navigate(['/login']);
-      }
-    });
-  }
+  // Sin lógica por ahora, solo un placeholder
 }

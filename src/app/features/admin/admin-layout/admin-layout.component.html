@@ -1,0 +1,85 @@
+<div class="admin-layout">
+  <!-- HEADER -->
+  <header class="admin-header">
+    <div class="header-left">
+      <!-- Toggle sidebar button (mobile) -->
+      <div class="sidebar-toggle">
+        <p-button
+          icon="pi pi-bars"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="toggleSidebar()"
+        />
+      </div>
+
+      <!-- Logo y título -->
+      <div class="header-brand">
+        <i class="pi pi-shopping-bag"></i>
+        <h1>Admin Panel</h1>
+      </div>
+    </div>
+
+    <!-- User menu -->
+    <div class="header-right">
+      @if (currentUser(); as user) {
+        <div class="user-info">
+          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          <span class="user-email">{{ user.email }}</span>
+        </div>
+
+        <p-avatar
+          [label]="getUserInitials()"
+          shape="circle"
+        />
+
+        <p-menu
+          #userMenu
+          [model]="userMenuItems"
+          [popup]="true"
+          appendTo="body"
+        />
+
+        <p-button
+          icon="pi pi-angle-down"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="userMenu.toggle($event)"
+          aria-label="User menu"
+        />
+      }
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" [class.collapsed]="!sidebarVisible()">
+      <nav class="sidebar-nav">
+        @for (item of navItems; track item.route) {
+          @if (item.disabled) {
+            <!-- Item deshabilitado: usar <span> para que no sea clickeable -->
+            <span class="nav-item disabled">
+              <i [class]="item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="badge">Próximamente</span>
+            </span>
+          } @else {
+            <!-- Item habilitado: usar <a> con routerLink -->
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="nav-item"
+            >
+              <i [class]="item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+          }
+        }
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

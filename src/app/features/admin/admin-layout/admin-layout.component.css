@@ -1,0 +1,293 @@
+/**
+ * Admin Layout Styles
+ *
+ * ARQUITECTURA:
+ * - Header fijo en top (64px altura)
+ * - Sidebar fijo a la izquierda (256px ancho)
+ * - Content ocupa el resto con scroll
+ *
+ * RESPONSIVE:
+ * - Mobile (<1024px): Sidebar colapsable con overlay
+ * - Desktop: Sidebar siempre visible
+ *
+ * NOTA: Siguiendo STYLING-GUIDELINES.md
+ * - NO usamos @apply (solo CSS vanilla)
+ * - Tailwind se usa en el HTML directamente
+ */
+
+/* ========== LAYOUT CONTAINER ========== */
+
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  overflow-x: hidden; /* Prevenir scroll horizontal */
+  width: 100%;
+}
+
+/* ========== HEADER ========== */
+
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 64px;
+  background-color: white;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  width: 100%;
+  max-width: 100vw; /* No exceder viewport width */
+  box-sizing: border-box; /* Incluir padding en el width */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto; /* No permitir que crezca */
+  min-width: 0; /* Permitir shrink */
+}
+
+.sidebar-toggle {
+  display: block;
+  flex-shrink: 0; /* No comprimir el botón */
+}
+
+@media (min-width: 1024px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden; /* Prevenir overflow */
+}
+
+.header-brand i {
+  color: var(--p-primary-color);
+  font-size: 1.25rem;
+  flex-shrink: 0; /* No comprimir icono */
+}
+
+@media (min-width: 640px) {
+  .header-brand i {
+    font-size: 1.5rem;
+  }
+}
+
+.header-brand h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  white-space: nowrap; /* Evitar wrap */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 640px) {
+  .header-brand h1 {
+    font-size: 1.25rem;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto; /* No permitir que crezca */
+  min-width: 0; /* Permitir shrink */
+}
+
+.user-info {
+  display: none; /* Oculto por defecto */
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .user-info {
+    display: flex; /* Mostrar solo en desktop */
+  }
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #212529;
+  white-space: nowrap;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+/* ========== CONTAINER (sidebar + content) ========== */
+
+.admin-container {
+  display: flex;
+  margin-top: 64px;
+  min-height: calc(100vh - 64px);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* ========== SIDEBAR ========== */
+
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  z-index: 40;
+  width: 256px;
+  background-color: white;
+  border-right: 1px solid #dee2e6;
+  transition: transform 0.3s ease-in-out;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+/* Sidebar colapsado (mobile) */
+.admin-sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+@media (min-width: 1024px) {
+  .admin-sidebar.collapsed {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar navigation */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #495057;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-item:hover:not(.disabled) {
+  background-color: #f8f9fa;
+  color: var(--p-primary-color);
+}
+
+.nav-item.active {
+  background-color: var(--p-primary-50);
+  color: var(--p-primary-color);
+}
+
+.nav-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: auto; /* Permitir que se vea el cursor not-allowed */
+}
+
+.nav-item i {
+  font-size: 1.125rem;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.nav-item .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+/* ========== MAIN CONTENT ========== */
+
+.admin-content {
+  flex: 1;
+  padding: 1rem;
+  margin-left: 0;
+  width: 100%;
+  min-width: 0; /* Permitir que se encoja */
+  box-sizing: border-box;
+  overflow-x: auto; /* Permitir scroll horizontal solo en content si es necesario */
+}
+
+@media (min-width: 640px) {
+  .admin-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-content {
+    margin-left: 256px;
+    width: calc(100% - 256px); /* Restar ancho del sidebar */
+  }
+}
+
+/* ========== USER MENU POPUP FIX ========== */
+
+/*
+ * NOTA: Usando !important porque PrimeNG aplica estilos inline
+ * con JavaScript para posicionar el menu popup.
+ * Este fix asegura que el menu siempre se vea completo,
+ * incluso cuando DevTools está abierto o en ventanas angostas.
+ */
+
+/* Forzar que el menu popup se alinee desde la derecha del viewport */
+::ng-deep .p-menu.p-menu-overlay {
+  position: fixed !important;
+  right: 0.5rem !important;
+  left: auto !important;
+  top: 4.5rem !important; /* Debajo del header (64px + margin) */
+  transform: none !important;
+  max-width: 250px !important;
+  z-index: 9999 !important;
+}
+
+/* Alternativa: si el menú tiene una clase específica cuando se usa en este componente */
+::ng-deep .p-component-overlay.p-menu {
+  position: fixed !important;
+  right: 0.5rem !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+/* ========== BACKDROP (Mobile) ========== */
+
+/* Backdrop cuando sidebar está abierto en mobile */
+@media (max-width: 1023px) {
+  .admin-sidebar:not(.collapsed) {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .admin-sidebar:not(.collapsed)::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+}

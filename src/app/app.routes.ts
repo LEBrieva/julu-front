@@ -46,25 +46,11 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard], // ⭐ Requiere autenticación + rol ADMIN
-    children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/admin/dashboard/admin-dashboard.component').then(
-            (m) => m.AdminDashboardComponent
-          )
-      }
-      // TODO FASE 5: Agregar rutas para products, orders, users
-      // {
-      //   path: 'products',
-      //   loadComponent: () => import('./features/admin/products/...').then(...)
-      // },
-    ]
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES)
+    // ⭐ Lazy loading a nivel de feature module
+    // Carga AdminLayoutComponent + todos los componentes admin en un chunk separado
+    // Solo se descarga si el usuario es ADMIN y accede a /admin
   },
 
   // ========== RUTAS AUTENTICADAS (solo authGuard) ==========
