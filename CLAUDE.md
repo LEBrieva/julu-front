@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 3 completada (Login Component) - Sistema de autenticación end-to-end funcional: formulario con validaciones centralizadas, integración con backend, manejo de errores, y arquitectura de estilos sólida documentada.
+**Estado actual**: FASE 4 completada (Admin Layout) - Sistema de autenticación completo + panel de administración con layout profesional: sidebar con navegación, header responsivo con user menu, lazy loading eficiente a nivel de feature module, y guards funcionando correctamente.
 
 ---
 
@@ -663,11 +663,32 @@ console.log(payload); // { sub, email, role, exp }
 - [x] Conexión verificada con backend (CORS configurado)
 - [x] Guía de estilos documentada (`STYLING-GUIDELINES.md`)
 
-### FASE 4: Admin Layout
-- [ ] Crear layout con sidebar y navigation
-- [ ] Rutas admin protegidas (authGuard + adminGuard)
-- [ ] Header con user menu y logout
-- [ ] Sidebar con enlaces: Dashboard, Products, Orders, Users
+### ✅ FASE 4: Admin Layout (COMPLETADA)
+- [x] Crear AdminLayoutComponent con estructura header + sidebar + content
+- [x] Implementar lazy loading a nivel de feature module (loadChildren)
+- [x] Rutas admin protegidas con authGuard + adminGuard
+- [x] Header responsivo con:
+  - Logo y título adaptable a mobile/desktop
+  - User info (nombre, email) visible solo en desktop (≥1024px)
+  - Avatar con iniciales del usuario
+  - Dropdown menu con p-menu (Perfil, Cerrar Sesión)
+  - Fix de posicionamiento para viewport angosto (`position: fixed` + `right: 0.5rem`)
+- [x] Sidebar colapsable con:
+  - Toggle button para mobile (hamburger menu)
+  - Navegación: Dashboard (activo), Products, Orders, Users (deshabilitados con badge "Próximamente")
+  - Items deshabilitados usando `<span>` (no clickeables) vs `<a>` con routerLink
+  - Backdrop overlay en mobile cuando está abierto
+- [x] Dashboard placeholder limpio (sin header/logout redundante)
+- [x] Responsive design:
+  - Mobile (< 1024px): Sidebar colapsado por defecto, header compacto
+  - Desktop (≥ 1024px): Sidebar fijo, header con info completa
+  - Sin scroll horizontal en ningún viewport (fix con `overflow-x: hidden` + `max-width: 100vw`)
+- [x] Fix enum mismatch: UserRole values lowercase ('admin', 'user') para coincidir con backend
+- [x] Arquitectura de lazy loading optimizada:
+  - `app.routes.ts` → `loadChildren` a `admin.routes.ts`
+  - `admin.routes.ts` → `loadComponent` para AdminLayoutComponent (wrapper)
+  - Children routes con lazy loading individual
+  - Chunks generados: admin-layout (~22KB), admin-dashboard (~11KB), admin-routes (~1KB)
 
 ### FASE 5: CRUD de Productos (Admin)
 - [ ] Lista de productos con tabla (PrimeNG DataTable)
@@ -767,4 +788,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-10-14 (FASE 3 completada)
+**Última actualización**: 2025-10-15 (FASE 4 completada)

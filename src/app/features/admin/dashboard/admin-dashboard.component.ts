@@ -40,11 +40,11 @@ import { CommonModule } from '@angular/common';
             </li>
             <li class="completed">
               <i class="pi pi-check-circle"></i>
-              <span>FASE 4: Admin Layout</span>
+              <span>FASE 4: Admin Layout con Lazy Loading</span>
             </li>
             <li>
               <i class="pi pi-circle"></i>
-              <span>FASE 5: CRUD Productos</span>
+              <span>FASE 5: CRUD de Productos</span>
             </li>
             <li>
               <i class="pi pi-circle"></i>
@@ -53,6 +53,14 @@ import { CommonModule } from '@angular/common';
             <li>
               <i class="pi pi-circle"></i>
               <span>FASE 7: Gestión de Usuarios</span>
+            </li>
+            <li>
+              <i class="pi pi-circle"></i>
+              <span>FASE 8: Catálogo Público</span>
+            </li>
+            <li>
+              <i class="pi pi-circle"></i>
+              <span>FASE 9: Carrito y Checkout</span>
             </li>
           </ul>
         </div>
