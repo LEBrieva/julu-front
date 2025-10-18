@@ -1,0 +1,41 @@
+/* ===========================
+   Tooltip Icon Button
+   =========================== */
+.tooltip-icon-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 0.875rem;
+  cursor: help;
+  transition: all 0.2s;
+  border-radius: 50%;
+  padding: 0.25rem;
+  margin-left: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  outline: none;
+}
+
+.tooltip-icon-btn:hover {
+  color: #198754;
+}
+
+.tooltip-icon-btn:focus,
+.tooltip-icon-btn:active {
+  color: #198754;
+  outline: none;
+}
+
+/* Aumentar área táctil en móviles */
+@media (max-width: 768px) {
+  .tooltip-icon-btn {
+    font-size: 1.125rem;
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+}

@@ -154,16 +154,19 @@
         >
           <ng-template pTemplate="header">
             <tr>
+              <th>SKU</th>
               <th>Talla</th>
               <th>Color</th>
               <th>Precio</th>
               <th>Stock</th>
-              <th>Estado</th>
             </tr>
           </ng-template>
 
           <ng-template pTemplate="body" let-variant>
             <tr>
+              <td>
+                <span class="monospace text-sm">{{ variant.sku }}</span>
+              </td>
               <td>
                 <span class="font-semibold capitalize">
                   {{ formatEnumValue(variant.size) }}
@@ -184,12 +187,6 @@
                   <i class="pi pi-box"></i>
                   {{ variant.stock }}
                 </span>
-              </td>
-              <td>
-                <p-tag
-                  [value]="formatEnumValue(variant.status)"
-                  [severity]="getStatusSeverity(variant.status)"
-                ></p-tag>
               </td>
             </tr>
           </ng-template>

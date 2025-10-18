@@ -74,6 +74,9 @@
   font-weight: 600;
   color: #212529;
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 .form-label.required::after {
@@ -150,6 +153,64 @@ textarea.ng-invalid.ng-dirty {
 input.ng-valid.ng-dirty,
 textarea.ng-valid.ng-dirty {
   border-color: #198754 !important;
+}
+
+/* ===========================
+   Tags Input
+   =========================== */
+.tag-input-container {
+  margin-bottom: 0.75rem;
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+  min-height: 3rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--p-primary-color);
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.tag-chip span {
+  line-height: 1;
+}
+
+.tag-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.tag-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tag-remove i {
+  font-size: 0.75rem;
 }
 
 /* ===========================

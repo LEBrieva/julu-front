@@ -229,3 +229,11 @@ p-card {
 .text-center {
   text-align: center;
 }
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.monospace {
+  font-family: 'Courier New', monospace;
+}

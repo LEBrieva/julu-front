@@ -1,7 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+
+// Shared Components
+import { TooltipIcon } from '../../../../shared/components/tooltip-icon/tooltip-icon';
 
 // PrimeNG Components
 import { InputTextModule } from 'primeng/inputtext';
@@ -47,6 +51,7 @@ import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     InputTextModule,
     TextareaModule,
     InputNumberModule,
@@ -54,7 +59,8 @@ import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
     ButtonModule,
     CardModule,
     MessageModule,
-    ToastModule
+    ToastModule,
+    TooltipIcon
   ],
   providers: [MessageService],
   templateUrl: './product-form.component.html',
@@ -76,6 +82,9 @@ export class ProductFormComponent implements OnInit {
   // Form
   productForm: FormGroup;
 
+  // Tags input temporal
+  tagInput: string = '';
+
   // Dropdown options
   categoryOptions = enumToOptions(ProductCategory);
   availableStyleOptions: { label: string; value: string }[] = [];
@@ -93,7 +102,8 @@ export class ProductFormComponent implements OnInit {
       basePrice: [0, [Validators.required, Validators.min(0)]],
       category: ['', Validators.required],
       style: ['', Validators.required],
-      status: [ProductStatus.ACTIVE]
+      status: [ProductStatus.ACTIVE],
+      tags: [[]]  // Array de strings vacío por defecto
     });
 
     // Escuchar cambios en categoría para actualizar estilos disponibles
@@ -147,7 +157,8 @@ export class ProductFormComponent implements OnInit {
       basePrice: product.basePrice,
       category: product.category,
       style: product.style,
-      status: product.status
+      status: product.status,
+      tags: product.tags || []
     });
 
     // Actualizar estilos disponibles según la categoría cargada
@@ -244,7 +255,7 @@ export class ProductFormComponent implements OnInit {
       category: formValue.category,
       style: formValue.style,
       variants: [defaultVariant], // Siempre al menos 1 variante
-      tags: []
+      tags: formValue.tags || []
     };
 
     this.productService.createProduct(createDto).subscribe({
@@ -281,7 +292,8 @@ export class ProductFormComponent implements OnInit {
       basePrice: formValue.basePrice,
       category: formValue.category,
       style: formValue.style,
-      status: formValue.status
+      status: formValue.status,
+      tags: formValue.tags
     };
 
     this.productService.updateProduct(this.productId, updateDto).subscribe({
@@ -316,7 +328,58 @@ export class ProductFormComponent implements OnInit {
   resetForm(): void {
     this.productForm.reset({
       status: ProductStatus.ACTIVE,
-      basePrice: 0
+      basePrice: 0,
+      tags: []
+    });
+    this.tagInput = '';
+  }
+
+  /**
+   * Agrega un tag al array cuando se presiona Enter
+   */
+  addTag(event: Event): void {
+    event.preventDefault(); // Previene submit del formulario
+    event.stopPropagation();
+
+    const tag = this.tagInput.trim();
+
+    // Validar que no esté vacío
+    if (!tag) {
+      return;
+    }
+
+    // Obtener tags actuales
+    const currentTags: string[] = this.productForm.get('tags')?.value || [];
+
+    // Validar que no exista ya (evitar duplicados)
+    if (currentTags.includes(tag)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Tag Duplicado',
+        detail: 'Este tag ya fue agregado.'
+      });
+      this.tagInput = '';
+      return;
+    }
+
+    // Agregar nuevo tag
+    this.productForm.patchValue({
+      tags: [...currentTags, tag]
+    });
+
+    // Limpiar input
+    this.tagInput = '';
+  }
+
+  /**
+   * Elimina un tag del array
+   */
+  removeTag(index: number): void {
+    const currentTags: string[] = this.productForm.get('tags')?.value || [];
+    const updatedTags = currentTags.filter((_, i) => i !== index);
+
+    this.productForm.patchValue({
+      tags: updatedTags
     });
   }
 }

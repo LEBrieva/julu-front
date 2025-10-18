@@ -292,7 +292,8 @@ export function enumToOptions<T extends Record<string, string>>(
  * Formatea un valor de enum para mostrar en UI
  * Ej: 'out_of_stock' → 'Out Of Stock'
  */
-export function formatEnumValue(value: string): string {
+export function formatEnumValue(value: string | undefined | null): string {
+  if (!value) return '';
   return value
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

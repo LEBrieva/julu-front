@@ -31,7 +31,10 @@
       <div class="form-grid">
         <!-- Código -->
         <div class="form-field">
-          <label for="code" class="form-label required">Código</label>
+          <label for="code" class="form-label required">
+            Código
+            <app-tooltip-icon text="Identificador único del producto"></app-tooltip-icon>
+          </label>
           <input
             pInputText
             id="code"
@@ -46,7 +49,6 @@
               {{ getErrorMessage(f['code']) }}
             </small>
           }
-          <small class="field-hint">Identificador único del producto</small>
         </div>
 
         <!-- Nombre -->
@@ -70,7 +72,10 @@
 
         <!-- Descripción (span 2 columnas) -->
         <div class="form-field form-field-full">
-          <label for="description" class="form-label">Descripción</label>
+          <label for="description" class="form-label">
+            Descripción
+            <app-tooltip-icon text="Opcional - Información adicional del producto"></app-tooltip-icon>
+          </label>
           <textarea
             pInputTextarea
             id="description"
@@ -79,12 +84,54 @@
             rows="4"
             class="w-full"
           ></textarea>
-          <small class="field-hint">Opcional - Información adicional del producto</small>
+        </div>
+
+        <!-- Tags (span 2 columnas) -->
+        <div class="form-field form-field-full">
+          <label for="tags" class="form-label">
+            Etiquetas
+            <app-tooltip-icon text="Opcional - Palabras clave para organizar y buscar productos (Ej: verano, promocion, nuevo)"></app-tooltip-icon>
+          </label>
+
+          <!-- Input para agregar tags -->
+          <div class="tag-input-container">
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="tagInput"
+              [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="addTag($event)"
+              placeholder="Escribe y presiona Enter para agregar"
+              class="w-full"
+            />
+          </div>
+
+          <!-- Lista de tags agregados -->
+          @if (productForm.get('tags')?.value?.length > 0) {
+            <div class="tags-display">
+              @for (tag of productForm.get('tags')?.value; track tag; let i = $index) {
+                <div class="tag-chip">
+                  <span>{{ tag }}</span>
+                  <button
+                    type="button"
+                    class="tag-remove"
+                    (click)="removeTag(i)"
+                    [attr.aria-label]="'Eliminar tag ' + tag"
+                  >
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Precio Base -->
         <div class="form-field">
-          <label for="basePrice" class="form-label required">Precio Base</label>
+          <label for="basePrice" class="form-label required">
+            Precio Base
+            <app-tooltip-icon text="Precio base del producto (sin variantes)"></app-tooltip-icon>
+          </label>
           <p-inputNumber
             inputId="basePrice"
             formControlName="basePrice"
@@ -102,7 +149,6 @@
               {{ getErrorMessage(f['basePrice']) }}
             </small>
           }
-          <small class="field-hint">Precio base del producto (sin variantes)</small>
         </div>
 
         <!-- Categoría -->
@@ -127,7 +173,10 @@
 
         <!-- Estilo -->
         <div class="form-field">
-          <label for="style" class="form-label required">Estilo</label>
+          <label for="style" class="form-label required">
+            Estilo
+            <app-tooltip-icon text="Selecciona primero una categoría para ver los estilos disponibles"></app-tooltip-icon>
+          </label>
           <p-select
             inputId="style"
             formControlName="style"
@@ -154,7 +203,10 @@
         <!-- Estado (solo en modo editar) -->
         @if (isEditMode()) {
           <div class="form-field">
-            <label for="status" class="form-label">Estado</label>
+            <label for="status" class="form-label">
+              Estado
+              <app-tooltip-icon text="Estado del producto en el sistema"></app-tooltip-icon>
+            </label>
             <p-select
               inputId="status"
               formControlName="status"
@@ -164,7 +216,6 @@
               styleClass="w-full"
               [showClear]="false"
             ></p-select>
-            <small class="field-hint">Estado del producto en el sistema</small>
           </div>
         }
       </div>
