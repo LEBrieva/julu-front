@@ -70,8 +70,8 @@ export class AdminLayoutComponent {
     {
       label: 'Productos',
       icon: 'pi pi-box',
-      route: '/admin/products',
-      disabled: true // TODO FASE 5
+      route: '/admin/products'
+      // ✅ FASE 5 COMPLETADA
     },
     {
       label: 'Órdenes',

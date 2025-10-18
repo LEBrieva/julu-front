@@ -1,0 +1,208 @@
+<!-- Toasts para notificaciones -->
+<p-toast></p-toast>
+
+<!-- Confirmación para activar/desactivar -->
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Contenedor principal -->
+<div class="products-container">
+  <!-- Header con título y botón crear -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <i class="pi pi-box"></i>
+        Productos
+      </h1>
+      <p class="page-subtitle">Gestión de catálogo de productos</p>
+    </div>
+    <div class="header-right">
+      <p-button
+        label="Nuevo Producto"
+        icon="pi pi-plus"
+        (onClick)="createProduct()"
+        severity="success"
+      ></p-button>
+    </div>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="filters-section">
+    <div class="search-container">
+      <p-iconfield class="search-input">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar por nombre, código o descripción..."
+          class="w-full"
+        />
+      </p-iconfield>
+      <p-button
+        label="Buscar"
+        icon="pi pi-search"
+        (onClick)="onSearch()"
+        [loading]="loading"
+      ></p-button>
+      @if (searchTerm) {
+        <p-button
+          label="Limpiar"
+          icon="pi pi-times"
+          (onClick)="clearSearch()"
+          severity="secondary"
+          [outlined]="true"
+        ></p-button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabla de productos -->
+  <div class="table-container">
+    <p-table
+      [value]="products"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="rowsPerPage"
+      [totalRecords]="totalRecords"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+      responsiveLayout="scroll"
+      styleClass="p-datatable-gridlines"
+    >
+      <!-- Template cuando no hay datos -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              @if (searchTerm) {
+                <p>No se encontraron productos que coincidan con "{{ searchTerm }}"</p>
+                <p-button
+                  label="Limpiar búsqueda"
+                  icon="pi pi-times"
+                  (onClick)="clearSearch()"
+                  severity="secondary"
+                  [text]="true"
+                ></p-button>
+              } @else {
+                <p>No hay productos registrados</p>
+                <p-button
+                  label="Crear primer producto"
+                  icon="pi pi-plus"
+                  (onClick)="createProduct()"
+                  severity="success"
+                  [text]="true"
+                ></p-button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Columnas -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Estilo</th>
+          <th>Precio Base</th>
+          <th>Estado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <!-- Rows -->
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <!-- Código -->
+          <td>
+            <span class="font-semibold">{{ product.code }}</span>
+          </td>
+
+          <!-- Nombre -->
+          <td>
+            <div class="product-name-cell">
+              <span class="product-name">{{ product.name }}</span>
+              @if (product.tags && product.tags.length > 0) {
+                <div class="product-tags">
+                  @for (tag of product.tags.slice(0, 3); track tag) {
+                    <p-tag [value]="tag" severity="secondary"></p-tag>
+                  }
+                  @if (product.tags.length > 3) {
+                    <span class="text-xs text-gray-500">+{{ product.tags.length - 3 }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </td>
+
+          <!-- Categoría -->
+          <td>
+            <span class="capitalize">{{ formatEnumValue(product.category || 'N/A') }}</span>
+          </td>
+
+          <!-- Estilo -->
+          <td>
+            <span class="capitalize">{{ formatEnumValue(product.style || 'N/A') }}</span>
+          </td>
+
+          <!-- Precio Base -->
+          <td>
+            <span class="price">${{ product.basePrice.toFixed(2) }}</span>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <p-tag
+              [value]="formatEnumValue(product.status)"
+              [severity]="getStatusSeverity(product.status)"
+            ></p-tag>
+          </td>
+
+          <!-- Acciones -->
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <!-- Ver -->
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (onClick)="viewProduct(product)"
+                pTooltip="Ver detalle"
+                tooltipPosition="top"
+              ></p-button>
+
+              <!-- Editar -->
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [rounded]="true"
+                severity="warn"
+                (onClick)="editProduct(product)"
+                pTooltip="Editar"
+                tooltipPosition="top"
+              ></p-button>
+
+              <!-- Toggle Estado (Activar/Desactivar) -->
+              <p-button
+                [icon]="getToggleButtonIcon(product.status)"
+                [text]="true"
+                [rounded]="true"
+                [severity]="getToggleButtonSeverity(product.status)"
+                (onClick)="toggleProductStatus(product)"
+                [pTooltip]="getToggleButtonLabel(product.status)"
+                tooltipPosition="top"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

@@ -33,16 +33,30 @@ export const ADMIN_ROUTES: Routes = [
           import('./dashboard/admin-dashboard.component').then(
             (m) => m.AdminDashboardComponent
           )
-      }
+      },
 
-      // TODO FASE 5: Products CRUD
-      // {
-      //   path: 'products',
-      //   loadComponent: () =>
-      //     import('./products/admin-products.component').then(
-      //       (m) => m.AdminProductsComponent
-      //     )
-      // },
+      // FASE 5: Products CRUD ✅
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./products/admin-products.component').then(
+            (m) => m.AdminProductsComponent
+          )
+      },
+      {
+        path: 'products/new',
+        loadComponent: () =>
+          import('./products/product-form/product-form.component').then(
+            (m) => m.ProductFormComponent
+          )
+      },
+      {
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import('./products/product-form/product-form.component').then(
+            (m) => m.ProductFormComponent
+          )
+      },
 
       // TODO FASE 6: Orders Management
       // {

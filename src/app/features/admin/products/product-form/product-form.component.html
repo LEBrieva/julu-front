@@ -1,0 +1,217 @@
+<!-- Toasts para notificaciones -->
+<p-toast></p-toast>
+
+<!-- Contenedor principal -->
+<div class="form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <i [class]="isEditMode() ? 'pi pi-pencil' : 'pi pi-plus-circle'"></i>
+        {{ isEditMode() ? 'Editar Producto' : 'Nuevo Producto' }}
+      </h1>
+      <p class="page-subtitle">
+        {{ isEditMode() ? 'Modifica los datos del producto' : 'Completa el formulario para crear un nuevo producto' }}
+      </p>
+    </div>
+    <div class="header-right">
+      <p-button
+        label="Volver"
+        icon="pi pi-arrow-left"
+        (onClick)="goBack()"
+        severity="secondary"
+        [outlined]="true"
+      ></p-button>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <p-card>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <!-- Código -->
+        <div class="form-field">
+          <label for="code" class="form-label required">Código</label>
+          <input
+            pInputText
+            id="code"
+            formControlName="code"
+            placeholder="Ej: REMERA-001"
+            class="w-full"
+            [class.ng-invalid]="f['code'].invalid && f['code'].touched"
+            [class.ng-dirty]="f['code'].touched"
+          />
+          @if (f['code'].invalid && f['code'].touched) {
+            <small class="error-message">
+              {{ getErrorMessage(f['code']) }}
+            </small>
+          }
+          <small class="field-hint">Identificador único del producto</small>
+        </div>
+
+        <!-- Nombre -->
+        <div class="form-field">
+          <label for="name" class="form-label required">Nombre</label>
+          <input
+            pInputText
+            id="name"
+            formControlName="name"
+            placeholder="Ej: Remera Oversize Negra"
+            class="w-full"
+            [class.ng-invalid]="f['name'].invalid && f['name'].touched"
+            [class.ng-dirty]="f['name'].touched"
+          />
+          @if (f['name'].invalid && f['name'].touched) {
+            <small class="error-message">
+              {{ getErrorMessage(f['name']) }}
+            </small>
+          }
+        </div>
+
+        <!-- Descripción (span 2 columnas) -->
+        <div class="form-field form-field-full">
+          <label for="description" class="form-label">Descripción</label>
+          <textarea
+            pInputTextarea
+            id="description"
+            formControlName="description"
+            placeholder="Describe el producto..."
+            rows="4"
+            class="w-full"
+          ></textarea>
+          <small class="field-hint">Opcional - Información adicional del producto</small>
+        </div>
+
+        <!-- Precio Base -->
+        <div class="form-field">
+          <label for="basePrice" class="form-label required">Precio Base</label>
+          <p-inputNumber
+            inputId="basePrice"
+            formControlName="basePrice"
+            mode="currency"
+            currency="USD"
+            locale="es-AR"
+            [min]="0"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            placeholder="0.00"
+            styleClass="w-full"
+          ></p-inputNumber>
+          @if (f['basePrice'].invalid && f['basePrice'].touched) {
+            <small class="error-message">
+              {{ getErrorMessage(f['basePrice']) }}
+            </small>
+          }
+          <small class="field-hint">Precio base del producto (sin variantes)</small>
+        </div>
+
+        <!-- Categoría -->
+        <div class="form-field">
+          <label for="category" class="form-label required">Categoría</label>
+          <p-select
+            inputId="category"
+            formControlName="category"
+            [options]="categoryOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Selecciona una categoría"
+            styleClass="w-full"
+            [showClear]="false"
+          ></p-select>
+          @if (f['category'].invalid && f['category'].touched) {
+            <small class="error-message">
+              {{ getErrorMessage(f['category']) }}
+            </small>
+          }
+        </div>
+
+        <!-- Estilo -->
+        <div class="form-field">
+          <label for="style" class="form-label required">Estilo</label>
+          <p-select
+            inputId="style"
+            formControlName="style"
+            [options]="availableStyleOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Selecciona un estilo"
+            [disabled]="!f['category'].value || availableStyleOptions.length === 0"
+            styleClass="w-full"
+            [showClear]="false"
+          ></p-select>
+          @if (f['style'].invalid && f['style'].touched) {
+            <small class="error-message">
+              {{ getErrorMessage(f['style']) }}
+            </small>
+          }
+          @if (!f['category'].value) {
+            <small class="field-hint">Primero selecciona una categoría</small>
+          } @else if (availableStyleOptions.length === 0) {
+            <small class="field-hint">No hay estilos disponibles para esta categoría</small>
+          }
+        </div>
+
+        <!-- Estado (solo en modo editar) -->
+        @if (isEditMode()) {
+          <div class="form-field">
+            <label for="status" class="form-label">Estado</label>
+            <p-select
+              inputId="status"
+              formControlName="status"
+              [options]="statusOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [showClear]="false"
+            ></p-select>
+            <small class="field-hint">Estado del producto en el sistema</small>
+          </div>
+        }
+      </div>
+
+      <!-- Info sobre variantes (versión simplificada) -->
+      <div class="info-box">
+        <i class="pi pi-info-circle"></i>
+        <div>
+          <strong>Nota sobre variantes:</strong>
+          @if (!isEditMode()) {
+            <p>Se creará una variante por defecto (Talla M, Negro, Stock 0) con el precio base configurado.</p>
+            <p>Podrás gestionar variantes (tallas, colores, stock) en futuras versiones.</p>
+          } @else {
+            <p>La gestión de variantes (tallas, colores, stock) estará disponible en futuras versiones.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <p-button
+          type="button"
+          label="Cancelar"
+          icon="pi pi-times"
+          (onClick)="goBack()"
+          severity="secondary"
+          [outlined]="true"
+        ></p-button>
+
+        @if (!isEditMode()) {
+          <p-button
+            type="button"
+            label="Limpiar"
+            icon="pi pi-refresh"
+            (onClick)="resetForm()"
+            severity="secondary"
+          ></p-button>
+        }
+
+        <p-button
+          type="submit"
+          [label]="isEditMode() ? 'Actualizar Producto' : 'Crear Producto'"
+          [icon]="isEditMode() ? 'pi pi-check' : 'pi pi-plus'"
+          severity="success"
+          [loading]="isLoading()"
+        ></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>
