@@ -1,0 +1,242 @@
+<!-- Toasts para notificaciones -->
+<p-toast></p-toast>
+
+<!-- Contenedor principal -->
+<div class="detail-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <i class="pi pi-eye"></i>
+        Detalle de Producto
+      </h1>
+      <p class="page-subtitle">
+        {{ product()?.name || 'Cargando...' }}
+      </p>
+    </div>
+    <div class="header-right">
+      <p-button
+        label="Volver"
+        icon="pi pi-arrow-left"
+        (onClick)="goBack()"
+        severity="secondary"
+        [outlined]="true"
+      ></p-button>
+      <p-button
+        label="Editar"
+        icon="pi pi-pencil"
+        (onClick)="editProduct()"
+        severity="warn"
+      ></p-button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (loading()) {
+    <p-card>
+      <div class="loading-state">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+        <p>Cargando producto...</p>
+      </div>
+    </p-card>
+  }
+
+  <!-- Product details -->
+  @if (product() && !loading()) {
+    <!-- Información básica -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h2 class="card-title">Información Básica</h2>
+        </div>
+      </ng-template>
+
+      <div class="detail-grid">
+        <!-- Código -->
+        <div class="detail-field">
+          <label class="detail-label">Código</label>
+          <p class="detail-value">{{ product()!.code }}</p>
+        </div>
+
+        <!-- Nombre -->
+        <div class="detail-field">
+          <label class="detail-label">Nombre</label>
+          <p class="detail-value">{{ product()!.name }}</p>
+        </div>
+
+        <!-- Descripción -->
+        <div class="detail-field detail-field-full">
+          <label class="detail-label">Descripción</label>
+          <p class="detail-value">
+            {{ product()!.description || 'Sin descripción' }}
+          </p>
+        </div>
+
+        <!-- Precio Base -->
+        <div class="detail-field">
+          <label class="detail-label">Precio Base</label>
+          <p class="detail-value price">
+            {{ product()!.basePrice | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+        <!-- Categoría -->
+        <div class="detail-field">
+          <label class="detail-label">Categoría</label>
+          <p class="detail-value capitalize">
+            {{ formatEnumValue(product()!.category) }}
+          </p>
+        </div>
+
+        <!-- Estilo -->
+        <div class="detail-field">
+          <label class="detail-label">Estilo</label>
+          <p class="detail-value capitalize">
+            {{ formatEnumValue(product()!.style) }}
+          </p>
+        </div>
+
+        <!-- Estado -->
+        <div class="detail-field">
+          <label class="detail-label">Estado</label>
+          <div>
+            <p-tag
+              [value]="formatEnumValue(product()!.status)"
+              [severity]="getStatusSeverity(product()!.status)"
+            ></p-tag>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        @if (product()!.tags && product()!.tags!.length > 0) {
+          <div class="detail-field detail-field-full">
+            <label class="detail-label">Etiquetas</label>
+            <div class="tags-container">
+              @for (tag of product()!.tags!; track tag) {
+                <p-tag [value]="tag" severity="secondary"></p-tag>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Stock Total -->
+        <div class="detail-field">
+          <label class="detail-label">Stock Total</label>
+          <p class="detail-value stock">
+            <i class="pi pi-box"></i>
+            {{ getTotalStock() }} unidades
+          </p>
+        </div>
+
+        <!-- Total Variantes -->
+        <div class="detail-field">
+          <label class="detail-label">Total Variantes</label>
+          <p class="detail-value">
+            {{ product()!.variants ? product()!.variants.length : 0 }} variantes
+          </p>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Variantes -->
+    @if (product()!.variants && product()!.variants.length > 0) {
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2 class="card-title">Variantes del Producto</h2>
+          </div>
+        </ng-template>
+
+        <p-table
+          [value]="product()!.variants"
+          responsiveLayout="scroll"
+          styleClass="p-datatable-gridlines"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Talla</th>
+              <th>Color</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-variant>
+            <tr>
+              <td>
+                <span class="font-semibold capitalize">
+                  {{ formatEnumValue(variant.size) }}
+                </span>
+              </td>
+              <td>
+                <span class="capitalize">
+                  {{ formatEnumValue(variant.color) }}
+                </span>
+              </td>
+              <td>
+                <span class="price">
+                  {{ variant.price | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                </span>
+              </td>
+              <td>
+                <span class="stock">
+                  <i class="pi pi-box"></i>
+                  {{ variant.stock }}
+                </span>
+              </td>
+              <td>
+                <p-tag
+                  [value]="formatEnumValue(variant.status)"
+                  [severity]="getStatusSeverity(variant.status)"
+                ></p-tag>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="text-center">
+                <p class="empty-message">No hay variantes registradas</p>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+    }
+
+    <!-- Metadatos -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h2 class="card-title">Información del Sistema</h2>
+        </div>
+      </ng-template>
+
+      <div class="detail-grid">
+        <div class="detail-field">
+          <label class="detail-label">ID del Producto</label>
+          <p class="detail-value monospace">{{ product()!.id }}</p>
+        </div>
+
+        @if (product()!.createdAt) {
+          <div class="detail-field">
+            <label class="detail-label">Fecha de Creación</label>
+            <p class="detail-value">
+              {{ product()!.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+        }
+
+        @if (product()!.updatedAt) {
+          <div class="detail-field">
+            <label class="detail-label">Última Actualización</label>
+            <p class="detail-value">
+              {{ product()!.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+        }
+      </div>
+    </p-card>
+  }
+</div>

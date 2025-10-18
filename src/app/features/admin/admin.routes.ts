@@ -57,6 +57,13 @@ export const ADMIN_ROUTES: Routes = [
             (m) => m.ProductFormComponent
           )
       },
+      {
+        path: 'products/:id',
+        loadComponent: () =>
+          import('./products/product-detail/product-detail.component').then(
+            (m) => m.ProductDetailComponent
+          )
+      },
 
       // TODO FASE 6: Orders Management
       // {

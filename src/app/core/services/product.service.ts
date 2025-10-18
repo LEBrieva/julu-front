@@ -31,7 +31,7 @@ export class ProductService {
    */
   getProducts(filters?: FilterProductDto): Observable<PaginatedResponse<ProductListItem>> {
     let params = new HttpParams();
-    debugger;
+
     // Agregar parámetros de paginación
     if (filters?.page) {
       params = params.set('page', filters.page.toString());
