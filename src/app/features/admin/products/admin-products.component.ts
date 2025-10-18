@@ -70,6 +70,7 @@ export class AdminProductsComponent implements OnInit {
   totalRecords = 0;
   currentPage = 1;
   rowsPerPage = 10;
+  first = 0; // Índice del primer registro en la tabla (para resetear paginación)
   pagination: PaginationInfo | null = null;
 
   // Helper functions (para usar en template)
@@ -78,18 +79,24 @@ export class AdminProductsComponent implements OnInit {
   ProductStatus = ProductStatus;
 
   ngOnInit(): void {
-    this.loadProducts();
+    // Resetear estado al inicializar (importante para cuando se vuelve a esta ruta)
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.first = 0;
+    this.products = [];
+    this.totalRecords = 0;
+    // La tabla disparará onLazyLoad automáticamente
   }
 
   /**
    * Carga productos con paginación y filtros
    */
-  loadProducts(): void {
+  loadProducts(page: number, rows: number): void {
     this.loading = true;
 
     const filters = {
-      page: this.currentPage,
-      limit: this.rowsPerPage,
+      page: page,
+      limit: rows,
       search: this.searchTerm || undefined
     };
 
@@ -113,20 +120,34 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Maneja el evento de paginación de PrimeNG Table
+   * Maneja el evento de lazy load de PrimeNG Table
+   * Este método se dispara automáticamente cuando:
+   * - La tabla se inicializa
+   * - Cambia la página
+   * - Cambia el número de filas por página
+   * - Se resetea la tabla (first cambia)
    */
   onPageChange(event: any): void {
-    this.currentPage = event.page + 1; // PrimeNG usa índice 0, backend usa 1
-    this.rowsPerPage = event.rows;
-    this.loadProducts();
+    // Validar que event.page exista (puede ser undefined en la primera carga)
+    const page = (event.page !== undefined ? event.page : 0) + 1; // PrimeNG usa índice 0, backend usa 1
+    const rows = event.rows || this.rowsPerPage;
+    const first = event.first !== undefined ? event.first : 0;
+
+    this.first = first;
+    this.currentPage = page;
+    this.rowsPerPage = rows;
+
+    this.loadProducts(page, rows);
   }
 
   /**
    * Maneja la búsqueda por texto
+   * Resetea la paginación y fuerza recarga
    */
   onSearch(): void {
-    this.currentPage = 1; // Resetear a página 1 al buscar
-    this.loadProducts();
+    this.first = 0;
+    this.currentPage = 1;
+    this.loadProducts(1, this.rowsPerPage);
   }
 
   /**
@@ -134,7 +155,9 @@ export class AdminProductsComponent implements OnInit {
    */
   clearSearch(): void {
     this.searchTerm = '';
-    this.onSearch();
+    this.first = 0;
+    this.currentPage = 1;
+    this.loadProducts(1, this.rowsPerPage);
   }
 
   /**
@@ -187,7 +210,8 @@ export class AdminProductsComponent implements OnInit {
               summary: 'Éxito',
               detail: `Producto ${isActive ? 'desactivado' : 'activado'} correctamente`
             });
-            this.loadProducts(); // Recargar lista
+            // Recargar lista manteniendo paginación actual
+            this.loadProducts(this.currentPage, this.rowsPerPage);
           },
           error: (error) => {
             console.error('Error cambiando estado del producto:', error);

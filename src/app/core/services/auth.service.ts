@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { User, UserRole, LoginResponse, RefreshResponse, JwtPayload } from '../models/user.model';
+import { User, UserRole, UserStatus, LoginResponse, RefreshResponse, JwtPayload } from '../models/user.model';
 
 /**
  * AuthService - Servicio de Autenticación
@@ -125,6 +125,7 @@ export class AuthService {
    * 2. Backend valida el refreshToken de la BD
    * 3. Backend genera un nuevo accessToken
    * 4. Actualizamos localStorage con el nuevo token
+   * 5. Decodificamos el token y actualizamos el signal del usuario
    *
    * NOTA: Este endpoint es @Public() en tu backend porque el accessToken ya expiró
    */
@@ -137,6 +138,19 @@ export class AuthService {
       tap(response => {
         console.log('🔄 Token renovado');
         localStorage.setItem('accessToken', response.accessToken);
+
+        // ⭐ NUEVO: Actualizar el signal del usuario decodificando el token
+        const payload = this.decodeToken(response.accessToken);
+        if (payload) {
+          const user: User = {
+            id: payload.sub,
+            email: payload.email,
+            role: payload.role,
+            status: UserStatus.ACTIVE // Asumimos que está activo
+          };
+          this.currentUserSignal.set(user);
+          console.log('✅ Usuario sincronizado después del refresh:', user.email);
+        }
       }),
       catchError(error => {
         console.error('❌ Error al renovar token:', error);
@@ -240,7 +254,7 @@ export class AuthService {
           id: payload.sub,
           email: payload.email,
           role: payload.role,
-          status: 'ACTIVE' as any, // Asumimos que está activo
+          status: UserStatus.ACTIVE // Asumimos que está activo
         };
         this.currentUserSignal.set(user);
       }

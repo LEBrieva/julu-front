@@ -65,6 +65,7 @@
       [paginator]="true"
       [rows]="rowsPerPage"
       [totalRecords]="totalRecords"
+      [first]="first"
       [lazy]="true"
       (onLazyLoad)="onPageChange($event)"
       [rowsPerPageOptions]="[10, 25, 50]"
@@ -153,7 +154,7 @@
 
           <!-- Precio Base -->
           <td>
-            <span class="price">${{ product.basePrice.toFixed(2) }}</span>
+            <span class="price">{{ product.basePrice | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
           </td>
 
           <!-- Estado -->
