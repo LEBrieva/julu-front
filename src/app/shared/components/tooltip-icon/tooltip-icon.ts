@@ -5,9 +5,7 @@ import { TooltipModule } from 'primeng/tooltip';
  * TooltipIconComponent - Ícono de ayuda con tooltip
  *
  * Componente reutilizable que muestra un ícono (?) con tooltip informativo.
- * Detecta automáticamente si es dispositivo táctil y ajusta el evento:
- * - PC: hover (pasar el mouse)
- * - Móvil: focus (tap)
+ * Usa evento 'focus' para consistencia en todos los dispositivos (requiere click/tap).
  */
 @Component({
   selector: 'app-tooltip-icon',
@@ -26,28 +24,13 @@ export class TooltipIcon {
    */
   @Input() position: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
-  /**
-   * Detectar si es dispositivo táctil al inicializar el componente
-   */
-  private isTouchDevice = this.detectTouchDevice();
+
 
   /**
-   * Detecta si el dispositivo tiene capacidad táctil
+   * Siempre usa 'focus' para consistencia en todos los dispositivos
+   * - Requiere click/tap en cualquier dispositivo
    */
-  private detectTouchDevice(): boolean {
-    return (
-      'ontouchstart' in window ||
-      navigator.maxTouchPoints > 0 ||
-      (navigator as any).msMaxTouchPoints > 0
-    );
-  }
-
-  /**
-   * Retorna el evento de tooltip según el tipo de dispositivo
-   * - Dispositivos táctiles: 'focus' (requiere tap)
-   * - Dispositivos no táctiles: 'hover' (requiere mouse)
-   */
-  get tooltipEvent(): 'hover' | 'focus' {
-    return this.isTouchDevice ? 'focus' : 'hover';
+  get tooltipEvent(): 'focus' {
+    return 'focus';
   }
 }
