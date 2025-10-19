@@ -5,6 +5,11 @@ import { Observable, tap, catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { User, UserRole, UserStatus, LoginResponse, RefreshResponse, JwtPayload } from '../models/user.model';
+import {
+  SILENT_REFRESH_INTERVAL,
+  USER_INACTIVITY_THRESHOLD,
+  ACTIVITY_EVENTS
+} from '../constants/auth.constants';
 
 /**
  * AuthService - Servicio de Autenticación
@@ -51,6 +56,10 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isAdmin = computed(() => this.currentUser()?.role === UserRole.ADMIN);
 
+  // ⏰ Silent Token Refresh - Activity Tracking
+  private lastInteractionTime = Date.now();
+  private silentRefreshInterval: any = null;
+
   /**
    * Login - Autenticación de usuario
    *
@@ -81,6 +90,9 @@ export class AuthService {
 
         // Actualizar el signal con los datos del usuario
         this.currentUserSignal.set(response.user);
+
+        // ⏰ Iniciar silent refresh después del login
+        this.startSilentRefresh();
       }),
       catchError(error => {
         console.error('❌ Error en login:', error);
@@ -107,11 +119,15 @@ export class AuthService {
       tap(() => {
         console.log('✅ Logout exitoso');
         this.clearSession();
+        // ⏰ Detener silent refresh
+        this.stopSilentRefresh();
       }),
       catchError(error => {
         console.error('❌ Error en logout:', error);
         // Aunque falle, limpiamos la sesión local
         this.clearSession();
+        // ⏰ Detener silent refresh incluso si falla el logout
+        this.stopSilentRefresh();
         return throwError(() => error);
       })
     );
@@ -139,7 +155,7 @@ export class AuthService {
         console.log('🔄 Token renovado');
         localStorage.setItem('accessToken', response.accessToken);
 
-        // ⭐ NUEVO: Actualizar el signal del usuario decodificando el token
+        // ⭐ Actualizar el signal del usuario decodificando el token
         const payload = this.decodeToken(response.accessToken);
         if (payload) {
           const user: User = {
@@ -154,9 +170,9 @@ export class AuthService {
       }),
       catchError(error => {
         console.error('❌ Error al renovar token:', error);
-        // Si el refresh falla, la sesión expiró → logout
+        // Si el refresh falla, solo limpiar sesión
+        // El error.interceptor se encargará del redirect si es necesario
         this.clearSession();
-        this.router.navigate(['/login']);
         return throwError(() => error);
       })
     );
@@ -216,14 +232,125 @@ export class AuthService {
   }
 
   /**
+   * ⏰ SILENT TOKEN REFRESH - Activity Tracking
+   *
+   * Configura listeners para detectar actividad del usuario
+   * Eventos monitoreados definidos en ACTIVITY_EVENTS (auth.constants.ts)
+   * NO incluye mousemove para evitar demasiada sensibilidad
+   */
+  private setupActivityTracking(): void {
+    ACTIVITY_EVENTS.forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        this.lastInteractionTime = Date.now();
+      }, { passive: true }); // passive: true para mejor performance
+    });
+
+    console.log('👁️ Activity tracking iniciado');
+  }
+
+  /**
+   * Obtiene el tiempo transcurrido (en ms) desde la última interacción del usuario
+   */
+  private getTimeSinceLastInteraction(): number {
+    return Date.now() - this.lastInteractionTime;
+  }
+
+  /**
+   * Logout silencioso (sin POST al backend, sin redirect)
+   *
+   * Se usa cuando el usuario está inactivo y no queremos
+   * hacer una llamada al backend innecesaria.
+   *
+   * Solo limpia localStorage y signal.
+   */
+  private silentLogout(): void {
+    console.log('🔕 Silent logout - Usuario inactivo');
+    localStorage.removeItem('accessToken');
+    this.currentUserSignal.set(null);
+    this.stopSilentRefresh(); // Detener el intervalo
+  }
+
+  /**
+   * ⏰ SILENT TOKEN REFRESH
+   *
+   * Inicia un intervalo definido en SILENT_REFRESH_INTERVAL (auth.constants.ts) que:
+   * 1. Verifica si el usuario estuvo activo según USER_INACTIVITY_THRESHOLD
+   * 2. Si SÍ → Hace refresh del token automáticamente
+   * 3. Si NO → Logout diferenciado por rol:
+   *    - ADMIN: Logout + redirect a /login (seguridad)
+   *    - USER: Logout silencioso (sin redirect, sigue en la vista actual)
+   *
+   * NOTA: El backend debe tener el accessToken configurado con expiración de 1 hora
+   * Ver configuración en: src/app/core/constants/auth.constants.ts
+   */
+  startSilentRefresh(): void {
+    // Detener intervalo previo si existe
+    this.stopSilentRefresh();
+
+    this.silentRefreshInterval = setInterval(() => {
+      const inactiveTime = this.getTimeSinceLastInteraction();
+
+      if (inactiveTime > USER_INACTIVITY_THRESHOLD) {
+        // ⚠️ Usuario INACTIVO
+        console.log(`⚠️ Usuario inactivo por ${Math.round(inactiveTime / 1000 / 60)} minutos`);
+
+        const currentUser = this.currentUser();
+        const role = currentUser?.role;
+
+        if (role === UserRole.ADMIN) {
+          // 🔐 ADMIN: Logout completo + redirect (seguridad)
+          console.log('🔐 ADMIN inactivo → Logout + redirect a /login');
+          this.logout().subscribe(() => {
+            this.router.navigate(['/login']);
+          });
+        } else {
+          // 👤 USER: Logout silencioso (se queda en la vista)
+          console.log('👤 USER inactivo → Logout silencioso');
+          this.silentLogout();
+        }
+      } else {
+        // ✅ Usuario ACTIVO → Refresh automático
+        console.log('🔄 Usuario activo → Refresh automático del token');
+        this.refresh().subscribe({
+          next: () => {
+            console.log('✅ Token renovado automáticamente (silent refresh)');
+          },
+          error: (error) => {
+            console.error('❌ Error en silent refresh:', error);
+            // Si falla el refresh, el error.interceptor se encargará
+          }
+        });
+      }
+    }, SILENT_REFRESH_INTERVAL);
+
+    console.log(`⏰ Silent refresh iniciado (intervalo: ${SILENT_REFRESH_INTERVAL / 1000 / 60} min, inactividad: ${USER_INACTIVITY_THRESHOLD / 1000 / 60} min)`);
+  }
+
+  /**
+   * Detiene el intervalo de silent refresh
+   */
+  private stopSilentRefresh(): void {
+    if (this.silentRefreshInterval) {
+      clearInterval(this.silentRefreshInterval);
+      this.silentRefreshInterval = null;
+      console.log('⏰ Silent refresh detenido');
+    }
+  }
+
+  /**
    * Inicializar sesión al cargar la app
    *
    * Este método se debe llamar en el AppComponent para:
-   * 1. Verificar si hay un token guardado
-   * 2. Si existe y es válido, restaurar la sesión
-   * 3. Si expiró, intentar refresh automático
+   * 1. Configurar activity tracking
+   * 2. Verificar si hay un token guardado
+   * 3. Si existe y es válido, restaurar la sesión
+   * 4. Si expiró, intentar refresh automático
+   * 5. Iniciar silent refresh si hay sesión válida
    */
   initializeAuth(): void {
+    // 1. Configurar activity tracking
+    this.setupActivityTracking();
+
     const token = this.getAccessToken();
 
     if (!token) {
@@ -236,8 +363,8 @@ export class AuthService {
       this.refresh().subscribe({
         next: () => {
           console.log('Sesión restaurada con refresh');
-          // Aquí podrías hacer una petición para obtener los datos del usuario
-          // o decodificar el nuevo token para extraer la info
+          // Iniciar silent refresh después de restaurar sesión
+          this.startSilentRefresh();
         },
         error: () => {
           console.log('No se pudo restaurar la sesión');
@@ -257,6 +384,8 @@ export class AuthService {
           status: UserStatus.ACTIVE // Asumimos que está activo
         };
         this.currentUserSignal.set(user);
+        // Iniciar silent refresh
+        this.startSilentRefresh();
       }
     }
   }

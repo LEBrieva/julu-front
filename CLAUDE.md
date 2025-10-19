@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 4 completada (Admin Layout) - Sistema de autenticación completo + panel de administración con layout profesional: sidebar con navegación, header responsivo con user menu, lazy loading eficiente a nivel de feature module, y guards funcionando correctamente.
+**Estado actual**: FASE 5 completada (CRUD de Productos Admin) - Sistema completo de gestión de productos en panel admin: listado con tabla responsive, paginación server-side, búsqueda en tiempo real, filtros por categoría y disponibilidad, formulario de crear/editar con validaciones, eliminación con confirmación, badges de estado, y manejo robusto de errores. Upload de imágenes pendiente para FASE 5 bis.
 
 ---
 
@@ -47,15 +47,25 @@ src/app/
 │   │   └── error.interceptor.ts  # Manejo global de errores HTTP + toasts
 │   ├── models/
 │   │   ├── user.model.ts         # User, LoginResponse, JwtPayload, enums
+│   │   ├── product.model.ts      # Product, ProductCategory, ProductStatus
 │   │   └── api-response.model.ts # Tipos genéricos para respuestas paginadas
 │   └── services/
-│       └── auth.service.ts       # Autenticación con JWT + Signals
+│       ├── auth.service.ts       # Autenticación con JWT + Signals
+│       └── product.service.ts    # CRUD de productos + búsqueda/filtrado
 │
 ├── features/                  # Módulos de funcionalidad (lazy loaded)
 │   ├── admin/                 # Panel de administración
 │   │   ├── dashboard/
 │   │   │   └── admin-dashboard.component.ts  # ✅ Dashboard admin (placeholder)
-│   │   ├── products/          # TODO FASE 5
+│   │   ├── products/          # ✅ FASE 5: CRUD completo de productos
+│   │   │   ├── admin-products.component.ts   # Componente principal con tabla
+│   │   │   ├── admin-products.component.html # Template con PrimeNG Table
+│   │   │   ├── admin-products.component.css  # Estilos con Tailwind
+│   │   │   ├── product-form/                 # Subcomponente de formulario
+│   │   │   │   ├── product-form.component.ts
+│   │   │   │   ├── product-form.component.html
+│   │   │   │   └── product-form.component.css
+│   │   │   └── product-form.validator.ts     # Validaciones personalizadas
 │   │   ├── orders/            # TODO FASE 6
 │   │   └── users/             # TODO FASE 7
 │   ├── auth/                  # Autenticación
@@ -468,6 +478,55 @@ export interface ApiError {
 }
 ```
 
+### Product Models
+```typescript
+// core/models/product.model.ts
+export enum ProductCategory {
+  ELECTRONICS = 'electronics',
+  CLOTHING = 'clothing',
+  HOME = 'home',
+  SPORTS = 'sports',
+  BOOKS = 'books',
+  OTHER = 'other'
+}
+
+export enum ProductStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive'
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: ProductCategory;
+  status: ProductStatus;
+  imageUrl?: string;        // Opcional (FASE 5 bis)
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateProductDto {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: ProductCategory;
+  status?: ProductStatus;   // Opcional, default: ACTIVE
+}
+
+export interface UpdateProductDto {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category?: ProductCategory;
+  status?: ProductStatus;
+}
+```
+
 ---
 
 ## 🔌 Integración con Backend
@@ -663,6 +722,49 @@ console.log(payload); // { sub, email, role, exp }
 - [x] Conexión verificada con backend (CORS configurado)
 - [x] Guía de estilos documentada (`STYLING-GUIDELINES.md`)
 
+### ✅ FASE 3 bis: Silent Token Refresh (COMPLETADA)
+- [x] Activity tracking para detectar actividad del usuario:
+  - Eventos monitoreados: `click`, `keypress`, `scroll`
+  - Timestamp de última interacción actualizado en cada evento
+  - No incluye `mousemove` para evitar sensibilidad excesiva
+- [x] Constantes centralizadas en `core/constants/auth.constants.ts`:
+  - `ACCESS_TOKEN_EXPIRATION` - 1 hora (debe coincidir con backend)
+  - `SILENT_REFRESH_INTERVAL` - 55 minutos (refresh antes de expirar)
+  - `USER_INACTIVITY_THRESHOLD` - 15 minutos (umbral de inactividad)
+  - `ACTIVITY_EVENTS` - Array de eventos monitoreados
+  - Valores de testing comentados para desarrollo rápido
+- [x] Silent refresh automático cada 55 minutos:
+  - Verifica actividad del usuario antes de refrescar
+  - Si usuario activo (< 15 min inactivo): Refresh automático del token
+  - Si usuario inactivo (> 15 min): Logout diferenciado por rol
+- [x] Logout diferenciado por rol:
+  - **ADMIN inactivo**: Logout completo + redirect a `/login` (seguridad)
+  - **USER inactivo**: Logout silencioso sin redirect (se queda en la vista actual)
+  - USER puede seguir navegando rutas públicas (`/products`)
+  - authGuard redirige a `/login` al intentar acceder a rutas protegidas
+- [x] Métodos en AuthService:
+  - `setupActivityTracking()` - Configura listeners de eventos
+  - `getTimeSinceLastInteraction()` - Calcula tiempo de inactividad
+  - `silentLogout()` - Limpia sesión sin POST al backend
+  - `startSilentRefresh()` - Inicia intervalo de refresh automático
+  - `stopSilentRefresh()` - Detiene intervalo (en logout)
+- [x] Integración completa:
+  - `initializeAuth()` configura activity tracking al cargar la app
+  - `login()` inicia silent refresh después de autenticación exitosa
+  - `logout()` detiene silent refresh
+  - `refresh()` actualiza token y signal del usuario
+- [x] Logs detallados para debugging:
+  - `👁️ Activity tracking iniciado`
+  - `⏰ Silent refresh iniciado (intervalo: X min, inactividad: Y min)`
+  - `🔄 Usuario activo → Refresh automático del token`
+  - `⚠️ Usuario inactivo por X minutos`
+  - `🔐 ADMIN inactivo → Logout + redirect`
+  - `👤 USER inactivo → Logout silencioso`
+- [x] Performance optimizations:
+  - Event listeners con `{ passive: true }`
+  - Previene intervalos duplicados con `stopSilentRefresh()` antes de crear nuevo
+  - Limpia recursos al hacer logout
+
 ### ✅ FASE 4: Admin Layout (COMPLETADA)
 - [x] Crear AdminLayoutComponent con estructura header + sidebar + content
 - [x] Implementar lazy loading a nivel de feature module (loadChildren)
@@ -690,12 +792,65 @@ console.log(payload); // { sub, email, role, exp }
   - Children routes con lazy loading individual
   - Chunks generados: admin-layout (~22KB), admin-dashboard (~11KB), admin-routes (~1KB)
 
-### FASE 5: CRUD de Productos (Admin)
-- [ ] Lista de productos con tabla (PrimeNG DataTable)
-- [ ] Paginación y búsqueda
-- [ ] Formulario de crear/editar producto (dialog)
-- [ ] Eliminación con confirmación
-- [ ] Upload de imágenes
+### ✅ FASE 5: CRUD de Productos (Admin) (COMPLETADA)
+- [x] Modelo de datos `Product` con enums (ProductCategory, ProductStatus)
+- [x] Servicio `ProductService` con CRUD completo:
+  - `getProducts(params)` - Listado paginado con filtros (search, category, status, sort)
+  - `getProductById(id)` - Detalle de producto
+  - `createProduct(dto)` - Crear producto
+  - `updateProduct(id, dto)` - Actualizar producto
+  - `deleteProduct(id)` - Eliminar producto
+- [x] Componente `AdminProductsComponent` con PrimeNG Table:
+  - Tabla responsive con columnas: Nombre, Descripción (truncada), Categoría, Precio, Stock, Estado, Acciones
+  - Paginación server-side (lazy loading) con control de page/limit
+  - Búsqueda en tiempo real (debounce 500ms) por nombre/descripción
+  - Filtros dropdown por categoría y estado (con opción "Todos")
+  - Ordenamiento por columnas (nombre, precio, stock, fecha)
+  - Badges visuales para categorías y estados (success/warning)
+  - Botón "Nuevo Producto" con permisos admin
+- [x] Subcomponente `ProductFormComponent` (dialog):
+  - Formulario reactivo con validaciones:
+    - Nombre: required, minLength(3), maxLength(100)
+    - Descripción: required, minLength(10), maxLength(500)
+    - Precio: required, min(0.01)
+    - Stock: required, min(0), integer
+    - Categoría: required (dropdown con todas las categorías)
+    - Estado: required (toggle activo/inactivo)
+  - Modo crear/editar dinámico (mismo formulario)
+  - Loading state durante submit
+  - Validación custom: precio con 2 decimales máximo
+  - Mensajes de error centralizados (shared/constants/validation-messages.ts)
+  - Toast de éxito/error automático (vía error.interceptor)
+- [x] Eliminación con confirmación:
+  - Dialog de confirmación con PrimeNG ConfirmDialog
+  - Muestra nombre del producto en el mensaje
+  - Toast de éxito al eliminar
+  - Recarga automática de la tabla tras eliminar
+- [x] Manejo robusto de errores:
+  - Errores HTTP manejados por error.interceptor (toasts automáticos)
+  - Validación de formularios con mensajes claros
+  - Estado de carga en botones y tabla
+  - Mensajes cuando no hay datos (empty state)
+- [x] UI/UX optimizada:
+  - Tabla con skeleton loading durante fetch
+  - Iconos consistentes (PrimeIcons)
+  - Diseño responsive (mobile-first)
+  - Acciones con tooltips (editar/eliminar)
+  - Botones disabled durante loading
+- [x] Integración completa con backend:
+  - Query params correctos para paginación/filtros
+  - Manejo de respuestas paginadas (`PaginatedResponse<Product>`)
+  - Sincronización con endpoints `/products`
+  - Validaciones alineadas con backend (DTOs)
+
+### FASE 5 bis: Upload de Imágenes de Productos (PENDIENTE)
+- [ ] Componente de upload de imágenes (PrimeNG FileUpload)
+- [ ] Integración con servicio de almacenamiento (backend)
+- [ ] Preview de imagen antes de subir
+- [ ] Validación de tipo y tamaño de archivo
+- [ ] Crop/resize de imágenes (opcional)
+- [ ] Galería de imágenes por producto (múltiples imágenes)
+- [ ] Actualizar modelo Product.imageUrl a Product.images[]
 
 ### FASE 6: Gestión de Órdenes (Admin)
 - [ ] Lista de órdenes con filtros (estado, fecha)
@@ -788,4 +943,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-10-15 (FASE 4 completada)
+**Última actualización**: 2025-10-19 (FASE 3 bis completada - Silent Token Refresh, FASE 5 completada - CRUD de Productos Admin)
