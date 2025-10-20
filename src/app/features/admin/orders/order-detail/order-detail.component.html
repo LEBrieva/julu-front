@@ -1,0 +1,281 @@
+<!-- Toast para notificaciones -->
+<p-toast />
+
+<!-- Loading skeleton -->
+@if (loading) {
+  <div class="p-4">
+    <div class="mb-6">
+      <p-skeleton width="10rem" height="2rem" styleClass="mb-2" />
+      <p-skeleton width="20rem" height="3rem" styleClass="mb-4" />
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <p-skeleton width="100%" height="15rem" />
+      <p-skeleton width="100%" height="15rem" />
+    </div>
+    <p-skeleton width="100%" height="20rem" />
+  </div>
+}
+
+<!-- Contenido principal (solo si cargó) -->
+@if (!loading && order) {
+  <div class="p-4">
+    <!-- Header -->
+    <div class="mb-6">
+      <!-- Botón volver -->
+      <p-button
+        label="Volver a Órdenes"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [text]="true"
+        (onClick)="goBack()"
+        styleClass="mb-4"
+      />
+
+      <!-- Título con número de orden -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            {{ order.orderNumber }}
+          </h1>
+          <p class="text-gray-600">
+            Creada: {{ formatDateLong(order.createdAt) }}
+          </p>
+        </div>
+
+        <!-- Badges de estado -->
+        <div class="flex flex-wrap gap-2">
+          <p-tag
+            [value]="formatOrderStatus(order.status)"
+            [severity]="getOrderStatusSeverity(order.status)"
+            styleClass="text-base px-4 py-2"
+          />
+          <p-tag
+            [value]="formatPaymentStatus(order.paymentStatus)"
+            [severity]="getPaymentStatusSeverity(order.paymentStatus)"
+            styleClass="text-base px-4 py-2"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid principal: Info + Productos -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+      <!-- Columna izquierda: Info Cliente + Dirección -->
+      <div class="lg:col-span-2 space-y-4">
+        <!-- Card: Información del Cliente -->
+        <p-card header="Información del Cliente">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-600 block mb-1">
+                Nombre Completo
+              </label>
+              <p class="text-gray-900 font-medium">
+                {{ order.shippingAddress.fullName }}
+              </p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-600 block mb-1">
+                Email
+              </label>
+              <p class="text-gray-900">
+                {{ order.shippingAddress.email }}
+              </p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-600 block mb-1">
+                Teléfono
+              </label>
+              <p class="text-gray-900">
+                {{ order.shippingAddress.phone }}
+              </p>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Card: Dirección de Envío -->
+        <p-card header="Dirección de Envío">
+          <div class="space-y-2">
+            <p class="text-gray-900 font-medium">
+              {{ order.shippingAddress.fullName }}
+            </p>
+            <p class="text-gray-700">
+              {{ order.shippingAddress.street }}
+            </p>
+            <p class="text-gray-700">
+              {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zipCode }}
+            </p>
+            <p class="text-gray-700">
+              {{ order.shippingAddress.country }}
+            </p>
+            <p class="text-gray-700">
+              Tel: {{ order.shippingAddress.phone }}
+            </p>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Columna derecha: Totales + Acciones -->
+      <div class="space-y-4">
+        <!-- Card: Resumen de Totales -->
+        <p-card header="Resumen">
+          <div class="space-y-3">
+            <!-- Subtotal -->
+            <div class="flex justify-between items-center pb-2">
+              <span class="text-gray-600">Subtotal:</span>
+              <span class="font-medium">{{ formatCurrency(order.subtotal) }}</span>
+            </div>
+
+            <!-- Envío -->
+            <div class="flex justify-between items-center pb-2">
+              <span class="text-gray-600">Envío:</span>
+              <span class="font-medium">{{ formatCurrency(order.shippingCost) }}</span>
+            </div>
+
+            <!-- Total -->
+            <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+              <span class="text-lg font-semibold">Total:</span>
+              <span class="text-lg font-bold text-green-700">
+                {{ formatCurrency(order.total) }}
+              </span>
+            </div>
+
+            <!-- Método de pago -->
+            <div class="pt-3 border-t border-gray-200">
+              <div class="flex items-center gap-2">
+                <i [class]="'pi ' + getPaymentMethodIcon(order.paymentMethod) + ' text-gray-600'"></i>
+                <span class="text-gray-700 font-medium">
+                  {{ formatPaymentMethod(order.paymentMethod) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Total de items -->
+            <div class="pt-2">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="pi pi-shopping-cart"></i>
+                <span>{{ getTotalItems() }} producto(s)</span>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Card: Acciones Admin -->
+        <p-card header="Acciones Admin">
+          <div class="space-y-3">
+            <div>
+              <label for="status" class="text-sm font-medium text-gray-700 block mb-2">
+                Cambiar Estado
+              </label>
+              <p-select
+                id="status"
+                [options]="changeStatusOptions"
+                [(ngModel)]="selectedStatus"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona estado"
+                [showClear]="false"
+                [disabled]="updatingStatus"
+                styleClass="w-full"
+              />
+            </div>
+
+            <p-button
+              label="Guardar Cambios"
+              icon="pi pi-check"
+              severity="success"
+              (onClick)="changeStatus()"
+              [disabled]="updatingStatus || selectedStatus === order.status"
+              [loading]="updatingStatus"
+              styleClass="w-full"
+            />
+          </div>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Card: Productos -->
+    <p-card header="Productos ({{ order.items.length }} items)">
+      <p-table
+        [value]="order.items"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="font-semibold" style="width: 5rem">Imagen</th>
+            <th class="font-semibold" style="min-width: 15rem">Producto</th>
+            <th class="font-semibold" style="min-width: 10rem">Variante</th>
+            <th class="font-semibold text-center" style="width: 8rem">Cantidad</th>
+            <th class="font-semibold text-right" style="width: 10rem">Precio Unit.</th>
+            <th class="font-semibold text-right" style="width: 10rem">Subtotal</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <!-- Imagen -->
+            <td>
+              @if (item.productImage) {
+                <img
+                  [src]="item.productImage"
+                  [alt]="item.productName"
+                  class="w-16 h-16 object-cover rounded border border-gray-200"
+                />
+              } @else {
+                <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                  <i class="pi pi-image text-gray-400 text-2xl"></i>
+                </div>
+              }
+            </td>
+
+            <!-- Nombre del producto -->
+            <td>
+              <span class="font-medium text-gray-900">{{ item.productName }}</span>
+              <div class="text-xs text-gray-500 mt-1">SKU: {{ item.variantSKU }}</div>
+            </td>
+
+            <!-- Variante (talla + color) -->
+            <td>
+              <div class="space-y-1">
+                <div class="text-sm">
+                  <span class="text-gray-600">Talla:</span>
+                  <span class="font-medium ml-1">{{ item.variantSize }}</span>
+                </div>
+                <div class="text-sm">
+                  <span class="text-gray-600">Color:</span>
+                  <span class="font-medium ml-1">{{ item.variantColor }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Cantidad -->
+            <td class="text-center">
+              <span class="font-semibold text-lg">{{ item.quantity }}</span>
+            </td>
+
+            <!-- Precio unitario -->
+            <td class="text-right">
+              <span class="font-medium">{{ formatCurrency(item.price) }}</span>
+            </td>
+
+            <!-- Subtotal -->
+            <td class="text-right">
+              <span class="font-semibold text-green-700">
+                {{ formatCurrency(item.subtotal) }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+
+    <!-- Notas (si existen) -->
+    @if (order.notes) {
+      <p-card header="Notas" styleClass="mt-4">
+        <p class="text-gray-700 whitespace-pre-wrap">{{ order.notes }}</p>
+      </p-card>
+    }
+  </div>
+}

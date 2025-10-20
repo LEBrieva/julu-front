@@ -1,0 +1,37 @@
+/**
+ * AdminOrdersComponent Styles
+ *
+ * Estilos mínimos. La mayoría del diseño viene de:
+ * - PrimeNG (componentes)
+ * - TailwindCSS (utilidades)
+ */
+
+/* Asegurar que el datepicker no se corte */
+:host ::ng-deep .p-datepicker {
+  width: 100%;
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext {
+  width: 100%;
+}
+
+/* Asegurar que los select inline en la tabla tengan z-index correcto */
+:host ::ng-deep .p-select-overlay {
+  z-index: 1100;
+}
+
+/* Mejorar el contraste del número de orden clickeable */
+:host button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Centrar correctamente el empty state */
+:host ::ng-deep .p-datatable .p-datatable-emptymessage td {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-emptymessage {
+  background: transparent;
+}

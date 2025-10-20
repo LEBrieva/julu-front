@@ -76,8 +76,8 @@ export class AdminLayoutComponent {
     {
       label: 'Órdenes',
       icon: 'pi pi-shopping-cart',
-      route: '/admin/orders',
-      disabled: true // TODO FASE 6
+      route: '/admin/orders'
+      // ✅ FASE 6 COMPLETADA
     },
     {
       label: 'Usuarios',

@@ -65,14 +65,21 @@ export const ADMIN_ROUTES: Routes = [
           )
       },
 
-      // TODO FASE 6: Orders Management
-      // {
-      //   path: 'orders',
-      //   loadComponent: () =>
-      //     import('./orders/admin-orders.component').then(
-      //       (m) => m.AdminOrdersComponent
-      //     )
-      // },
+      // FASE 6: Orders Management ✅
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./orders/admin-orders.component').then(
+            (m) => m.AdminOrdersComponent
+          )
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./orders/order-detail/order-detail.component').then(
+            (m) => m.OrderDetailComponent
+          )
+      },
 
       // TODO FASE 7: Users Management
       // {

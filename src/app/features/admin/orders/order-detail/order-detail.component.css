@@ -1,0 +1,29 @@
+/**
+ * OrderDetailComponent Styles
+ *
+ * Estilos mínimos. La mayoría del diseño viene de:
+ * - PrimeNG (componentes Card, Table, Tag)
+ * - TailwindCSS (utilidades)
+ */
+
+/* Asegurar que las cards tengan buen espaciado interno */
+:host ::ng-deep .p-card .p-card-body {
+  padding: 1.5rem;
+}
+
+:host ::ng-deep .p-card .p-card-content {
+  padding: 0;
+}
+
+/* Mejorar el aspecto de la tabla de productos */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Responsive: En mobile, hacer scroll horizontal en tabla de productos */
+@media (max-width: 768px) {
+  :host ::ng-deep .p-card {
+    margin-bottom: 1rem;
+  }
+}
