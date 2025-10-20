@@ -240,11 +240,13 @@ export const PAYMENT_STATUS_OPTIONS = [
 
 /**
  * Opciones de OrderStatus para cambiar estado (admin)
- * Excluimos PENDING y CANCELLED (no se puede cambiar manualmente a esos estados)
+ * Incluye todos los estados posibles
  */
 export const CHANGE_STATUS_OPTIONS = [
+  { label: formatOrderStatus(OrderStatus.PENDING), value: OrderStatus.PENDING },
   { label: formatOrderStatus(OrderStatus.PAID), value: OrderStatus.PAID },
   { label: formatOrderStatus(OrderStatus.PROCESSING), value: OrderStatus.PROCESSING },
   { label: formatOrderStatus(OrderStatus.SHIPPED), value: OrderStatus.SHIPPED },
-  { label: formatOrderStatus(OrderStatus.DELIVERED), value: OrderStatus.DELIVERED }
+  { label: formatOrderStatus(OrderStatus.DELIVERED), value: OrderStatus.DELIVERED },
+  { label: formatOrderStatus(OrderStatus.CANCELLED), value: OrderStatus.CANCELLED }
 ];

@@ -35,3 +35,18 @@
 :host ::ng-deep .p-datatable .p-datatable-emptymessage {
   background: transparent;
 }
+
+/* FORZAR que el dropdown del paginador (10, 25, 50) se abra HACIA ARRIBA */
+:host ::ng-deep .p-paginator .p-select-overlay {
+  position: fixed !important;
+  bottom: auto !important;
+  top: auto !important;
+  transform-origin: bottom center !important;
+}
+
+/* Asegurar que el paginador permita overflow visible */
+:host ::ng-deep .p-paginator {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
+}

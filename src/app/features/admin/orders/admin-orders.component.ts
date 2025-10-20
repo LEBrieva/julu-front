@@ -15,7 +15,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Select } from 'primeng/select';
 import { DatePicker } from 'primeng/datepicker';
 import { SkeletonModule } from 'primeng/skeleton';
-import { MessageService } from 'primeng/api';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 // Services and models
 import { OrderService } from '../../../core/services/order.service';
@@ -59,9 +60,10 @@ import { PaginationInfo } from '../../../core/models/api-response.model';
     TooltipModule,
     Select,
     DatePicker,
-    SkeletonModule
+    SkeletonModule,
+    ConfirmDialog
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './admin-orders.component.html',
   styleUrl: './admin-orders.component.css'
 })
@@ -70,10 +72,13 @@ export class AdminOrdersComponent implements OnInit {
   private orderService = inject(OrderService);
   private router = inject(Router);
   private messageService = inject(MessageService);
+  private confirmationService = inject(ConfirmationService);
 
   // State
   orders: OrderListItem[] = [];
   loading = false;
+  editingOrderId: string | null = null;
+  originalStatus: OrderStatus | null = null;
 
   // Filtros
   searchTerm = '';
@@ -110,6 +115,84 @@ export class AdminOrdersComponent implements OnInit {
     this.orders = [];
     this.totalRecords = 0;
     // La tabla disparará onLazyLoad automáticamente
+
+    // Fix para el dropdown del paginador - reposicionar hacia arriba
+    this.setupPaginatorDropdownFix();
+  }
+
+  /**
+   * Configura un observer para detectar cuando se abre cualquier dropdown
+   * (paginador o estado de orden) y forzarlo a abrirse hacia arriba
+   */
+  private setupPaginatorDropdownFix(): void {
+    setTimeout(() => {
+      const observer = new MutationObserver(() => {
+        // Buscar todos los overlays de select
+        const overlays = document.querySelectorAll('.p-select-overlay');
+
+        overlays.forEach((overlay: Element) => {
+          const htmlOverlay = overlay as HTMLElement;
+
+          // Verificar si está visible y si ya fue reposicionado
+          if (htmlOverlay.offsetParent !== null && !htmlOverlay.dataset['repositioned']) {
+            // Buscar el trigger ACTIVO (el que tiene aria-expanded="true")
+            let trigger: HTMLElement | null = null;
+
+            // Buscar todos los p-select en la página
+            const allSelects = document.querySelectorAll('.p-select');
+
+            // Encontrar el que está expandido (activo)
+            for (const select of Array.from(allSelects)) {
+              const selectElement = select as HTMLElement;
+              const button = selectElement.querySelector('button[aria-expanded="true"]');
+
+              if (button) {
+                trigger = selectElement;
+                break;
+              }
+            }
+
+            if (trigger) {
+              const triggerRect = trigger.getBoundingClientRect();
+
+              requestAnimationFrame(() => {
+                const overlayHeight = htmlOverlay.offsetHeight;
+                const overlayWidth = htmlOverlay.offsetWidth;
+
+                // Calcular left para que esté alineado con el trigger
+                // Ajustar si se sale del viewport
+                let left = triggerRect.left;
+                if (left + overlayWidth > window.innerWidth) {
+                  left = window.innerWidth - overlayWidth - 10;
+                }
+                // Si está muy a la izquierda
+                if (left < 10) {
+                  left = 10;
+                }
+
+                // FORZAR posición hacia arriba
+                htmlOverlay.style.setProperty('position', 'fixed', 'important');
+                htmlOverlay.style.setProperty('top', `${triggerRect.top - overlayHeight - 4}px`, 'important');
+                htmlOverlay.style.setProperty('left', `${left}px`, 'important');
+                htmlOverlay.style.setProperty('bottom', 'auto', 'important');
+                htmlOverlay.style.setProperty('transform', 'none', 'important');
+                htmlOverlay.style.setProperty('width', 'auto', 'important');
+                htmlOverlay.style.setProperty('max-width', '250px', 'important');
+
+                // Marcar como reposicionado para evitar loops
+                htmlOverlay.dataset['repositioned'] = 'true';
+              });
+            }
+          }
+        });
+      });
+
+      // Observar cambios en el body
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }, 500);
   }
 
   /**
@@ -216,13 +299,65 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Cambia el estado de una orden (dropdown inline en tabla)
+   * Verifica si se puede editar el estado de una orden
+   * No se pueden editar órdenes canceladas o entregadas (estados finales)
    */
-  changeOrderStatus(order: OrderListItem, newStatus: OrderStatus): void {
-    if (order.status === newStatus) {
-      return; // No hacer nada si es el mismo estado
+  canEditStatus(order: OrderListItem): boolean {
+    return order.status !== OrderStatus.CANCELLED && order.status !== OrderStatus.DELIVERED;
+  }
+
+  /**
+   * Inicia el modo de edición del estado de una orden
+   */
+  startEditOrderStatus(order: OrderListItem): void {
+    // Solo permitir edición si el estado no es final
+    if (!this.canEditStatus(order)) {
+      return;
     }
 
+    this.editingOrderId = order.id;
+    this.originalStatus = order.status;
+  }
+
+  /**
+   * Maneja el cambio de estado cuando se selecciona un nuevo valor
+   */
+  onOrderStatusChange(order: OrderListItem): void {
+    const newStatus = order.status;
+
+    // Si es el mismo estado, cancelar
+    if (newStatus === this.originalStatus) {
+      this.editingOrderId = null;
+      this.originalStatus = null;
+      return;
+    }
+
+    const newStatusLabel = formatOrderStatus(newStatus);
+    const currentStatusLabel = formatOrderStatus(this.originalStatus!);
+
+    // Mostrar confirmación
+    this.confirmationService.confirm({
+      message: `¿Cambiar estado de "${currentStatusLabel}" a "${newStatusLabel}"?`,
+      header: 'Confirmar Cambio',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, cambiar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        this.updateOrderStatus(order, newStatus);
+      },
+      reject: () => {
+        // Cancelar: resetear al estado original
+        order.status = this.originalStatus!;
+        this.editingOrderId = null;
+        this.originalStatus = null;
+      }
+    });
+  }
+
+  /**
+   * Actualiza el estado de una orden en el backend
+   */
+  private updateOrderStatus(order: OrderListItem, newStatus: OrderStatus): void {
     this.loading = true;
 
     this.orderService.updateOrderStatus(order.id, { status: newStatus }).subscribe({
@@ -243,10 +378,16 @@ export class AdminOrdersComponent implements OnInit {
         });
 
         this.loading = false;
+        this.editingOrderId = null;
+        this.originalStatus = null;
       },
       error: (error) => {
         console.error('Error al actualizar estado:', error);
+        // Resetear al estado original
+        order.status = this.originalStatus!;
         this.loading = false;
+        this.editingOrderId = null;
+        this.originalStatus = null;
         // El error.interceptor ya muestra el toast de error
       }
     });

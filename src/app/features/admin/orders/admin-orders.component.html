@@ -1,6 +1,9 @@
 <!-- Toast para notificaciones -->
 <p-toast />
 
+<!-- Dialog de confirmación -->
+<p-confirmdialog />
+
 <!-- Contenedor principal -->
 <div class="p-4">
   <!-- Header -->
@@ -160,12 +163,41 @@
             </span>
           </td>
 
-          <!-- Estado orden (badge) -->
+          <!-- Estado orden (badge clickeable / selector) -->
           <td class="text-center">
-            <p-tag
-              [value]="formatOrderStatus(order.status)"
-              [severity]="getOrderStatusSeverity(order.status)"
-            />
+            @if (editingOrderId !== order.id) {
+              <!-- Badge editable (si no es estado final) -->
+              @if (canEditStatus(order)) {
+                <div
+                  class="cursor-pointer transition-all hover:scale-105 inline-block"
+                  (click)="startEditOrderStatus(order)"
+                  title="Clic para cambiar estado"
+                >
+                  <p-tag
+                    [value]="formatOrderStatus(order.status) + ' ✎'"
+                    [severity]="getOrderStatusSeverity(order.status)"
+                  />
+                </div>
+              } @else {
+                <!-- Badge no editable (estados finales) -->
+                <p-tag
+                  [value]="formatOrderStatus(order.status)"
+                  [severity]="getOrderStatusSeverity(order.status)"
+                />
+              }
+            } @else {
+              <!-- Selector activo -->
+              <p-select
+                [options]="changeStatusOptions"
+                [(ngModel)]="order.status"
+                (onChange)="onOrderStatusChange(order)"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="false"
+                styleClass="w-auto"
+                appendTo="body"
+              />
+            }
           </td>
 
           <!-- Estado pago (badge) -->
@@ -183,35 +215,16 @@
 
           <!-- Acciones -->
           <td class="text-center">
-            <div class="flex items-center justify-center gap-2">
-              <!-- Ver detalle -->
-              <p-button
-                icon="pi pi-eye"
-                severity="info"
-                [text]="true"
-                [rounded]="true"
-                pTooltip="Ver Detalle"
-                tooltipPosition="top"
-                (onClick)="viewOrderDetail(order.id)"
-              />
-
-              <!-- Cambiar estado (select) -->
-              <p-select
-                [options]="changeStatusOptions"
-                [(ngModel)]="order.status"
-                (onChange)="changeOrderStatus(order, order.status)"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Cambiar"
-                [showClear]="false"
-                styleClass="w-auto"
-                appendTo="body"
-              >
-                <ng-template pTemplate="selectedItem">
-                  <i class="pi pi-refresh text-gray-600"></i>
-                </ng-template>
-              </p-select>
-            </div>
+            <!-- Ver detalle -->
+            <p-button
+              icon="pi pi-eye"
+              severity="info"
+              [text]="true"
+              [rounded]="true"
+              pTooltip="Ver Detalle"
+              tooltipPosition="top"
+              (onClick)="viewOrderDetail(order.id)"
+            />
           </td>
         </tr>
       </ng-template>
