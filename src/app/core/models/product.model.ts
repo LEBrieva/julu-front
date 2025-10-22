@@ -70,12 +70,10 @@ export enum ProductStyle {
  * Tallas de producto (para futura fase de variantes)
  */
 export enum ProductSize {
-  XS = 'xs',
-  S = 's',
-  M = 'm',
-  G = 'g',
-  GG = 'gg',
-  XXL = 'xxl'
+  P = 'P',
+  M = 'M',
+  G = 'G',
+  GG = 'GG',
 }
 
 /**
@@ -145,12 +143,12 @@ export const CATEGORY_STYLE_MAP: Record<ProductCategory, ProductStyle[]> = {
 // ===========================
 
 /**
- * Interface de Variante (para futura fase)
+ * Interface de Variante
  */
 export interface ProductVariant {
   sku: string;
-  size: string;
-  color: string;
+  size: ProductSize;
+  color: ProductColor;
   stock: number;
   price: number;
 }
@@ -241,6 +239,26 @@ export interface UpdateProductDto {
 }
 
 /**
+ * DTO para agregar variante a un producto existente
+ * Enviado a: POST /products/:id/variants
+ */
+export interface AddVariantDto {
+  size: ProductSize;
+  color: ProductColor;
+  stock: number;
+  price: number;
+}
+
+/**
+ * DTO para actualizar una variante específica
+ * Enviado a: PATCH /products/:id/variants/:sku
+ */
+export interface UpdateSingleVariantDto {
+  stock?: number;
+  price?: number;
+}
+
+/**
  * DTO para filtrar productos (query params)
  * Usado en: GET /products?page=1&limit=10&search=...
  */
@@ -311,6 +329,101 @@ export function getStatusSeverity(status: ProductStatus): 'success' | 'danger' |
       return 'danger';
     case ProductStatus.OUT_OF_STOCK:
       return 'warn';
+    default:
+      return 'warn';
+  }
+}
+
+// ===========================
+// HELPERS - VARIANTES
+// ===========================
+
+/**
+ * Formatea el tamaño de producto para mostrar en UI
+ */
+export function formatSize(size: ProductSize): string {
+  return size.toUpperCase();
+}
+
+/**
+ * Formatea el color de producto para mostrar en UI
+ */
+export function formatColor(color: ProductColor): string {
+  const colorMap: Record<ProductColor, string> = {
+    [ProductColor.BLACK]: 'Negro',
+    [ProductColor.WHITE]: 'Blanco',
+    [ProductColor.GRAY]: 'Gris',
+    [ProductColor.NAVY]: 'Azul Marino',
+    [ProductColor.RED]: 'Rojo',
+    [ProductColor.BLUE]: 'Azul'
+  };
+  return colorMap[color] || formatEnumValue(color);
+}
+
+/**
+ * Formatea el estilo de producto para mostrar en UI
+ */
+export function formatStyle(style: ProductStyle): string {
+  const styleMap: Record<ProductStyle, string> = {
+    [ProductStyle.REGULAR]: 'Regular',
+    [ProductStyle.OVERSIZE]: 'Oversize',
+    [ProductStyle.SLIM_FIT]: 'Slim Fit',
+    [ProductStyle.STRAIGHT]: 'Recto',
+    [ProductStyle.SKINNY]: 'Ajustado',
+    [ProductStyle.RELAXED]: 'Relajado',
+    [ProductStyle.BOOTCUT]: 'Bootcut',
+    [ProductStyle.CLASSIC]: 'Clásico',
+    [ProductStyle.CROPPED]: 'Corto',
+    [ProductStyle.OVERSIZED]: 'Oversize',
+    [ProductStyle.CASUAL]: 'Casual',
+    [ProductStyle.FORMAL]: 'Formal',
+    [ProductStyle.DEPORTIVO]: 'Deportivo',
+    [ProductStyle.URBANO]: 'Urbano',
+    [ProductStyle.A_LINE]: 'Línea A',
+    [ProductStyle.BODYCON]: 'Ajustado',
+    [ProductStyle.MAXI]: 'Maxi',
+    [ProductStyle.MINI]: 'Mini',
+    [ProductStyle.MIDI]: 'Midi'
+  };
+  return styleMap[style] || formatEnumValue(style);
+}
+
+/**
+ * Obtiene el código hexadecimal de un color
+ */
+export function getColorHex(color: ProductColor): string {
+  const colorHexMap: Record<ProductColor, string> = {
+    [ProductColor.BLACK]: '#000000',
+    [ProductColor.WHITE]: '#FFFFFF',
+    [ProductColor.GRAY]: '#6B7280',
+    [ProductColor.NAVY]: '#1E3A8A',
+    [ProductColor.RED]: '#DC2626',
+    [ProductColor.BLUE]: '#3B82F6'
+  };
+  return colorHexMap[color] || '#6B7280';
+}
+
+/**
+ * Obtiene el color de texto apropiado según el color de fondo
+ */
+export function getTextColor(color: ProductColor): string {
+  // Colores claros necesitan texto oscuro, colores oscuros necesitan texto claro
+  const lightColors = [ProductColor.WHITE];
+  return lightColors.includes(color) ? '#000000' : '#FFFFFF';
+}
+
+/**
+ * Obtiene la severidad de PrimeNG según el tamaño
+ */
+export function getSizeSeverity(size: ProductSize): 'info' | 'success' | 'warn' | 'danger' {
+  switch (size) {
+    case ProductSize.P:
+      return 'info';
+    case ProductSize.M:
+    case ProductSize.G:
+      return 'success';
+    case ProductSize.GG:
+      return 'danger';
     default:
       return 'warn';
   }

@@ -214,6 +214,112 @@ textarea.ng-valid.ng-dirty {
 }
 
 /* ===========================
+   Gestión de Variantes
+   =========================== */
+.variant-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Tabla simple de variantes (modo CREAR) */
+.variants-table {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: white;
+}
+
+.variants-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr 1.2fr 0.8fr;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.variants-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr 1.2fr 0.8fr;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.variants-table-row:last-child {
+  border-bottom: none;
+}
+
+.variants-table-row:hover {
+  background-color: #f8f9fa;
+}
+
+.variant-col-size,
+.variant-col-color,
+.variant-col-stock,
+.variant-col-price,
+.variant-col-actions {
+  display: flex;
+  align-items: center;
+}
+
+.variant-col-actions {
+  justify-content: center;
+}
+
+.variant-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.variant-remove-btn:hover {
+  background-color: #fee;
+  color: #b02a37;
+}
+
+.variant-remove-btn i {
+  font-size: 0.875rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border: 1px dashed #dee2e6;
+  border-radius: 0.5rem;
+}
+
+.empty-state i {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.empty-state small {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* ===========================
    Responsive
    =========================== */
 @media (max-width: 768px) {
@@ -245,6 +351,61 @@ textarea.ng-valid.ng-dirty {
 
   .form-field-full {
     grid-column: span 1;
+  }
+
+  .variant-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Responsive para tabla de variantes (modo CREAR) */
+  .variants-table-header {
+    display: none; /* Ocultar headers en mobile */
+  }
+
+  .variants-table-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .variant-col-size,
+  .variant-col-color,
+  .variant-col-stock,
+  .variant-col-price {
+    justify-content: space-between;
+  }
+
+  .variant-col-size::before {
+    content: 'Tamaño:';
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .variant-col-color::before {
+    content: 'Color:';
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .variant-col-stock::before {
+    content: 'Stock:';
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .variant-col-price::before {
+    content: 'Precio:';
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .variant-col-actions {
+    justify-content: stretch;
+  }
+
+  .variant-remove-btn {
+    width: 100%;
+    padding: 0.5rem;
   }
 
   .form-actions {

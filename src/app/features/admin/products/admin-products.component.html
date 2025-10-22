@@ -77,7 +77,7 @@
       <!-- Template cuando no hay datos -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="7" class="text-center">
+          <td colspan="9" class="text-center">
             <div class="empty-state">
               <i class="pi pi-inbox"></i>
               @if (searchTerm) {
@@ -112,7 +112,9 @@
           <th>Categoría</th>
           <th>Estilo</th>
           <th>Precio Base</th>
-          <th>Estado</th>
+          <th class="text-center">Variantes</th>
+          <th class="text-center">Stock Total</th>
+          <th class="text-center">Estado</th>
           <th class="text-center">Acciones</th>
         </tr>
       </ng-template>
@@ -157,8 +159,24 @@
             <span class="price">{{ product.basePrice | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
           </td>
 
+          <!-- Variantes -->
+          <td class="text-center">
+            <p-tag
+              [value]="product.totalVariants.toString()"
+              severity="info"
+              [rounded]="true"
+            ></p-tag>
+          </td>
+
+          <!-- Stock Total -->
+          <td class="text-center">
+            <span class="font-semibold" [class.text-danger]="product.totalStock === 0">
+              {{ product.totalStock }}
+            </span>
+          </td>
+
           <!-- Estado -->
-          <td>
+          <td class="text-center">
             <p-tag
               [value]="formatEnumValue(product.status)"
               [severity]="getStatusSeverity(product.status)"

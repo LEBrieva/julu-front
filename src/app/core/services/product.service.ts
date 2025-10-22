@@ -9,7 +9,9 @@ import {
   ProductListItem,
   CreateProductDto,
   UpdateProductDto,
-  FilterProductDto
+  FilterProductDto,
+  AddVariantDto,
+  UpdateSingleVariantDto
 } from '../models/product.model';
 
 /**
@@ -156,5 +158,49 @@ export class ProductService {
    */
   getPublicProductById(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/catalog/${id}`);
+  }
+
+  // ===========================
+  // GESTIÓN DE VARIANTES
+  // ===========================
+
+  /**
+   * Agrega una nueva variante a un producto existente (ADMIN)
+   * Endpoint: POST /products/:id/variants
+   *
+   * @param productId ID del producto
+   * @param variant Datos de la variante (size, color, stock, price)
+   * @returns Producto actualizado con la nueva variante
+   */
+  addVariant(productId: string, variant: AddVariantDto): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/${productId}/variants`, variant);
+  }
+
+  /**
+   * Actualiza una variante específica de un producto (ADMIN)
+   * Endpoint: PATCH /products/:id/variants/:sku
+   *
+   * @param productId ID del producto
+   * @param sku SKU de la variante a actualizar
+   * @param data Datos a actualizar (stock, price)
+   * @returns Producto actualizado
+   */
+  updateVariant(productId: string, sku: string, data: UpdateSingleVariantDto): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/${productId}/variants/${sku}`, data);
+  }
+
+  /**
+   * Elimina una variante de un producto (ADMIN)
+   * Endpoint: DELETE /products/:id/variants/:sku
+   *
+   * NOTA: El backend puede rechazar la eliminación si la variante
+   * tiene órdenes asociadas (error 409 Conflict).
+   *
+   * @param productId ID del producto
+   * @param sku SKU de la variante a eliminar
+   * @returns Producto actualizado sin la variante
+   */
+  deleteVariant(productId: string, sku: string): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/${productId}/variants/${sku}`);
   }
 }

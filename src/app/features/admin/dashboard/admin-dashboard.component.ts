@@ -47,8 +47,8 @@ import { CommonModule } from '@angular/common';
               <span>FASE 5: CRUD de Productos</span>
               <small class="text-red-400">(Faltan las imagenes, agregar más adelante)</small>
             </li>
-            <li>
-              <i class="pi pi-circle"></i>
+            <li class="completed">
+              <i class="pi pi-check-circle"></i>
               <span>FASE 6: Gestión de Órdenes</span>
             </li>
             <li>

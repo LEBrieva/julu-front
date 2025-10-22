@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 5 completada (CRUD de Productos Admin) - Sistema completo de gestión de productos en panel admin: listado con tabla responsive, paginación server-side, búsqueda en tiempo real, filtros por categoría y disponibilidad, formulario de crear/editar con validaciones, eliminación con confirmación, badges de estado, y manejo robusto de errores. Upload de imágenes pendiente para FASE 5 bis.
+**Estado actual**: FASE 5 con gestión de variantes completada (falta upload de imágenes), FASE 6 completada. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa.
 
 ---
 
@@ -66,7 +66,14 @@ src/app/
 │   │   │   │   ├── product-form.component.html
 │   │   │   │   └── product-form.component.css
 │   │   │   └── product-form.validator.ts     # Validaciones personalizadas
-│   │   ├── orders/            # TODO FASE 6
+│   │   ├── orders/            # ✅ FASE 6: Gestión completa de órdenes
+│   │   │   ├── admin-orders.component.ts    # Componente principal con tabla
+│   │   │   ├── admin-orders.component.html  # Template con filtros y paginación
+│   │   │   ├── admin-orders.component.css   # Estilos con Tailwind
+│   │   │   └── order-detail/                # Subcomponente de detalle
+│   │   │       ├── order-detail.component.ts
+│   │   │       ├── order-detail.component.html
+│   │   │       └── order-detail.component.css
 │   │   └── users/             # TODO FASE 7
 │   ├── auth/                  # Autenticación
 │   │   └── login/
@@ -792,56 +799,116 @@ console.log(payload); // { sub, email, role, exp }
   - Children routes con lazy loading individual
   - Chunks generados: admin-layout (~22KB), admin-dashboard (~11KB), admin-routes (~1KB)
 
-### ✅ FASE 5: CRUD de Productos (Admin) (COMPLETADA)
-- [x] Modelo de datos `Product` con enums (ProductCategory, ProductStatus)
-- [x] Servicio `ProductService` con CRUD completo:
-  - `getProducts(params)` - Listado paginado con filtros (search, category, status, sort)
+### ✅ FASE 5: CRUD de Productos con Gestión de Variantes (Admin) (VARIANTES COMPLETADAS - FALTA IMÁGENES)
+
+#### Modelos de Datos
+- [x] Enums actualizados:
+  - `ProductSize` (P, M, G, GG) - valores en MAYÚSCULAS
+  - `ProductColor` (black, white, gray, navy, red, blue)
+  - `ProductStyle` (regular, oversize, slim_fit, straight, skinny, etc.)
+  - `ProductCategory` (remera, pantalon, chaqueta, zapatillas, botas, shorts, vestido, blusa)
+- [x] Interface `ProductVariant { sku, size, color, stock, price }`
+- [x] DTOs para variantes:
+  - `CreateProductVariantDto` - Para crear producto con variantes iniciales
+  - `AddVariantDto` - Para agregar variante a producto existente
+  - `UpdateSingleVariantDto` - Para actualizar stock/price de variante
+- [x] Constante `CATEGORY_STYLE_MAP` - Mapeo categoría → estilos válidos
+- [x] Helpers de formateo y visualización:
+  - `formatSize()` - Retorna tamaño en MAYÚSCULAS (P, M, G, GG)
+  - `formatColor()` - Retorna color en español (Negro, Blanco, Gris, etc.)
+  - `formatStyle()` - Retorna estilo en español (Regular, Oversize, etc.)
+  - `getColorHex()` - Retorna código hex del color para badges (#000000, #FFFFFF, etc.)
+  - `getTextColor()` - Retorna color de texto apropiado según fondo
+  - `getSizeSeverity()` - Retorna severity de PrimeNG según tamaño (P=info, M/G=success, GG=danger)
+
+#### ProductService
+- [x] Métodos CRUD básicos:
+  - `getProducts(params)` - Listado paginado con filtros
   - `getProductById(id)` - Detalle de producto
-  - `createProduct(dto)` - Crear producto
-  - `updateProduct(id, dto)` - Actualizar producto
-  - `deleteProduct(id)` - Eliminar producto
-- [x] Componente `AdminProductsComponent` con PrimeNG Table:
-  - Tabla responsive con columnas: Nombre, Descripción (truncada), Categoría, Precio, Stock, Estado, Acciones
-  - Paginación server-side (lazy loading) con control de page/limit
-  - Búsqueda en tiempo real (debounce 500ms) por nombre/descripción
-  - Filtros dropdown por categoría y estado (con opción "Todos")
-  - Ordenamiento por columnas (nombre, precio, stock, fecha)
-  - Badges visuales para categorías y estados (success/warning)
-  - Botón "Nuevo Producto" con permisos admin
-- [x] Subcomponente `ProductFormComponent` (dialog):
-  - Formulario reactivo con validaciones:
-    - Nombre: required, minLength(3), maxLength(100)
-    - Descripción: required, minLength(10), maxLength(500)
-    - Precio: required, min(0.01)
-    - Stock: required, min(0), integer
-    - Categoría: required (dropdown con todas las categorías)
-    - Estado: required (toggle activo/inactivo)
-  - Modo crear/editar dinámico (mismo formulario)
-  - Loading state durante submit
-  - Validación custom: precio con 2 decimales máximo
-  - Mensajes de error centralizados (shared/constants/validation-messages.ts)
-  - Toast de éxito/error automático (vía error.interceptor)
-- [x] Eliminación con confirmación:
-  - Dialog de confirmación con PrimeNG ConfirmDialog
-  - Muestra nombre del producto en el mensaje
-  - Toast de éxito al eliminar
-  - Recarga automática de la tabla tras eliminar
-- [x] Manejo robusto de errores:
-  - Errores HTTP manejados por error.interceptor (toasts automáticos)
-  - Validación de formularios con mensajes claros
-  - Estado de carga en botones y tabla
-  - Mensajes cuando no hay datos (empty state)
-- [x] UI/UX optimizada:
-  - Tabla con skeleton loading durante fetch
-  - Iconos consistentes (PrimeIcons)
-  - Diseño responsive (mobile-first)
-  - Acciones con tooltips (editar/eliminar)
-  - Botones disabled durante loading
-- [x] Integración completa con backend:
-  - Query params correctos para paginación/filtros
-  - Manejo de respuestas paginadas (`PaginatedResponse<Product>`)
-  - Sincronización con endpoints `/products`
-  - Validaciones alineadas con backend (DTOs)
+  - `createProduct(dto)` - Crear producto con variantes
+  - `updateProduct(id, dto)` - Actualizar datos básicos del producto
+  - `activateProduct(id)` / `deactivateProduct(id)` - Cambiar estado
+- [x] **Métodos de gestión de variantes**:
+  - `addVariant(productId, variant)` → POST `/products/:id/variants`
+  - `updateVariant(productId, sku, data)` → PATCH `/products/:id/variants/:sku`
+  - `deleteVariant(productId, sku)` → DELETE `/products/:id/variants/:sku`
+
+#### AdminProductsComponent (Lista)
+- [x] Tabla responsive con columnas:
+  - Código, Nombre (con tags), Categoría, Estilo, Precio Base
+  - **Variantes** (badge redondeado con count total)
+  - **Stock Total** (suma de todas las variantes, rojo si es 0)
+  - Estado, Acciones
+- [x] Paginación server-side (lazy loading)
+- [x] Búsqueda por nombre/código/descripción
+- [x] Botones: Ver detalle, Editar, Activar/Desactivar
+
+#### ProductFormComponent - Modo CREAR
+- [x] Formulario de datos básicos:
+  - code (requerido, único), name, description, basePrice
+  - category (dropdown), style (dropdown dinámico según categoría)
+  - tags (chips input opcional)
+- [x] **Sección "Variantes"** (PrimeNG Fieldset colapsable):
+  - **Formulario inline** para agregar variantes:
+    - Size: Dropdown con P, M, G, GG en MAYÚSCULAS
+    - Color: Dropdown en español (Negro, Blanco, Gris, Azul Marino, Rojo, Azul)
+    - Stock: Input number con botones +/-
+    - Price: Input currency (BRL)
+  - **Validaciones**:
+    - Mínimo 1 variante requerida antes de crear producto
+    - No permitir duplicados size+color (validación frontend)
+    - Stock y price ≥ 0
+  - **Tabla de variantes agregadas** con headers claros:
+    - Columnas: Tamaño | Color | Stock | Precio | Acción
+    - Badges de tamaño con severity (P=info, M/G=success, GG=danger)
+    - Chips de color con hex real del color y texto contrastante
+    - Botón eliminar por variante (solo elimina del array local, sin toasts)
+  - **Empty state** cuando no hay variantes
+  - **Responsive**: Headers ocultos en mobile, labels inline
+- [x] Submit: Envía datos básicos + array de variantes al backend
+
+#### ProductFormComponent - Modo EDITAR
+- [x] Campos básicos editables (name, description, basePrice, category, style, status, tags)
+- [x] Code read-only (no se puede cambiar)
+- [x] **Tabla de Variantes** (PrimeNG Table editable):
+  - **Columnas**: Tamaño (badge) | Color (chip) | SKU (read-only) | Stock | Precio | Acciones
+  - **Edición inline granular** (estilo admin-orders):
+    - Click en stock/price → input editable
+    - Blur/Enter → guarda **inmediatamente** vía API (PATCH `/products/:id/variants/:sku`)
+    - Escape → cancela y restaura valor original
+    - Loading state durante guardado
+  - **Botón "Agregar Nueva Variante"**:
+    - Expande/contrae formulario inline (igual al de modo CREAR)
+    - Validación de duplicados size+color
+    - Llamada a API: POST `/products/:id/variants`
+    - Toast de éxito al agregar
+  - **Eliminación de variantes**:
+    - PrimeNG ConfirmDialog antes de eliminar
+    - Llamada a API: DELETE `/products/:id/variants/:sku`
+    - Manejo automático de errores (ej: variante con órdenes asociadas no se puede eliminar)
+    - Toast de éxito/error
+  - **Empty state** si no hay variantes
+- [x] **Guardado granular**: Cada cambio de variante se guarda al instante, independiente del botón "Actualizar Producto"
+- [x] Botón "Actualizar Producto" solo actualiza datos básicos (no variantes, ya están guardadas)
+
+#### UI/UX
+- [x] **Toasts inteligentes**:
+  - Modo CREAR: Sin toasts al agregar/eliminar variantes (es array local)
+  - Modo EDITAR: Toasts en operaciones API (agregar, actualizar, eliminar variantes)
+- [x] Confirmaciones para eliminaciones
+- [x] Loading states en todas las operaciones
+- [x] Empty states informativos
+- [x] Validaciones frontend antes de llamar al backend
+- [x] Diseño responsive completo (mobile-first)
+
+#### Integración Backend
+- [x] Endpoints alineados con NestJS
+- [x] Validación de duplicados size+color
+- [x] Manejo de errores del backend:
+  - Code duplicado (409 Conflict)
+  - Variante con órdenes no se puede eliminar (400/409)
+  - Errores de validación (400 Bad Request)
+- [x] Actualización automática del producto completo después de operaciones de variantes
 
 ### FASE 5 bis: Upload de Imágenes de Productos (PENDIENTE)
 - [ ] Componente de upload de imágenes (PrimeNG FileUpload)
@@ -852,11 +919,15 @@ console.log(payload); // { sub, email, role, exp }
 - [ ] Galería de imágenes por producto (múltiples imágenes)
 - [ ] Actualizar modelo Product.imageUrl a Product.images[]
 
-### FASE 6: Gestión de Órdenes (Admin)
-- [ ] Lista de órdenes con filtros (estado, fecha)
-- [ ] Vista detalle de orden
-- [ ] Cambio de estado de orden
-- [ ] Vista de productos de la orden
+### ✅ FASE 6: Gestión de Órdenes (Admin) (COMPLETADA)
+- [x] Lista de órdenes con filtros (estado orden, estado pago, rango de fechas)
+- [x] Búsqueda por número de orden
+- [x] Vista detalle de orden (cliente, dirección, productos, totales)
+- [x] Cambio de estado de orden (inline desde lista + desde detalle)
+- [x] Vista de productos de la orden (tabla con precios snapshot)
+- [x] Validaciones (solo órdenes no finales pueden cambiar estado)
+- [x] Confirmación antes de cambiar estado
+- [x] Navegación lista ↔ detalle
 
 ### FASE 7: Gestión de Usuarios (Admin)
 - [ ] Lista de usuarios con paginación
@@ -943,4 +1014,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-10-19 (FASE 3 bis completada - Silent Token Refresh, FASE 5 completada - CRUD de Productos Admin)
+**Última actualización**: 2025-10-22 (FASE 5 - Gestión de Variantes completada; FASE 6 - Gestión de Órdenes Admin completada)

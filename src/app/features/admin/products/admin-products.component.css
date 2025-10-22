@@ -222,3 +222,7 @@
 .text-gray-500 {
   color: #6c757d;
 }
+
+.text-danger {
+  color: #dc3545;
+}

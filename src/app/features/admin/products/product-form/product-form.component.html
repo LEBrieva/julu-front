@@ -220,19 +220,387 @@
         }
       </div>
 
-      <!-- Info sobre variantes (versión simplificada) -->
-      <div class="info-box">
-        <i class="pi pi-info-circle"></i>
-        <div>
-          <strong>Nota sobre variantes:</strong>
-          @if (!isEditMode()) {
-            <p>Se creará una variante por defecto (Talla M, Negro, Stock 0) con el precio base configurado.</p>
-            <p>Podrás gestionar variantes (tallas, colores, stock) en futuras versiones.</p>
+      <!-- Gestión de Variantes (solo modo CREAR) -->
+      @if (!isEditMode()) {
+        <p-fieldset legend="Variantes" [toggleable]="true" [collapsed]="false" styleClass="mb-4">
+          <p class="mb-4 text-gray-600">
+            Agrega las variantes del producto (combinaciones de tamaño y color).
+            <strong>Debes agregar al menos una variante.</strong>
+          </p>
+
+          <!-- Formulario inline para agregar variante -->
+          <div class="variant-form-grid">
+            <!-- Tamaño -->
+            <div class="form-field">
+              <label for="variantSize" class="form-label required">Tamaño</label>
+              <p-select
+                inputId="variantSize"
+                [(ngModel)]="variantSize"
+                [ngModelOptions]="{standalone: true}"
+                [options]="sizeOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona tamaño"
+                styleClass="w-full"
+                [showClear]="true"
+              ></p-select>
+            </div>
+
+            <!-- Color -->
+            <div class="form-field">
+              <label for="variantColor" class="form-label required">Color</label>
+              <p-select
+                inputId="variantColor"
+                [(ngModel)]="variantColor"
+                [ngModelOptions]="{standalone: true}"
+                [options]="colorOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecciona color"
+                styleClass="w-full"
+                [showClear]="true"
+              ></p-select>
+            </div>
+
+            <!-- Stock -->
+            <div class="form-field">
+              <label for="variantStock" class="form-label required">Stock</label>
+              <p-inputNumber
+                inputId="variantStock"
+                [(ngModel)]="variantStock"
+                [ngModelOptions]="{standalone: true}"
+                [min]="0"
+                [showButtons]="true"
+                placeholder="0"
+                styleClass="w-full"
+              ></p-inputNumber>
+            </div>
+
+            <!-- Precio -->
+            <div class="form-field">
+              <label for="variantPrice" class="form-label required">Precio</label>
+              <p-inputNumber
+                inputId="variantPrice"
+                [(ngModel)]="variantPrice"
+                [ngModelOptions]="{standalone: true}"
+                mode="currency"
+                currency="BRL"
+                locale="pt-BR"
+                [min]="0"
+                [minFractionDigits]="2"
+                [maxFractionDigits]="2"
+                placeholder="0.00"
+                styleClass="w-full"
+              ></p-inputNumber>
+            </div>
+          </div>
+
+          <!-- Botón Agregar Variante -->
+          <div class="mt-3">
+            <p-button
+              type="button"
+              label="Agregar Variante"
+              icon="pi pi-plus"
+              (onClick)="addVariant()"
+              severity="secondary"
+              [outlined]="true"
+            ></p-button>
+          </div>
+
+          <!-- Lista de variantes agregadas -->
+          @if (variants.length > 0) {
+            <div class="mt-4">
+              <h4 class="font-semibold mb-3">Variantes agregadas ({{ variants.length }})</h4>
+
+              <!-- Tabla simple de variantes -->
+              <div class="variants-table">
+                <!-- Header -->
+                <div class="variants-table-header">
+                  <div class="variant-col-size">Tamaño</div>
+                  <div class="variant-col-color">Color</div>
+                  <div class="variant-col-stock">Stock</div>
+                  <div class="variant-col-price">Precio</div>
+                  <div class="variant-col-actions">Acción</div>
+                </div>
+
+                <!-- Filas -->
+                @for (variant of variants; track $index) {
+                  <div class="variants-table-row">
+                    <div class="variant-col-size">
+                      <p-tag
+                        [value]="formatSize(variant.size)"
+                        [severity]="getSizeSeverity(variant.size)"
+                      ></p-tag>
+                    </div>
+                    <div class="variant-col-color">
+                      <p-tag
+                        [value]="formatColor(variant.color)"
+                        [style.backgroundColor]="getColorHex(variant.color)"
+                        [style.color]="getTextColor(variant.color)"
+                      ></p-tag>
+                    </div>
+                    <div class="variant-col-stock">
+                      <strong>{{ variant.stock }}</strong>
+                    </div>
+                    <div class="variant-col-price">
+                      <strong>{{ variant.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+                    </div>
+                    <div class="variant-col-actions">
+                      <button
+                        type="button"
+                        class="variant-remove-btn"
+                        (click)="removeVariant($index)"
+                        [attr.aria-label]="'Eliminar variante'"
+                      >
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
           } @else {
-            <p>La gestión de variantes (tallas, colores, stock) estará disponible en futuras versiones.</p>
+            <div class="empty-state mt-4">
+              <i class="pi pi-inbox text-gray-400 text-4xl"></i>
+              <p class="text-gray-600 mt-2">No hay variantes agregadas</p>
+              <small class="text-gray-500">Agrega al menos una variante antes de crear el producto</small>
+            </div>
           }
-        </div>
-      </div>
+        </p-fieldset>
+      }
+
+      <!-- Gestión de Variantes (solo modo EDITAR) -->
+      @if (isEditMode() && currentProduct) {
+        <p-fieldset legend="Variantes" [toggleable]="true" [collapsed]="false" styleClass="mb-4">
+          <!-- Confirmación Dialog -->
+          <p-confirmdialog />
+
+          <!-- Botón Agregar Variante -->
+          <div class="mb-4">
+            <p-button
+              type="button"
+              [label]="showAddVariantForm ? 'Cancelar' : 'Agregar Nueva Variante'"
+              [icon]="showAddVariantForm ? 'pi pi-times' : 'pi pi-plus'"
+              (onClick)="toggleAddVariantForm()"
+              [severity]="showAddVariantForm ? 'secondary' : 'success'"
+              [outlined]="true"
+            ></p-button>
+          </div>
+
+          <!-- Formulario inline para agregar variante (colapsable) -->
+          @if (showAddVariantForm) {
+            <div class="variant-form-grid mb-4">
+              <!-- Tamaño -->
+              <div class="form-field">
+                <label for="variantSizeEdit" class="form-label required">Tamaño</label>
+                <p-select
+                  inputId="variantSizeEdit"
+                  [(ngModel)]="variantSize"
+                  [ngModelOptions]="{standalone: true}"
+                  [options]="sizeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Selecciona tamaño"
+                  styleClass="w-full"
+                  [showClear]="true"
+                ></p-select>
+              </div>
+
+              <!-- Color -->
+              <div class="form-field">
+                <label for="variantColorEdit" class="form-label required">Color</label>
+                <p-select
+                  inputId="variantColorEdit"
+                  [(ngModel)]="variantColor"
+                  [ngModelOptions]="{standalone: true}"
+                  [options]="colorOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Selecciona color"
+                  styleClass="w-full"
+                  [showClear]="true"
+                ></p-select>
+              </div>
+
+              <!-- Stock -->
+              <div class="form-field">
+                <label for="variantStockEdit" class="form-label required">Stock</label>
+                <p-inputNumber
+                  inputId="variantStockEdit"
+                  [(ngModel)]="variantStock"
+                  [ngModelOptions]="{standalone: true}"
+                  [min]="0"
+                  [showButtons]="true"
+                  placeholder="0"
+                  styleClass="w-full"
+                ></p-inputNumber>
+              </div>
+
+              <!-- Precio -->
+              <div class="form-field">
+                <label for="variantPriceEdit" class="form-label required">Precio</label>
+                <p-inputNumber
+                  inputId="variantPriceEdit"
+                  [(ngModel)]="variantPrice"
+                  [ngModelOptions]="{standalone: true}"
+                  mode="currency"
+                  currency="BRL"
+                  locale="pt-BR"
+                  [min]="0"
+                  [minFractionDigits]="2"
+                  [maxFractionDigits]="2"
+                  placeholder="0.00"
+                  styleClass="w-full"
+                ></p-inputNumber>
+              </div>
+
+              <!-- Botones del formulario inline -->
+              <div class="form-field" style="grid-column: span 4;">
+                <div class="flex gap-2">
+                  <p-button
+                    type="button"
+                    label="Agregar"
+                    icon="pi pi-check"
+                    (onClick)="addVariantToProduct()"
+                    severity="success"
+                  ></p-button>
+                  <p-button
+                    type="button"
+                    label="Cancelar"
+                    icon="pi pi-times"
+                    (onClick)="toggleAddVariantForm()"
+                    severity="secondary"
+                    [outlined]="true"
+                  ></p-button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Tabla de variantes -->
+          <p-table
+            [value]="currentProduct.variants"
+            styleClass="p-datatable-sm"
+            [tableStyle]="{ 'min-width': '46rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="min-width: 7rem">Tamaño</th>
+                <th style="min-width: 9rem">Color</th>
+                <th style="min-width: 10rem">SKU</th>
+                <th style="min-width: 6rem">Stock</th>
+                <th style="min-width: 8rem">Precio</th>
+                <th style="min-width: 6rem; text-align: center">Acciones</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-variant>
+              <tr>
+                <!-- Tamaño (badge) -->
+                <td>
+                  <p-tag
+                    [value]="formatSize(variant.size)"
+                    [severity]="getSizeSeverity(variant.size)"
+                  ></p-tag>
+                </td>
+
+                <!-- Color (chip con color) -->
+                <td>
+                  <p-tag
+                    [value]="formatColor(variant.color)"
+                    [style.backgroundColor]="getColorHex(variant.color)"
+                    [style.color]="getTextColor(variant.color)"
+                  ></p-tag>
+                </td>
+
+                <!-- SKU (read-only) -->
+                <td>
+                  <span class="text-xs font-mono text-gray-600">{{ variant.sku }}</span>
+                </td>
+
+                <!-- Stock (editable) -->
+                <td>
+                  @if (editingVariantSku === variant.sku) {
+                    <p-inputNumber
+                      [(ngModel)]="variant.stock"
+                      [ngModelOptions]="{standalone: true}"
+                      [min]="0"
+                      [showButtons]="true"
+                      placeholder="0"
+                      (onBlur)="saveVariantChanges(variant)"
+                      (keydown.enter)="saveVariantChanges(variant)"
+                      (keydown.escape)="cancelEditVariant()"
+                      styleClass="w-full"
+                    ></p-inputNumber>
+                  } @else {
+                    <span
+                      class="cursor-pointer hover:underline"
+                      (click)="startEditVariant(variant)"
+                      title="Clic para editar"
+                    >
+                      {{ variant.stock }}
+                    </span>
+                  }
+                </td>
+
+                <!-- Precio (editable) -->
+                <td>
+                  @if (editingVariantSku === variant.sku) {
+                    <p-inputNumber
+                      [(ngModel)]="variant.price"
+                      [ngModelOptions]="{standalone: true}"
+                      mode="currency"
+                      currency="BRL"
+                      locale="pt-BR"
+                      [min]="0"
+                      [minFractionDigits]="2"
+                      [maxFractionDigits]="2"
+                      (onBlur)="saveVariantChanges(variant)"
+                      (keydown.enter)="saveVariantChanges(variant)"
+                      (keydown.escape)="cancelEditVariant()"
+                      styleClass="w-full"
+                    ></p-inputNumber>
+                  } @else {
+                    <span
+                      class="cursor-pointer hover:underline"
+                      (click)="startEditVariant(variant)"
+                      title="Clic para editar"
+                    >
+                      {{ variant.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}
+                    </span>
+                  }
+                </td>
+
+                <!-- Acciones -->
+                <td style="text-align: center">
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Eliminar Variante"
+                    tooltipPosition="top"
+                    (onClick)="deleteVariantFromProduct(variant)"
+                  ></p-button>
+                </td>
+              </tr>
+            </ng-template>
+
+            <!-- Empty state -->
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem">
+                  <div class="empty-state">
+                    <i class="pi pi-inbox text-gray-400 text-4xl"></i>
+                    <p class="text-gray-600 mt-2">No hay variantes</p>
+                    <small class="text-gray-500">Agrega al menos una variante para este producto</small>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-fieldset>
+      }
 
       <!-- Botones -->
       <div class="form-actions">

@@ -16,7 +16,12 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { Fieldset } from 'primeng/fieldset';
+import { Tag } from 'primeng/tag';
+import { Table, TableModule } from 'primeng/table';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 // Services and models
 import { ProductService } from '../../../../core/services/product.service';
@@ -27,11 +32,19 @@ import {
   ProductStatus,
   ProductSize,
   ProductColor,
+  ProductVariant,
   CATEGORY_STYLE_MAP,
   enumToOptions,
   CreateProductDto,
   UpdateProductDto,
-  CreateProductVariantDto
+  CreateProductVariantDto,
+  AddVariantDto,
+  UpdateSingleVariantDto,
+  formatSize,
+  formatColor,
+  getColorHex,
+  getTextColor,
+  getSizeSeverity
 } from '../../../../core/models/product.model';
 import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
 
@@ -60,9 +73,14 @@ import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
     CardModule,
     MessageModule,
     ToastModule,
+    Fieldset,
+    Tag,
+    TableModule,
+    ConfirmDialog,
+    TooltipModule,
     TooltipIcon
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.css'
 })
@@ -73,11 +91,13 @@ export class ProductFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
+  private confirmationService = inject(ConfirmationService);
 
   // State
   isLoading = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   productId: string | null = null;
+  currentProduct: Product | null = null; // Producto cargado en modo editar
 
   // Form
   productForm: FormGroup;
@@ -85,10 +105,47 @@ export class ProductFormComponent implements OnInit {
   // Tags input temporal
   tagInput: string = '';
 
+  // Gestión de variantes (modo CREAR)
+  variants: CreateProductVariantDto[] = [];
+  variantSize: ProductSize | null = null;
+  variantColor: ProductColor | null = null;
+  variantStock: number = 0;
+  variantPrice: number = 0;
+
+  // Gestión de variantes (modo EDITAR)
+  editingVariantSku: string | null = null;
+  originalVariant: ProductVariant | null = null;
+  showAddVariantForm = false; // Controla si se muestra el formulario de agregar variante
+
   // Dropdown options
   categoryOptions = enumToOptions(ProductCategory);
   availableStyleOptions: { label: string; value: string }[] = [];
   statusOptions = enumToOptions(ProductStatus);
+
+  // Opciones de tamaño con labels en MAYÚSCULAS
+  sizeOptions = [
+    { label: 'P', value: ProductSize.P },
+    { label: 'M', value: ProductSize.M },
+    { label: 'G', value: ProductSize.G },
+    { label: 'GG', value: ProductSize.GG },
+  ];
+
+  // Opciones de color en español
+  colorOptions = [
+    { label: 'Negro', value: ProductColor.BLACK },
+    { label: 'Blanco', value: ProductColor.WHITE },
+    { label: 'Gris', value: ProductColor.GRAY },
+    { label: 'Azul Marino', value: ProductColor.NAVY },
+    { label: 'Rojo', value: ProductColor.RED },
+    { label: 'Azul', value: ProductColor.BLUE }
+  ];
+
+  // Helpers para variantes
+  formatSize = formatSize;
+  formatColor = formatColor;
+  getColorHex = getColorHex;
+  getTextColor = getTextColor;
+  getSizeSeverity = getSizeSeverity;
 
   // Helper para mensajes de error
   getErrorMessage = getErrorMessage;
@@ -150,6 +207,8 @@ export class ProductFormComponent implements OnInit {
    * Rellena el formulario con los datos del producto
    */
   private populateForm(product: Product): void {
+    this.currentProduct = product; // Guardar producto completo para acceso a variantes
+
     this.productForm.patchValue({
       code: product.code,
       name: product.name,
@@ -239,13 +298,16 @@ export class ProductFormComponent implements OnInit {
   private createProduct(): void {
     const formValue = this.productForm.value;
 
-    // Crear variante por defecto (requerida por el backend)
-    const defaultVariant: CreateProductVariantDto = {
-      size: ProductSize.M,
-      color: ProductColor.BLACK,
-      stock: 0,
-      price: formValue.basePrice
-    };
+    // Validar que haya al menos 1 variante
+    if (this.variants.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Variantes Requeridas',
+        detail: 'Debes agregar al menos una variante antes de crear el producto.'
+      });
+      this.isLoading.set(false);
+      return;
+    }
 
     const createDto: CreateProductDto = {
       code: formValue.code,
@@ -254,7 +316,7 @@ export class ProductFormComponent implements OnInit {
       basePrice: formValue.basePrice,
       category: formValue.category,
       style: formValue.style,
-      variants: [defaultVariant], // Siempre al menos 1 variante
+      variants: this.variants, // Usar variantes agregadas por el usuario
       tags: formValue.tags || []
     };
 
@@ -263,7 +325,7 @@ export class ProductFormComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Producto Creado',
-          detail: `El producto "${product.name}" fue creado correctamente.`
+          detail: `El producto "${product.name}" fue creado correctamente con ${this.variants.length} variante(s).`
         });
         this.isLoading.set(false);
         // Esperar un momento para que el usuario vea el mensaje
@@ -380,6 +442,276 @@ export class ProductFormComponent implements OnInit {
 
     this.productForm.patchValue({
       tags: updatedTags
+    });
+  }
+
+  // ===========================
+  // GESTIÓN DE VARIANTES (CREAR)
+  // ===========================
+
+  /**
+   * Agrega una variante al array local (solo modo CREAR)
+   * Valida que la combinación size+color no exista
+   */
+  addVariant(): void {
+    // Validar que size y color estén seleccionados
+    if (!this.variantSize || !this.variantColor) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Datos Incompletos',
+        detail: 'Debes seleccionar tamaño y color para agregar una variante.'
+      });
+      return;
+    }
+
+    // Validar que stock y price sean >= 0
+    if (this.variantStock < 0 || this.variantPrice < 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Valores Inválidos',
+        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+      });
+      return;
+    }
+
+    // Validar que la combinación size+color no exista
+    const exists = this.variants.some(
+      (v) => v.size === this.variantSize && v.color === this.variantColor
+    );
+
+    if (exists) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Variante Duplicada',
+        detail: `Ya existe una variante con tamaño ${formatSize(this.variantSize)} y color ${formatColor(this.variantColor)}.`
+      });
+      return;
+    }
+
+    // Agregar variante al array local
+    const newVariant: CreateProductVariantDto = {
+      size: this.variantSize,
+      color: this.variantColor,
+      stock: this.variantStock,
+      price: this.variantPrice
+    };
+
+    this.variants.push(newVariant);
+
+    // Resetear inputs
+    this.variantSize = null;
+    this.variantColor = null;
+    this.variantStock = 0;
+    this.variantPrice = 0;
+
+    // No mostrar toast en modo CREAR (es solo array local)
+  }
+
+  /**
+   * Elimina una variante del array local (solo modo CREAR)
+   */
+  removeVariant(index: number): void {
+    if (index < 0 || index >= this.variants.length) return;
+
+    this.variants.splice(index, 1);
+
+    // No mostrar toast en modo CREAR (es solo array local)
+  }
+
+  // ===========================
+  // GESTIÓN DE VARIANTES (EDITAR)
+  // ===========================
+
+  /**
+   * Inicia la edición de una variante (solo modo EDITAR)
+   */
+  startEditVariant(variant: ProductVariant): void {
+    this.editingVariantSku = variant.sku;
+    this.originalVariant = { ...variant }; // Guardar copia para cancelar
+  }
+
+  /**
+   * Cancela la edición de una variante
+   */
+  cancelEditVariant(): void {
+    if (this.originalVariant && this.currentProduct) {
+      // Restaurar valores originales
+      const index = this.currentProduct.variants.findIndex(v => v.sku === this.editingVariantSku);
+      if (index !== -1) {
+        this.currentProduct.variants[index] = { ...this.originalVariant };
+      }
+    }
+    this.editingVariantSku = null;
+    this.originalVariant = null;
+  }
+
+  /**
+   * Guarda los cambios de una variante (solo modo EDITAR)
+   */
+  saveVariantChanges(variant: ProductVariant): void {
+    if (!this.productId || !this.currentProduct) return;
+
+    // Validar cambios
+    if (variant.stock < 0 || variant.price < 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Valores Inválidos',
+        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+      });
+      this.cancelEditVariant();
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    const updateData: UpdateSingleVariantDto = {
+      stock: variant.stock,
+      price: variant.price
+    };
+
+    this.productService.updateVariant(this.productId, variant.sku, updateData).subscribe({
+      next: (updatedProduct) => {
+        this.currentProduct = updatedProduct; // Actualizar producto completo
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Variante Actualizada',
+          detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} actualizada correctamente.`
+        });
+        this.isLoading.set(false);
+        this.editingVariantSku = null;
+        this.originalVariant = null;
+      },
+      error: (error) => {
+        console.error('Error actualizando variante:', error);
+        this.cancelEditVariant(); // Restaurar valores originales
+        this.isLoading.set(false);
+        // El error.interceptor ya mostró el toast
+      }
+    });
+  }
+
+  /**
+   * Muestra/oculta el formulario de agregar variante (solo modo EDITAR)
+   */
+  toggleAddVariantForm(): void {
+    this.showAddVariantForm = !this.showAddVariantForm;
+
+    // Si se cierra, resetear inputs
+    if (!this.showAddVariantForm) {
+      this.variantSize = null;
+      this.variantColor = null;
+      this.variantStock = 0;
+      this.variantPrice = 0;
+    }
+  }
+
+  /**
+   * Agrega una variante al producto existente (solo modo EDITAR)
+   */
+  addVariantToProduct(): void {
+    if (!this.productId || !this.currentProduct) return;
+
+    // Validar que size y color estén seleccionados
+    if (!this.variantSize || !this.variantColor) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Datos Incompletos',
+        detail: 'Debes seleccionar tamaño y color para agregar una variante.'
+      });
+      return;
+    }
+
+    // Validar que stock y price sean >= 0
+    if (this.variantStock < 0 || this.variantPrice < 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Valores Inválidos',
+        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+      });
+      return;
+    }
+
+    // Validar que la combinación size+color no exista
+    const exists = this.currentProduct.variants.some(
+      (v) => v.size === this.variantSize && v.color === this.variantColor
+    );
+
+    if (exists) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Variante Duplicada',
+        detail: `Ya existe una variante con tamaño ${formatSize(this.variantSize)} y color ${formatColor(this.variantColor)}.`
+      });
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    const newVariant: AddVariantDto = {
+      size: this.variantSize,
+      color: this.variantColor,
+      stock: this.variantStock,
+      price: this.variantPrice
+    };
+
+    this.productService.addVariant(this.productId, newVariant).subscribe({
+      next: (updatedProduct) => {
+        this.currentProduct = updatedProduct; // Actualizar producto completo
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Variante Agregada',
+          detail: `Variante ${formatSize(newVariant.size)} - ${formatColor(newVariant.color)} agregada correctamente.`
+        });
+        this.isLoading.set(false);
+
+        // Resetear formulario y ocultarlo
+        this.variantSize = null;
+        this.variantColor = null;
+        this.variantStock = 0;
+        this.variantPrice = 0;
+        this.showAddVariantForm = false;
+      },
+      error: (error) => {
+        console.error('Error agregando variante:', error);
+        this.isLoading.set(false);
+        // El error.interceptor ya mostró el toast
+      }
+    });
+  }
+
+  /**
+   * Elimina una variante del producto existente (solo modo EDITAR)
+   */
+  deleteVariantFromProduct(variant: ProductVariant): void {
+    if (!this.productId || !this.currentProduct) return;
+
+    this.confirmationService.confirm({
+      message: `¿Estás seguro de eliminar la variante ${formatSize(variant.size)} - ${formatColor(variant.color)}?`,
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, eliminar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        this.isLoading.set(true);
+
+        this.productService.deleteVariant(this.productId!, variant.sku).subscribe({
+          next: (updatedProduct) => {
+            this.currentProduct = updatedProduct; // Actualizar producto completo
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Variante Eliminada',
+              detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} eliminada correctamente.`
+            });
+            this.isLoading.set(false);
+          },
+          error: (error) => {
+            console.error('Error eliminando variante:', error);
+            this.isLoading.set(false);
+            // El error.interceptor ya mostró el toast
+            // Si el error es por órdenes asociadas, el mensaje vendrá del backend
+          }
+        });
+      }
     });
   }
 }
