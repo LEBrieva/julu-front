@@ -29,7 +29,27 @@
   outline: none;
 }
 
-/* Aumentar �rea t�ctil en m�viles */
+/* Mejorar feedback visual en dispositivos táctiles */
+.tooltip-icon-btn:focus-visible {
+  outline: 2px solid #198754;
+  outline-offset: 2px;
+}
+
+/* Asegurar que el botón sea fácil de tocar en móviles */
+@media (hover: none) and (pointer: coarse) {
+  .tooltip-icon-btn {
+    background-color: rgba(108, 117, 125, 0.1);
+    border-radius: 50%;
+    touch-action: manipulation;
+  }
+  
+  .tooltip-icon-btn:active {
+    background-color: rgba(25, 135, 84, 0.2);
+    transform: scale(0.95);
+  }
+}
+
+/* Aumentar �rea t�ctil en m�viles */
 @media (max-width: 768px) {
   .tooltip-icon-btn {
     font-size: 1.125rem;
