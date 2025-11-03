@@ -138,6 +138,39 @@
       </div>
     </p-card>
 
+    <!-- Imágenes del Producto -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <h2 class="card-title">Imágenes del Producto</h2>
+        </div>
+      </ng-template>
+
+      @if (product()!.images && product()!.images!.length > 0) {
+        <div class="images-grid">
+          @for (imageUrl of product()!.images!; track imageUrl; let i = $index) {
+            <div class="image-card">
+              <p-image
+                [src]="imageUrl"
+                [alt]="product()!.name + ' - Imagen ' + (i + 1)"
+                [preview]="true"
+                width="250"
+                imageClass="product-image"
+              />
+              <div class="image-number">{{ i + 1 }}</div>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Empty state -->
+        <div class="empty-images-state">
+          <i class="pi pi-image text-6xl text-gray-300 mb-3"></i>
+          <p class="text-gray-600">Este producto no tiene imágenes</p>
+          <p class="text-sm text-gray-400">Edita el producto para agregar imágenes</p>
+        </div>
+      }
+    </p-card>
+
     <!-- Variantes -->
     @if (product()!.variants && product()!.variants.length > 0) {
       <p-card>

@@ -203,4 +203,42 @@ export class ProductService {
   deleteVariant(productId: string, sku: string): Observable<Product> {
     return this.http.delete<Product>(`${this.apiUrl}/${productId}/variants/${sku}`);
   }
+
+  // ===========================
+  // GESTIÓN DE IMÁGENES
+  // ===========================
+
+  /**
+   * Sube imágenes a un producto (ADMIN)
+   * Endpoint: POST /products/:id/images
+   *
+   * @param productId ID del producto
+   * @param files Array de archivos de imagen (máx 5)
+   * @returns Response con producto actualizado e imágenes
+   */
+  uploadImages(productId: string, files: File[]): Observable<{ id: string; images: string[]; message: string }> {
+    const formData = new FormData();
+
+    // Agregar cada archivo al FormData con la key 'images'
+    files.forEach((file) => {
+      formData.append('images', file, file.name);
+    });
+
+    return this.http.post<{ id: string; images: string[]; message: string }>(
+      `${this.apiUrl}/${productId}/images`,
+      formData
+    );
+  }
+
+  /**
+   * Elimina una imagen de un producto (ADMIN)
+   * Endpoint: DELETE /products/:id/images/:index
+   *
+   * @param productId ID del producto
+   * @param imageIndex Índice de la imagen en el array (0-4)
+   * @returns Producto actualizado sin la imagen eliminada
+   */
+  deleteImage(productId: string, imageIndex: number): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/${productId}/images/${imageIndex}`);
+  }
 }

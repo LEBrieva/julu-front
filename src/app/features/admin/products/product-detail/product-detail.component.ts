@@ -9,6 +9,8 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
+import { ImageModule } from 'primeng/image';
+import { GalleriaModule } from 'primeng/galleria';
 
 // Services and models
 import { ProductService } from '../../../../core/services/product.service';
@@ -36,7 +38,9 @@ import {
     CardModule,
     TagModule,
     ToastModule,
-    TableModule
+    TableModule,
+    ImageModule,
+    GalleriaModule
   ],
   providers: [MessageService],
   templateUrl: './product-detail.component.html',

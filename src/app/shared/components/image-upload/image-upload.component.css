@@ -1,0 +1,76 @@
+/* Container principal */
+.image-upload-container {
+  @apply bg-white rounded-lg border border-gray-200 p-6;
+}
+
+/* Grid de imágenes responsive */
+.images-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+/* Card de imagen individual */
+.image-card {
+  @apply relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 aspect-square;
+  transition: all 0.2s ease;
+}
+
+.image-card:hover {
+  @apply shadow-md border-gray-300;
+}
+
+.image-card:hover .image-overlay {
+  @apply opacity-100;
+}
+
+/* Overlay con botón eliminar (visible en hover) */
+.image-overlay {
+  @apply absolute inset-0 bg-black/40 flex items-center justify-center opacity-0;
+  transition: opacity 0.2s ease;
+}
+
+/* Badge de número de imagen */
+.image-badge {
+  @apply absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold;
+  @apply w-6 h-6 rounded-full flex items-center justify-center;
+}
+
+/* Empty state */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300;
+}
+
+/* Límite alcanzado */
+.limit-reached {
+  @apply flex items-center p-4 bg-blue-50 border border-blue-200 rounded-lg;
+}
+
+/* Mensaje deshabilitado */
+.disabled-message {
+  @apply flex items-center p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+/* Responsive: Mobile */
+@media (max-width: 768px) {
+  .images-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .image-upload-container {
+    @apply p-4;
+  }
+}
+
+/* Overlay de loading full-screen */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}

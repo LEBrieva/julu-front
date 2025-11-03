@@ -602,6 +602,24 @@
         </p-fieldset>
       }
 
+      <!-- Gestión de Imágenes -->
+      @if (isEditMode() && productId) {
+        <app-image-upload
+          [productId]="productId"
+          [currentImages]="productImages()"
+          (imagesChanged)="onImagesChanged($event)"
+          class="mb-6"
+        />
+      } @else {
+        <!-- Mensaje en modo crear -->
+        <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <p class="text-gray-600 text-center">
+            <i class="pi pi-info-circle mr-2"></i>
+            Guarda el producto primero para poder agregar imágenes
+          </p>
+        </div>
+      }
+
       <!-- Botones -->
       <div class="form-actions">
         <p-button

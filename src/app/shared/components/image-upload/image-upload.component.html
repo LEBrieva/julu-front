@@ -1,0 +1,140 @@
+<div class="image-upload-container">
+    <!-- Header con contador -->
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">
+        Imágenes del Producto
+      </h3>
+      <span class="text-sm text-gray-600">
+        {{ currentImages().length }} / {{ maxImages() }} imágenes
+      </span>
+    </div>
+
+  <!-- Grid de imágenes actuales -->
+  @if (currentImages().length > 0) {
+    <div class="images-grid mb-6">
+      @for (imageUrl of currentImages(); track imageUrl; let i = $index) {
+        <div class="image-card">
+          <!-- Imagen con preview -->
+          <p-image
+            [src]="imageUrl"
+            [alt]="'Imagen ' + (i + 1)"
+            [preview]="true"
+            imageClass="w-full h-full object-cover"
+          />
+
+          <!-- Overlay con botón eliminar -->
+          <div class="image-overlay">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger p-button-sm"
+              (click)="deleteImage(imageUrl, i)"
+              [disabled]="disabled()"
+              pTooltip="Eliminar imagen"
+              tooltipPosition="top"
+            ></button>
+          </div>
+
+          <!-- Badge de número -->
+          <div class="image-badge">
+            {{ i + 1 }}
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Empty state -->
+    <div class="empty-state mb-6">
+      <i class="pi pi-image text-6xl text-gray-300 mb-4"></i>
+      <p class="text-gray-500">No hay imágenes</p>
+      <p class="text-sm text-gray-400">Sube hasta {{ maxImages() }} imágenes</p>
+    </div>
+  }
+
+  <!-- FileUpload Component -->
+  @if (canUpload()) {
+    <p-fileUpload
+      #fileUpload
+      [multiple]="true"
+      [accept]="acceptedTypes"
+      [maxFileSize]="maxFileSize"
+      [showUploadButton]="false"
+      [showCancelButton]="false"
+      [customUpload]="true"
+      (uploadHandler)="onUpload($event, fileUpload)"
+      (onSelect)="onSelect($event, fileUpload)"
+      [disabled]="disabled() || uploading()"
+      chooseLabel="Seleccionar imágenes"
+      chooseIcon="pi pi-plus"
+      class="w-full"
+    >
+      <ng-template pTemplate="content" let-files>
+        @if (files.length > 0) {
+          <!-- Preview de archivos seleccionados -->
+          <div class="mt-4">
+            <h4 class="text-sm font-semibold mb-2">Archivos seleccionados ({{ files.length }})</h4>
+            <div class="space-y-2">
+              @for (file of files; track file.name) {
+                <div class="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                  <i class="pi pi-file text-blue-500"></i>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 truncate">{{ file.name }}</p>
+                    <p class="text-xs text-gray-500">{{ (file.size / 1024).toFixed(2) }} KB</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Botón para subir -->
+            <button
+              pButton
+              type="button"
+              label="Subir {{ files.length }} imagen(es)"
+              icon="pi pi-upload"
+              class="mt-4 w-full"
+              (click)="fileUpload.upload()"
+              [loading]="uploading()"
+              [disabled]="uploading()"
+            ></button>
+          </div>
+        }
+      </ng-template>
+    </p-fileUpload>
+
+    <!-- Progress bar durante upload -->
+    @if (uploading()) {
+      <div class="mt-4">
+        <p-progressBar [value]="uploadProgress()" [showValue]="true"></p-progressBar>
+        <p class="text-sm text-gray-600 mt-2 text-center">Subiendo imágenes...</p>
+      </div>
+    }
+  } @else {
+    <!-- Límite alcanzado -->
+    @if (!disabled()) {
+      <div class="limit-reached">
+        <i class="pi pi-info-circle text-blue-500 mr-2"></i>
+        <span class="text-sm text-gray-700">
+          Límite de {{ maxImages() }} imágenes alcanzado. Elimina una imagen para subir otra.
+        </span>
+      </div>
+    }
+  }
+
+  <!-- Mensaje si está deshabilitado -->
+  @if (disabled()) {
+    <div class="disabled-message">
+      <i class="pi pi-lock text-gray-400 mr-2"></i>
+      <span class="text-sm text-gray-500">
+        Guarda el producto primero para poder agregar imágenes
+      </span>
+    </div>
+  }
+</div>
+
+<!-- Overlay de loading durante eliminación -->
+@if (deleting()) {
+  <div class="loading-overlay">
+    <p-progressSpinner />
+  </div>
+}

@@ -28,7 +28,7 @@ export const SILENT_REFRESH_INTERVAL = 55 * 60 * 1000; // 55 minutos
  * Si el usuario no interactúa durante este tiempo, se considera inactivo
  * y no se renueva el token automáticamente
  */
-export const USER_INACTIVITY_THRESHOLD = 15 * 60 * 1000; // 15 minutos
+export const USER_INACTIVITY_THRESHOLD = 10 * 60 * 1000; // 10 minutos
 
 /**
  * Eventos del DOM que se consideran como actividad del usuario

@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 // Shared Components
 import { TooltipIcon } from '../../../../shared/components/tooltip-icon/tooltip-icon';
+import { ImageUploadComponent } from '../../../../shared/components/image-upload/image-upload.component';
 
 // PrimeNG Components
 import { InputTextModule } from 'primeng/inputtext';
@@ -78,7 +79,8 @@ import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
     TableModule,
     ConfirmDialog,
     TooltipModule,
-    TooltipIcon
+    TooltipIcon,
+    ImageUploadComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './product-form.component.html',
@@ -98,6 +100,7 @@ export class ProductFormComponent implements OnInit {
   isEditMode = signal<boolean>(false);
   productId: string | null = null;
   currentProduct: Product | null = null; // Producto cargado en modo editar
+  productImages = signal<string[]>([]); // Imágenes del producto (reactivo)
 
   // Form
   productForm: FormGroup;
@@ -184,6 +187,7 @@ export class ProductFormComponent implements OnInit {
    */
   private loadProduct(id: string): void {
     this.isLoading.set(true);
+    this.productImages.set([]); // Limpiar imágenes anteriores
 
     this.productService.getProductById(id).subscribe({
       next: (product) => {
@@ -219,6 +223,9 @@ export class ProductFormComponent implements OnInit {
       status: product.status,
       tags: product.tags || []
     });
+
+    // Inicializar imágenes (asegurar que sea un array válido)
+    this.productImages.set(Array.isArray(product.images) ? product.images : []);
 
     // Actualizar estilos disponibles según la categoría cargada
     if (product.category) {
@@ -713,5 +720,17 @@ export class ProductFormComponent implements OnInit {
         });
       }
     });
+  }
+
+  // ===========================
+  // GESTIÓN DE IMÁGENES
+  // ===========================
+
+  /**
+   * Handler cuando cambian las imágenes del producto
+   * Actualiza el signal de imágenes para reflejar los cambios
+   */
+  onImagesChanged(newImages: string[]): void {
+    this.productImages.set(newImages);
   }
 }
