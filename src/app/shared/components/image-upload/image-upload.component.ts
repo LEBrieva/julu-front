@@ -6,6 +6,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ImageModule } from 'primeng/image';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { ProductService } from '../../../core/services/product.service';
 
@@ -16,6 +17,7 @@ import { ProductService } from '../../../core/services/product.service';
  * - Upload de múltiples imágenes (hasta 5 total)
  * - Validaciones: tipo (JPEG, PNG, WebP), tamaño (5MB), cantidad (5 máx)
  * - Preview de imágenes con grid responsive
+ * - Establecer imagen destacada/portada (estrella clickeable)
  * - Eliminación con confirmación
  * - Loading states
  * - Integración con Cloudinary vía backend
@@ -29,7 +31,8 @@ import { ProductService } from '../../../core/services/product.service';
     ButtonModule,
     ProgressBarModule,
     ImageModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    TooltipModule
   ],
   templateUrl: './image-upload.component.html',
   styleUrls: ['./image-upload.component.css']
@@ -46,11 +49,13 @@ export class ImageUploadComponent {
   // Inputs
   productId = input.required<string>();
   currentImages = input<string[]>([]);
+  featuredImageIndex = input<number>(0);
   maxImages = input<number>(5);
   disabled = input<boolean>(false);
 
-  // Output
+  // Outputs
   imagesChanged = output<string[]>();
+  featuredImageChanged = output<number>();
 
   // ==================
   // STATE (Signals)
@@ -59,6 +64,7 @@ export class ImageUploadComponent {
   uploading = signal(false);
   uploadProgress = signal(0);
   deleting = signal(false); // Estado de eliminación (bloquea toda la pantalla)
+  settingFeatured = signal(false); // Estado de cambio de imagen destacada
 
   // ==================
   // COMPUTED SIGNALS
@@ -246,6 +252,40 @@ export class ImageUploadComponent {
         detail: 'Las imágenes deben pesar menos de 5MB'
       });
       fileUpload.clear();
+    }
+  }
+
+  /**
+   * Establece una imagen como portada/destacada
+   * @param index Índice de la imagen a establecer como portada
+   */
+  async setFeaturedImage(index: number): Promise<void> {
+    if (this.disabled()) {
+      return;
+    }
+
+    this.settingFeatured.set(true);
+
+    try {
+      const updatedProduct = await this.productService.setFeaturedImage(this.productId(), index).toPromise();
+
+      if (updatedProduct && updatedProduct.featuredImageIndex !== undefined) {
+        this.featuredImageChanged.emit(updatedProduct.featuredImageIndex);
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Imagen destacada actualizada',
+          detail: 'La imagen portada se actualizó correctamente'
+        });
+      }
+    } catch (error: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error al establecer imagen destacada',
+        detail: error.error?.message || 'Ocurrió un error al actualizar la imagen destacada'
+      });
+    } finally {
+      this.settingFeatured.set(false);
     }
   }
 }

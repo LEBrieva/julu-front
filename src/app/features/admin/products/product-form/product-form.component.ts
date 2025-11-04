@@ -101,6 +101,7 @@ export class ProductFormComponent implements OnInit {
   productId: string | null = null;
   currentProduct: Product | null = null; // Producto cargado en modo editar
   productImages = signal<string[]>([]); // Imágenes del producto (reactivo)
+  productFeaturedIndex = signal<number>(0); // Índice de imagen destacada (reactivo)
 
   // Form
   productForm: FormGroup;
@@ -226,6 +227,9 @@ export class ProductFormComponent implements OnInit {
 
     // Inicializar imágenes (asegurar que sea un array válido)
     this.productImages.set(Array.isArray(product.images) ? product.images : []);
+
+    // Inicializar índice de imagen destacada
+    this.productFeaturedIndex.set(product.featuredImageIndex ?? 0);
 
     // Actualizar estilos disponibles según la categoría cargada
     if (product.category) {
@@ -732,5 +736,13 @@ export class ProductFormComponent implements OnInit {
    */
   onImagesChanged(newImages: string[]): void {
     this.productImages.set(newImages);
+  }
+
+  /**
+   * Handler cuando cambia la imagen destacada del producto
+   * Actualiza el signal del índice de imagen destacada
+   */
+  onFeaturedImageChanged(newIndex: number): void {
+    this.productFeaturedIndex.set(newIndex);
   }
 }

@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 5 con gestión de variantes completada (falta upload de imágenes), FASE 6 completada. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa.
+**Estado actual**: FASE 5 completada (CRUD + Variantes + Imágenes), FASE 6 completada. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa.
 
 ---
 
@@ -88,7 +88,11 @@ src/app/
 │   │   └── validation-messages.ts     # ✅ Mensajes de validación centralizados
 │   ├── utils/
 │   │   └── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
-│   ├── components/            # TODO: Componentes reutilizables
+│   ├── components/            # Componentes reutilizables
+│   │   └── image-upload/              # ✅ FASE 5 bis: Upload de imágenes
+│   │       ├── image-upload.component.ts
+│   │       ├── image-upload.component.html
+│   │       └── image-upload.component.css
 │   └── pipes/                 # TODO: Pipes personalizados
 │
 ├── app.config.ts              # Configuración global (providers, interceptors)
@@ -799,7 +803,7 @@ console.log(payload); // { sub, email, role, exp }
   - Children routes con lazy loading individual
   - Chunks generados: admin-layout (~22KB), admin-dashboard (~11KB), admin-routes (~1KB)
 
-### ✅ FASE 5: CRUD de Productos con Gestión de Variantes (Admin) (VARIANTES COMPLETADAS - FALTA IMÁGENES)
+### ✅ FASE 5: CRUD de Productos con Gestión de Variantes e Imágenes (Admin) (COMPLETADA)
 
 #### Modelos de Datos
 - [x] Enums actualizados:
@@ -910,14 +914,28 @@ console.log(payload); // { sub, email, role, exp }
   - Errores de validación (400 Bad Request)
 - [x] Actualización automática del producto completo después de operaciones de variantes
 
-### FASE 5 bis: Upload de Imágenes de Productos (PENDIENTE)
-- [ ] Componente de upload de imágenes (PrimeNG FileUpload)
-- [ ] Integración con servicio de almacenamiento (backend)
-- [ ] Preview de imagen antes de subir
-- [ ] Validación de tipo y tamaño de archivo
-- [ ] Crop/resize de imágenes (opcional)
-- [ ] Galería de imágenes por producto (múltiples imágenes)
-- [ ] Actualizar modelo Product.imageUrl a Product.images[]
+### ✅ FASE 5 bis: Upload de Imágenes de Productos (COMPLETADA)
+- [x] Componente reutilizable `ImageUploadComponent` en `shared/components/`
+- [x] Upload de múltiples imágenes (hasta 5) con PrimeNG FileUpload
+- [x] Validaciones completas:
+  - Tipos de archivo permitidos: JPEG, PNG, WebP
+  - Tamaño máximo: 5MB por archivo
+  - Máximo 5 imágenes por producto
+- [x] Preview interactivo con grid responsive (PrimeNG Image component)
+- [x] Eliminación de imágenes con confirmación (PrimeNG ConfirmDialog)
+- [x] Loading states y progress bar durante upload
+- [x] Empty states informativos (sin imágenes, límite alcanzado, disabled)
+- [x] Integración en ProductFormComponent (solo modo EDITAR)
+- [x] Modelo Product.images[] implementado
+- [x] Métodos en ProductService:
+  - `uploadImages(productId, files)` → POST `/products/:id/images`
+  - `deleteImage(productId, imageIndex)` → DELETE `/products/:id/images/:index`
+- [x] UI/UX completa:
+  - Signal reactivo `productImages()`
+  - Handler `onImagesChanged()`
+  - Toasts descriptivos para errores y éxitos
+  - Responsive design (2 columnas mobile, flexible desktop)
+  - Hover states y animaciones suaves
 
 ### ✅ FASE 6: Gestión de Órdenes (Admin) (COMPLETADA)
 - [x] Lista de órdenes con filtros (estado orden, estado pago, rango de fechas)
@@ -1014,4 +1032,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-10-22 (FASE 5 - Gestión de Variantes completada; FASE 6 - Gestión de Órdenes Admin completada)
+**Última actualización**: 2025-11-03 (FASE 5 completada con gestión de variantes e imágenes; FASE 6 completada)

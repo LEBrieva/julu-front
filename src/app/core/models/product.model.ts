@@ -164,6 +164,7 @@ export interface Product {
   description?: string;
   basePrice: number;
   images?: string[];
+  featuredImageIndex?: number;
   variants: ProductVariant[];
   status: ProductStatus;
   category: ProductCategory;
@@ -236,6 +237,7 @@ export interface UpdateProductDto {
   status?: ProductStatus;
   tags?: string[];
   images?: string[];
+  featuredImageIndex?: number;
 }
 
 /**

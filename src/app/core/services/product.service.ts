@@ -241,4 +241,19 @@ export class ProductService {
   deleteImage(productId: string, imageIndex: number): Observable<Product> {
     return this.http.delete<Product>(`${this.apiUrl}/${productId}/images/${imageIndex}`);
   }
+
+  /**
+   * Establece la imagen destacada/portada de un producto (ADMIN)
+   * Endpoint: PATCH /products/:id/featured-image
+   *
+   * @param productId ID del producto
+   * @param imageIndex Índice de la imagen a establecer como portada (0-4)
+   * @returns Producto actualizado con la nueva imagen destacada
+   */
+  setFeaturedImage(productId: string, imageIndex: number): Observable<Product> {
+    return this.http.patch<Product>(
+      `${this.apiUrl}/${productId}/featured-image`,
+      { index: imageIndex }
+    );
+  }
 }

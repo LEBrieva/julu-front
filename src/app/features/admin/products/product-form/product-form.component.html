@@ -607,7 +607,9 @@
         <app-image-upload
           [productId]="productId"
           [currentImages]="productImages()"
+          [featuredImageIndex]="productFeaturedIndex()"
           (imagesChanged)="onImagesChanged($event)"
+          (featuredImageChanged)="onFeaturedImageChanged($event)"
           class="mb-6"
         />
       } @else {

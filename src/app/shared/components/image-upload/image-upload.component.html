@@ -22,13 +22,30 @@
             imageClass="w-full h-full object-cover"
           />
 
-          <!-- Overlay con botón eliminar -->
+          <!-- Overlay con botones -->
           <div class="image-overlay">
+            <!-- Botón estrella (imagen favorita) -->
+            <button
+              pButton
+              type="button"
+              [icon]="featuredImageIndex() === i ? 'pi pi-star-fill' : 'pi pi-star'"
+              class="p-button-rounded p-button-sm featured-star-btn"
+              [ngClass]="{
+                'is-featured': featuredImageIndex() === i,
+                'p-button-secondary': featuredImageIndex() !== i
+              }"
+              (click)="setFeaturedImage(i)"
+              [disabled]="disabled() || settingFeatured()"
+              [pTooltip]="featuredImageIndex() === i ? 'Imagen portada actual' : 'Establecer como portada'"
+              tooltipPosition="top"
+            ></button>
+
+            <!-- Botón eliminar -->
             <button
               pButton
               type="button"
               icon="pi pi-trash"
-              class="p-button-rounded p-button-danger p-button-sm"
+              class="p-button-rounded p-button-danger p-button-sm ml-2"
               (click)="deleteImage(imageUrl, i)"
               [disabled]="disabled()"
               pTooltip="Eliminar imagen"
@@ -132,8 +149,8 @@
   }
 </div>
 
-<!-- Overlay de loading durante eliminación -->
-@if (deleting()) {
+<!-- Overlay de loading durante eliminación o cambio de imagen destacada -->
+@if (deleting() || settingFeatured()) {
   <div class="loading-overlay">
     <p-progressSpinner />
   </div>
