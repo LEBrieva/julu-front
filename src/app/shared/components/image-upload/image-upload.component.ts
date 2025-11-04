@@ -4,9 +4,9 @@ import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { ImageModule } from 'primeng/image';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
+import { GalleriaModule } from 'primeng/galleria';
 
 import { ProductService } from '../../../core/services/product.service';
 
@@ -17,7 +17,8 @@ import { ProductService } from '../../../core/services/product.service';
  * - Upload de múltiples imágenes (hasta 5 total)
  * - Validaciones: tipo (JPEG, PNG, WebP), tamaño (5MB), cantidad (5 máx)
  * - Preview de imágenes con grid responsive
- * - Establecer imagen destacada/portada (estrella clickeable)
+ * - Galería fullscreen (PrimeNG Galleria) con navegación y thumbnails
+ * - Establecer imagen destacada/portada (estrella dorada clickeable)
  * - Eliminación con confirmación
  * - Loading states
  * - Integración con Cloudinary vía backend
@@ -30,9 +31,9 @@ import { ProductService } from '../../../core/services/product.service';
     FileUploadModule,
     ButtonModule,
     ProgressBarModule,
-    ImageModule,
     ProgressSpinnerModule,
-    TooltipModule
+    TooltipModule,
+    GalleriaModule
   ],
   templateUrl: './image-upload.component.html',
   styleUrls: ['./image-upload.component.css']
@@ -63,8 +64,10 @@ export class ImageUploadComponent {
 
   uploading = signal(false);
   uploadProgress = signal(0);
-  deleting = signal(false); // Estado de eliminación (bloquea toda la pantalla)
-  settingFeatured = signal(false); // Estado de cambio de imagen destacada
+  deleting = signal(false);
+  settingFeatured = signal(false);
+  displayGalleria = signal(false); // Controla la visibilidad de la galería
+  activeIndex = signal(0); // Índice de la imagen activa en la galería
 
   // ==================
   // COMPUTED SIGNALS
@@ -252,6 +255,18 @@ export class ImageUploadComponent {
         detail: 'Las imágenes deben pesar menos de 5MB'
       });
       fileUpload.clear();
+    }
+  }
+
+  /**
+   * Abre la galería en una imagen específica
+   * @param imageUrl URL de la imagen para buscar su índice
+   */
+  openImagePreview(imageUrl: string): void {
+    const index = this.currentImages().indexOf(imageUrl);
+    if (index !== -1) {
+      this.activeIndex.set(index);
+      this.displayGalleria.set(true);
     }
   }
 

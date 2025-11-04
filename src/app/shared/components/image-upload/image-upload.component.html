@@ -14,43 +14,57 @@
     <div class="images-grid mb-6">
       @for (imageUrl of currentImages(); track imageUrl; let i = $index) {
         <div class="image-card">
-          <!-- Imagen con preview -->
-          <p-image
-            [src]="imageUrl"
-            [alt]="'Imagen ' + (i + 1)"
-            [preview]="true"
-            imageClass="w-full h-full object-cover"
-          />
+          <!-- Imagen con preview - Wrapper clickeable -->
+          <div class="image-preview-wrapper" (click)="openImagePreview(imageUrl)">
+            <img
+              [src]="imageUrl"
+              [alt]="'Imagen ' + (i + 1)"
+              class="w-full h-full object-cover image-clickable"
+            />
+          </div>
 
           <!-- Overlay con botones -->
           <div class="image-overlay">
-            <!-- Botón estrella (imagen favorita) -->
-            <button
-              pButton
-              type="button"
-              [icon]="featuredImageIndex() === i ? 'pi pi-star-fill' : 'pi pi-star'"
-              class="p-button-rounded p-button-sm featured-star-btn"
-              [ngClass]="{
-                'is-featured': featuredImageIndex() === i,
-                'p-button-secondary': featuredImageIndex() !== i
-              }"
-              (click)="setFeaturedImage(i)"
-              [disabled]="disabled() || settingFeatured()"
-              [pTooltip]="featuredImageIndex() === i ? 'Imagen portada actual' : 'Establecer como portada'"
-              tooltipPosition="top"
-            ></button>
+            <div class="button-group">
+              <!-- Botón ojo (ver en grande) -->
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                class="p-button-rounded p-button-sm p-button-info"
+                (click)="openImagePreview(imageUrl); $event.stopPropagation()"
+                pTooltip="Ver en grande"
+                tooltipPosition="top"
+              ></button>
 
-            <!-- Botón eliminar -->
-            <button
-              pButton
-              type="button"
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-danger p-button-sm ml-2"
-              (click)="deleteImage(imageUrl, i)"
-              [disabled]="disabled()"
-              pTooltip="Eliminar imagen"
-              tooltipPosition="top"
-            ></button>
+              <!-- Botón estrella (imagen favorita) -->
+              <button
+                pButton
+                type="button"
+                [icon]="featuredImageIndex() === i ? 'pi pi-star-fill' : 'pi pi-star'"
+                class="p-button-rounded p-button-sm featured-star-btn"
+                [ngClass]="{
+                  'is-featured': featuredImageIndex() === i,
+                  'p-button-secondary': featuredImageIndex() !== i
+                }"
+                (click)="setFeaturedImage(i)"
+                [disabled]="disabled() || settingFeatured()"
+                [pTooltip]="featuredImageIndex() === i ? 'Imagen portada actual' : 'Establecer como portada'"
+                tooltipPosition="top"
+              ></button>
+
+              <!-- Botón eliminar -->
+              <button
+                pButton
+                type="button"
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger p-button-sm"
+                (click)="deleteImage(imageUrl, i)"
+                [disabled]="disabled()"
+                pTooltip="Eliminar imagen"
+                tooltipPosition="top"
+              ></button>
+            </div>
           </div>
 
           <!-- Badge de número -->
@@ -155,3 +169,30 @@
     <p-progressSpinner />
   </div>
 }
+
+<!-- Galleria para preview de imágenes -->
+<p-galleria
+  [value]="currentImages()"
+  [(visible)]="displayGalleria"
+  [(activeIndex)]="activeIndex"
+  [responsiveOptions]="[
+    { breakpoint: '1024px', numVisible: 5 },
+    { breakpoint: '768px', numVisible: 3 },
+    { breakpoint: '560px', numVisible: 1 }
+  ]"
+  [containerStyle]="{ 'width': '85vw', 'max-width': '800px', 'background-color': 'white' }"
+  [numVisible]="5"
+  [circular]="true"
+  [fullScreen]="true"
+  [showItemNavigators]="true"
+  [showThumbnails]="true"
+>
+  <ng-template pTemplate="item" let-imageUrl>
+    <img [src]="imageUrl" style="width: 100%; height: 70vh; object-fit: contain; display: block;" />
+  </ng-template>
+  <ng-template pTemplate="thumbnail" let-imageUrl>
+    <div class="grid justify-center">
+      <img [src]="imageUrl" class="block" style="width: 100px; height: 100px; object-fit: cover;" />
+    </div>
+  </ng-template>
+</p-galleria>
