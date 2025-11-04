@@ -1,0 +1,117 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visibleChange.emit($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px' }"
+  [breakpoints]="{ '768px': '95vw' }"
+  styleClass="user-detail-dialog"
+>
+  <!-- Header personalizado -->
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <i class="pi pi-user text-blue-500 text-2xl"></i>
+      <div>
+        <h3 class="text-xl font-bold text-gray-800 m-0">Detalle de Usuario</h3>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Content -->
+  @if (user()) {
+    <div class="user-detail-content">
+      <!-- Avatar y nombre -->
+      <div class="user-header">
+        @if (user()!.avatar) {
+          <img [src]="user()!.avatar" [alt]="user()!.firstName || 'User'" class="user-avatar-large" />
+        } @else {
+          <div class="user-avatar-large-placeholder">
+            {{ user()!.firstName?.charAt(0) || 'U' }}{{ user()!.lastName?.charAt(0) || 'U' }}
+          </div>
+        }
+        <div class="user-header-info">
+          <h4 class="text-2xl font-bold text-gray-800">
+            {{ user()!.firstName || 'N/A' }} {{ user()!.lastName || '' }}
+          </h4>
+          <p class="text-gray-600">{{ user()!.email }}</p>
+        </div>
+      </div>
+
+      <!-- Grid de información -->
+      <div class="info-grid">
+        <!-- Rol -->
+        <div class="info-item">
+          <label class="info-label">Rol</label>
+          <div>
+            <p-tag
+              [value]="user()!.role === UserRole.ADMIN ? 'Administrador' : 'Usuario'"
+              [severity]="getRoleSeverity(user()!.role)"
+            />
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="info-item">
+          <label class="info-label">Estado</label>
+          <div>
+            <p-tag
+              [value]="user()!.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(user()!.status)"
+            />
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="info-item">
+          <label class="info-label">Teléfono</label>
+          <p class="info-value">{{ user()!.phone || 'No especificado' }}</p>
+        </div>
+
+        <!-- Email Verificado -->
+        <div class="info-item">
+          <label class="info-label">Email Verificado</label>
+          <div class="flex items-center gap-2">
+            @if (user()!.emailVerified) {
+              <i class="pi pi-check-circle text-green-500 text-xl"></i>
+              <span class="text-green-600 font-medium">Verificado</span>
+            } @else {
+              <i class="pi pi-times-circle text-gray-400 text-xl"></i>
+              <span class="text-gray-500">No verificado</span>
+            }
+          </div>
+        </div>
+
+        <!-- Último Login -->
+        <div class="info-item">
+          <label class="info-label">Último Login</label>
+          <p class="info-value">{{ formatDate(user()!.lastLogin) }}</p>
+        </div>
+
+        <!-- Fecha de Registro -->
+        <div class="info-item">
+          <label class="info-label">Fecha de Registro</label>
+          <p class="info-value">{{ formatDate(user()!.createdAt) }}</p>
+        </div>
+      </div>
+
+      <!-- ID (para referencia técnica) -->
+      <div class="user-id">
+        <label class="info-label">ID de Usuario</label>
+        <code class="id-code">{{ user()!.id }}</code>
+      </div>
+    </div>
+  }
+
+  <!-- Footer -->
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      type="button"
+      label="Cerrar"
+      icon="pi pi-times"
+      (click)="closeDialog()"
+      class="p-button-outlined"
+    ></button>
+  </ng-template>
+</p-dialog>

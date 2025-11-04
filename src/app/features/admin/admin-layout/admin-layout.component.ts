@@ -61,7 +61,7 @@ export class AdminLayoutComponent {
   ];
 
   // Sidebar navigation items
-  navItems = [
+  navItems: Array<{ label: string; icon: string; route: string; disabled?: boolean }> = [
     {
       label: 'Dashboard',
       icon: 'pi pi-th-large',
@@ -82,8 +82,8 @@ export class AdminLayoutComponent {
     {
       label: 'Usuarios',
       icon: 'pi pi-users',
-      route: '/admin/users',
-      disabled: true // TODO FASE 7
+      route: '/admin/users'
+      // ✅ FASE 7 COMPLETADA
     }
   ];
 

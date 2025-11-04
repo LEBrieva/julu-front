@@ -1,0 +1,248 @@
+<div class="admin-users-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h2 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h2>
+    <p class="text-gray-600 mt-1">Administra roles y estados de los usuarios</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-card">
+    <div class="filters-grid">
+      <!-- Búsqueda -->
+      <div class="filter-item search-input">
+        <label for="search" class="filter-label">Buscar</label>
+        <input
+          pInputText
+          id="search"
+          type="text"
+          placeholder="Nombre, apellido o email..."
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="applyFilters()"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Filtro: Rol -->
+      <div class="filter-item">
+        <label for="role" class="filter-label">Rol</label>
+        <p-select
+          [(ngModel)]="selectedRole"
+          [options]="roleOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccionar rol"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Filtro: Estado -->
+      <div class="filter-item">
+        <label for="status" class="filter-label">Estado</label>
+        <p-select
+          [(ngModel)]="selectedStatus"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccionar estado"
+          class="w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="filter-actions">
+      <button
+        pButton
+        type="button"
+        label="Buscar"
+        icon="pi pi-search"
+        (click)="applyFilters()"
+        class="p-button-primary"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Limpiar"
+        icon="pi pi-filter-slash"
+        (click)="clearFilters()"
+        class="p-button-outlined"
+      ></button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+    <p-table
+      [value]="users()"
+      [lazy]="true"
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="rowsPerPage()"
+      [totalRecords]="totalRecords()"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      (onLazyLoad)="onLazyLoad($event)"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+      styleClass="p-datatable-sm p-datatable-striped"
+    >
+      <!-- Empty state -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center py-8">
+            <i class="pi pi-users text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">No se encontraron usuarios</p>
+            @if (searchTerm() || selectedRole() || selectedStatus()) {
+              <button
+                pButton
+                type="button"
+                label="Limpiar filtros"
+                icon="pi pi-filter-slash"
+                (click)="clearFilters()"
+                class="p-button-text mt-4"
+              ></button>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Último Login</th>
+          <th>Email Verificado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <!-- Body -->
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <!-- Nombre -->
+          <td>
+            <div class="flex items-center gap-3">
+              @if (user.avatar) {
+                <img [src]="user.avatar" [alt]="user.firstName" class="user-avatar" />
+              } @else {
+                <div class="user-avatar-placeholder">
+                  {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                </div>
+              }
+              <div>
+                <div class="font-semibold text-gray-800">
+                  {{ user.firstName }} {{ user.lastName }}
+                </div>
+                @if (user.phone) {
+                  <div class="text-sm text-gray-500">{{ user.phone }}</div>
+                }
+              </div>
+            </div>
+          </td>
+
+          <!-- Email -->
+          <td>
+            <span class="text-gray-700">{{ user.email }}</span>
+          </td>
+
+          <!-- Rol (editable inline con dropdown) -->
+          <td>
+            <p-select
+              [ngModel]="user.role"
+              (ngModelChange)="changeRole(user, $event)"
+              [options]="[
+                { label: 'Usuario', value: UserRole.USER },
+                { label: 'Admin', value: UserRole.ADMIN }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="role-dropdown"
+            >
+              <ng-template pTemplate="selectedItem" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getRoleSeverity(option.value)"
+                />
+              </ng-template>
+              <ng-template pTemplate="item" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getRoleSeverity(option.value)"
+                />
+              </ng-template>
+            </p-select>
+          </td>
+
+          <!-- Estado (editable inline con dropdown) -->
+          <td>
+            <p-select
+              [ngModel]="user.status"
+              (ngModelChange)="changeStatus(user, $event)"
+              [options]="[
+                { label: 'Activo', value: UserStatus.ACTIVE },
+                { label: 'Inactivo', value: UserStatus.INACTIVE }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="status-dropdown"
+            >
+              <ng-template pTemplate="selectedItem" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getStatusSeverity(option.value)"
+                />
+              </ng-template>
+              <ng-template pTemplate="item" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getStatusSeverity(option.value)"
+                />
+              </ng-template>
+            </p-select>
+          </td>
+
+          <!-- Último Login -->
+          <td>
+            <span class="text-gray-600 text-sm">
+              {{ formatLastLogin(user.lastLogin) }}
+            </span>
+          </td>
+
+          <!-- Email Verificado -->
+          <td class="text-center">
+            @if (user.emailVerified) {
+              <i class="pi pi-check-circle text-green-500 text-xl" pTooltip="Email verificado"></i>
+            } @else {
+              <i class="pi pi-times-circle text-gray-400 text-xl" pTooltip="Email no verificado"></i>
+            }
+          </td>
+
+          <!-- Acciones -->
+          <td class="text-center">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-info"
+              (click)="viewUserDetail(user)"
+              pTooltip="Ver detalle"
+              tooltipPosition="top"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- ConfirmDialog para confirmaciones -->
+<p-confirmDialog />
+
+<!-- Dialog de detalle de usuario -->
+<app-user-detail
+  [user]="selectedUser()"
+  [visible]="showDetailDialog()"
+  (visibleChange)="showDetailDialog.set($event)"
+/>

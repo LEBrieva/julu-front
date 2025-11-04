@@ -1,0 +1,59 @@
+/* Content del dialog */
+.user-detail-content {
+  @apply space-y-6;
+}
+
+/* Header con avatar y nombre */
+.user-header {
+  @apply flex items-center gap-4 pb-6 border-b border-gray-200;
+}
+
+.user-avatar-large {
+  @apply w-20 h-20 rounded-full object-cover border-2 border-gray-200;
+}
+
+.user-avatar-large-placeholder {
+  @apply w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold flex items-center justify-center text-2xl;
+}
+
+.user-header-info {
+  @apply flex-1;
+}
+
+/* Grid de información */
+.info-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.info-item {
+  @apply flex flex-col gap-1;
+}
+
+.info-label {
+  @apply text-sm font-semibold text-gray-600 uppercase tracking-wide;
+}
+
+.info-value {
+  @apply text-base text-gray-800 m-0;
+}
+
+/* ID técnico */
+.user-id {
+  @apply pt-4 border-t border-gray-200;
+}
+
+.id-code {
+  @apply block mt-2 p-3 bg-gray-100 rounded font-mono text-sm text-gray-700 break-all;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-header {
+    @apply flex-col text-center;
+  }
+}

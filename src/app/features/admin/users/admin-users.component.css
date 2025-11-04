@@ -1,0 +1,95 @@
+/* Container principal */
+.admin-users-container {
+  @apply p-6;
+}
+
+/* Header */
+.page-header {
+  @apply mb-6;
+}
+
+/* Card de filtros */
+.filters-card {
+  @apply bg-white rounded-lg border border-gray-200 p-6 mb-6;
+}
+
+.filters-grid {
+  @apply grid gap-4 mb-4;
+  grid-template-columns: 2fr 1fr 1fr;
+}
+
+.filter-item {
+  @apply flex flex-col;
+}
+
+.filter-label {
+  @apply block text-sm font-semibold text-gray-700 mb-2;
+}
+
+.filter-actions {
+  @apply flex gap-3;
+}
+
+/* Responsive: filtros en mobile */
+@media (max-width: 1024px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card de tabla */
+.table-card {
+  @apply bg-white rounded-lg border border-gray-200 overflow-hidden;
+}
+
+/* Avatar de usuario */
+.user-avatar {
+  @apply w-10 h-10 rounded-full object-cover border border-gray-200;
+}
+
+.user-avatar-placeholder {
+  @apply w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold flex items-center justify-center text-sm;
+}
+
+/* Dropdowns inline (rol y estado) */
+:host ::ng-deep .role-dropdown,
+:host ::ng-deep .status-dropdown {
+  width: auto !important;
+  min-width: 130px;
+}
+
+:host ::ng-deep .role-dropdown .p-dropdown,
+:host ::ng-deep .status-dropdown .p-dropdown {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .role-dropdown .p-dropdown:hover,
+:host ::ng-deep .status-dropdown .p-dropdown:hover {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+:host ::ng-deep .role-dropdown .p-dropdown:focus,
+:host ::ng-deep .status-dropdown .p-dropdown:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Tabla responsive */
+@media (max-width: 768px) {
+  .admin-users-container {
+    @apply p-4;
+  }
+
+  .filters-card {
+    @apply p-4;
+  }
+
+  /* Ocultar columnas menos importantes en mobile */
+  :host ::ng-deep .p-datatable th:nth-child(5),
+  :host ::ng-deep .p-datatable td:nth-child(5),
+  :host ::ng-deep .p-datatable th:nth-child(6),
+  :host ::ng-deep .p-datatable td:nth-child(6) {
+    display: none;
+  }
+}

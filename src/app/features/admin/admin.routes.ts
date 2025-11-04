@@ -81,14 +81,14 @@ export const ADMIN_ROUTES: Routes = [
           )
       },
 
-      // TODO FASE 7: Users Management
-      // {
-      //   path: 'users',
-      //   loadComponent: () =>
-      //     import('./users/admin-users.component').then(
-      //       (m) => m.AdminUsersComponent
-      //     )
-      // }
+      // FASE 7: Users Management ✅
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./users/admin-users.component').then(
+            (m) => m.AdminUsersComponent
+          )
+      }
     ]
   }
 ];

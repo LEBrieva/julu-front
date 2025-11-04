@@ -20,23 +20,79 @@ export enum UserRole {
  */
 export enum UserStatus {
   ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  INACTIVE = 'inactive'
 }
 
 /**
  * Interface del Usuario (lo que recibes del backend)
+ * firstName y lastName son opcionales porque el JWT solo contiene id, email, role
  */
 export interface User {
   id: string;
   email: string;
-  role: UserRole;
-  status: UserStatus;
   firstName?: string;
   lastName?: string;
-  createdAt?: string;
-  lastLogin?: string;
+  role: UserRole;
+  status: UserStatus;
+  phone?: string;
+  avatar?: string;
+  lastLogin?: Date;
   emailVerified?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+/**
+ * DTO para crear usuario (admin)
+ */
+export interface CreateUserDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  avatar?: string;
+}
+
+/**
+ * DTO para actualizar usuario
+ */
+export interface UpdateUserDto {
+  email?: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  avatar?: string;
+  emailVerified?: boolean;
+}
+
+/**
+ * DTO para filtros de búsqueda de usuarios
+ */
+export interface FilterUserDto {
+  role?: UserRole;
+  status?: UserStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Respuesta paginada de usuarios
+ */
+export interface UsersPaginatedResponse {
+  data: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 /**
