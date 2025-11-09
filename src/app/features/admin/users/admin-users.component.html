@@ -147,60 +147,20 @@
             <span class="text-gray-700">{{ user.email }}</span>
           </td>
 
-          <!-- Rol (editable inline con dropdown) -->
+          <!-- Rol (read-only) -->
           <td>
-            <p-select
-              [ngModel]="user.role"
-              (ngModelChange)="changeRole(user, $event)"
-              [options]="[
-                { label: 'Usuario', value: UserRole.USER },
-                { label: 'Admin', value: UserRole.ADMIN }
-              ]"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="role-dropdown"
-            >
-              <ng-template pTemplate="selectedItem" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getRoleSeverity(option.value)"
-                />
-              </ng-template>
-              <ng-template pTemplate="item" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getRoleSeverity(option.value)"
-                />
-              </ng-template>
-            </p-select>
+            <p-tag
+              [value]="user.role === UserRole.ADMIN ? 'Administrador' : 'Usuario'"
+              [severity]="getRoleSeverity(user.role)"
+            />
           </td>
 
-          <!-- Estado (editable inline con dropdown) -->
+          <!-- Estado (read-only) -->
           <td>
-            <p-select
-              [ngModel]="user.status"
-              (ngModelChange)="changeStatus(user, $event)"
-              [options]="[
-                { label: 'Activo', value: UserStatus.ACTIVE },
-                { label: 'Inactivo', value: UserStatus.INACTIVE }
-              ]"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="status-dropdown"
-            >
-              <ng-template pTemplate="selectedItem" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getStatusSeverity(option.value)"
-                />
-              </ng-template>
-              <ng-template pTemplate="item" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getStatusSeverity(option.value)"
-                />
-              </ng-template>
-            </p-select>
+            <p-tag
+              [value]="user.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(user.status)"
+            />
           </td>
 
           <!-- Último Login -->
@@ -224,10 +184,10 @@
             <button
               pButton
               type="button"
-              icon="pi pi-eye"
+              icon="pi pi-pencil"
               class="p-button-rounded p-button-text p-button-info"
               (click)="viewUserDetail(user)"
-              pTooltip="Ver detalle"
+              pTooltip="Editar usuario"
               tooltipPosition="top"
             ></button>
           </td>
@@ -245,4 +205,5 @@
   [user]="selectedUser()"
   [visible]="showDetailDialog()"
   (visibleChange)="showDetailDialog.set($event)"
+  (userUpdated)="onUserUpdated($event)"
 />

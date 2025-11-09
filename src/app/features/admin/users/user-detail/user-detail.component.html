@@ -51,21 +51,45 @@
           </div>
         </div>
 
-        <!-- Estado -->
+        <!-- Estado (editable) -->
         <div class="info-item">
           <label class="info-label">Estado</label>
           <div>
-            <p-tag
-              [value]="user()!.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
-              [severity]="getStatusSeverity(user()!.status)"
-            />
+            <p-select
+              [(ngModel)]="editableStatus"
+              [options]="statusOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+            >
+              <ng-template pTemplate="selectedItem" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getStatusSeverity(option.value)"
+                />
+              </ng-template>
+              <ng-template pTemplate="item" let-option>
+                <p-tag
+                  [value]="option.label"
+                  [severity]="getStatusSeverity(option.value)"
+                />
+              </ng-template>
+            </p-select>
           </div>
         </div>
 
-        <!-- Teléfono -->
+        <!-- Teléfono (editable) -->
         <div class="info-item">
           <label class="info-label">Teléfono</label>
-          <p class="info-value">{{ user()!.phone || 'No especificado' }}</p>
+          <div class="flex items-center gap-2">
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="editablePhone"
+              placeholder="No especificado"
+              class="w-full"
+            />
+          </div>
         </div>
 
         <!-- Email Verificado -->
@@ -105,13 +129,27 @@
 
   <!-- Footer -->
   <ng-template pTemplate="footer">
-    <button
-      pButton
-      type="button"
-      label="Cerrar"
-      icon="pi pi-times"
-      (click)="closeDialog()"
-      class="p-button-outlined"
-    ></button>
+    <div class="flex justify-between w-full">
+      <button
+        pButton
+        type="button"
+        label="Cerrar"
+        icon="pi pi-times"
+        (click)="closeDialog()"
+        class="p-button-outlined"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Guardar Cambios"
+        icon="pi pi-check"
+        (click)="saveChanges()"
+        [disabled]="!hasChanges()"
+        class="p-button-primary"
+      ></button>
+    </div>
   </ng-template>
 </p-dialog>
+
+<!-- ConfirmDialog para confirmaciones -->
+<p-confirmDialog />

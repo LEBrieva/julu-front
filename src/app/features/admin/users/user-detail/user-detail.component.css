@@ -47,6 +47,11 @@
   @apply block mt-2 p-3 bg-gray-100 rounded font-mono text-sm text-gray-700 break-all;
 }
 
+/* Estilos para ConfirmDialog - Forzar saltos de línea */
+::ng-deep .p-confirmdialog .p-dialog-content {
+  white-space: pre-line;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .info-grid {

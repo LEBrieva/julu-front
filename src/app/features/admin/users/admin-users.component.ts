@@ -176,89 +176,12 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Cambia el rol de un usuario (inline)
+   * Actualiza un usuario en la lista cuando se edita desde el dialog
    */
-  changeRole(user: User, newRole: UserRole): void {
-    // Si el rol no cambió, no hacer nada
-    if (user.role === newRole) return;
-
-    this.confirmationService.confirm({
-      message: `¿Cambiar rol de ${user.firstName} ${user.lastName} a ${newRole === UserRole.ADMIN ? 'Administrador' : 'Usuario'}?`,
-      header: 'Confirmar Cambio de Rol',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, cambiar',
-      rejectLabel: 'Cancelar',
-      accept: () => {
-        this.loading.set(true);
-
-        this.userService.updateUser(user.id, { role: newRole }).subscribe({
-          next: (updatedUser) => {
-            // Actualizar usuario en la lista
-            this.users.update(users =>
-              users.map(u => u.id === updatedUser.id ? updatedUser : u)
-            );
-
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Rol actualizado',
-              detail: `Rol de ${updatedUser.firstName} ${updatedUser.lastName} actualizado correctamente`
-            });
-            this.loading.set(false);
-          },
-          error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error al cambiar rol',
-              detail: error.error?.message || 'Ocurrió un error al cambiar el rol'
-            });
-            this.loading.set(false);
-          }
-        });
-      }
-    });
-  }
-
-  /**
-   * Cambia el estado de un usuario (inline)
-   */
-  changeStatus(user: User, newStatus: UserStatus): void {
-    // Si el estado no cambió, no hacer nada
-    if (user.status === newStatus) return;
-
-    this.confirmationService.confirm({
-      message: `¿${newStatus === UserStatus.ACTIVE ? 'Activar' : 'Desactivar'} usuario ${user.firstName} ${user.lastName}?`,
-      header: 'Confirmar Cambio de Estado',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, cambiar',
-      rejectLabel: 'Cancelar',
-      accept: () => {
-        this.loading.set(true);
-
-        this.userService.updateUser(user.id, { status: newStatus }).subscribe({
-          next: (updatedUser) => {
-            // Actualizar usuario en la lista
-            this.users.update(users =>
-              users.map(u => u.id === updatedUser.id ? updatedUser : u)
-            );
-
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Estado actualizado',
-              detail: `Usuario ${updatedUser.firstName} ${updatedUser.lastName} ${newStatus === UserStatus.ACTIVE ? 'activado' : 'desactivado'}`
-            });
-            this.loading.set(false);
-          },
-          error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error al cambiar estado',
-              detail: error.error?.message || 'Ocurrió un error al cambiar el estado'
-            });
-            this.loading.set(false);
-          }
-        });
-      }
-    });
+  onUserUpdated(updatedUser: User): void {
+    this.users.update(users =>
+      users.map(u => u.id === updatedUser.id ? updatedUser : u)
+    );
   }
 
   /**
