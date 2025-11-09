@@ -1,0 +1,52 @@
+@if (visible()) {
+  <div class="avatar-overlay" (click)="close()">
+    <div class="avatar-overlay-content" (click)="$event.stopPropagation()">
+      <!-- Avatar ampliado -->
+      <div class="avatar-enlarged-container">
+        @if (previewUrl()) {
+          <!-- Preview de nueva imagen -->
+          <img [src]="previewUrl()!" [alt]="userName() + ' preview'" class="avatar-enlarged" />
+        } @else if (avatarUrl()) {
+          <!-- Avatar existente -->
+          <img [src]="avatarUrl()!" [alt]="userName()" class="avatar-enlarged" />
+        } @else {
+          <!-- Placeholder con iniciales -->
+          <div class="avatar-enlarged-placeholder">
+            <div class="avatar-initials">
+              {{ userInitials() }}
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Hidden File Input (antes de los botones) -->
+      <input
+        #fileInput
+        type="file"
+        hidden
+        accept="image/jpeg,image/png,image/webp"
+        (change)="onFileSelected($event)"
+      />
+
+      <!-- Botones de acción -->
+      <div class="avatar-overlay-actions">
+        <button
+          pButton
+          type="button"
+          label="Cambiar Avatar"
+          icon="pi pi-upload"
+          (click)="openFilePicker(fileInput)"
+          class="p-button-primary"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Cerrar"
+          icon="pi pi-times"
+          (click)="close()"
+          class="p-button-outlined p-button-secondary"
+        ></button>
+      </div>
+    </div>
+  </div>
+}

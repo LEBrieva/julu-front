@@ -1,6 +1,7 @@
 import { Component, input, output, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { switchMap, of } from 'rxjs';
 
 // PrimeNG
 import { DialogModule } from 'primeng/dialog';
@@ -14,6 +15,9 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 // Models & Services
 import { User, UserRole, UserStatus } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/user.service';
+
+// Shared Components
+import { AvatarOverlayComponent } from '../../../../shared/components/avatar-overlay/avatar-overlay.component';
 
 /**
  * UserDetailComponent - Modal de detalle de usuario
@@ -36,7 +40,8 @@ import { UserService } from '../../../../core/services/user.service';
     TagModule,
     Select,
     InputTextModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    AvatarOverlayComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './user-detail.component.html',
@@ -69,6 +74,11 @@ export class UserDetailComponent {
   editableStatus = signal<UserStatus>(UserStatus.ACTIVE);
   editablePhone = signal<string>('');
 
+  // Avatar
+  selectedAvatarFile = signal<File | null>(null);
+  avatarPreview = signal<string | null>(null);
+  showAvatarOverlay = signal(false);
+
   // Detecta si hay cambios pendientes
   hasChanges = computed(() => {
     const currentUser = this.user();
@@ -76,8 +86,9 @@ export class UserDetailComponent {
 
     const statusChanged = this.editableStatus() !== currentUser.status;
     const phoneChanged = this.editablePhone() !== (currentUser.phone || '');
+    const avatarChanged = this.selectedAvatarFile() !== null;
 
-    return statusChanged || phoneChanged;
+    return statusChanged || phoneChanged || avatarChanged;
   });
 
   constructor() {
@@ -87,6 +98,9 @@ export class UserDetailComponent {
       if (currentUser) {
         this.editableStatus.set(currentUser.status);
         this.editablePhone.set(currentUser.phone || '');
+        // Resetear avatar al cambiar de usuario
+        this.selectedAvatarFile.set(null);
+        this.avatarPreview.set(null);
       }
     });
   }
@@ -99,7 +113,47 @@ export class UserDetailComponent {
   }
 
   /**
-   * Guarda los cambios del formulario (estado y teléfono)
+   * Abre el overlay con el avatar ampliado
+   */
+  onAvatarClick(): void {
+    this.showAvatarOverlay.set(true);
+  }
+
+  /**
+   * Cierra el overlay del avatar
+   */
+  closeAvatarOverlay(): void {
+    this.showAvatarOverlay.set(false);
+  }
+
+  /**
+   * Maneja la selección de un nuevo avatar desde el overlay
+   */
+  onAvatarSelected(file: File): void {
+    // Guardar archivo seleccionado
+    this.selectedAvatarFile.set(file);
+
+    // Generar preview para mostrar en el dialog principal después de cerrar el overlay
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.avatarPreview.set(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * Maneja errores de validación del avatar
+   */
+  onAvatarValidationError(error: string): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Archivo no válido',
+      detail: error
+    });
+  }
+
+  /**
+   * Guarda los cambios del formulario (estado, teléfono y avatar)
    */
   saveChanges(): void {
     const currentUser = this.user();
@@ -116,6 +170,9 @@ export class UserDetailComponent {
       const phoneValue = this.editablePhone() || '(vacío)';
       changes.push(`   • Teléfono: ${phoneValue}`);
     }
+    if (this.selectedAvatarFile()) {
+      changes.push(`   • Avatar: Nueva imagen seleccionada`);
+    }
 
     const message = `¿Desea guardar los siguientes cambios para ${currentUser.firstName} ${currentUser.lastName}?\n\n${changes.join('\n')}`;
 
@@ -126,7 +183,6 @@ export class UserDetailComponent {
       acceptLabel: 'Sí, guardar',
       rejectLabel: 'Cancelar',
       accept: () => {
-        // Capturar usuario actualizado DENTRO del callback para tener la referencia correcta
         const userToUpdate = this.user();
         if (!userToUpdate || !userToUpdate.id) {
           this.messageService.add({
@@ -137,7 +193,12 @@ export class UserDetailComponent {
           return;
         }
 
-        // Preparar datos para actualizar
+        // Determinar qué hay que actualizar
+        const hasBasicChanges = this.editableStatus() !== userToUpdate.status ||
+                               this.editablePhone() !== (userToUpdate.phone || '');
+        const hasAvatarChange = this.selectedAvatarFile() !== null;
+
+        // Preparar datos básicos para actualizar
         const updateData: any = {};
         if (this.editableStatus() !== userToUpdate.status) {
           updateData.status = this.editableStatus();
@@ -146,14 +207,37 @@ export class UserDetailComponent {
           updateData.phone = this.editablePhone() || undefined;
         }
 
-        this.userService.updateUser(userToUpdate.id, updateData).subscribe({
+        // Crear observable inicial
+        let saveObservable = of(userToUpdate);
+
+        // Si hay cambios básicos, actualizar primero
+        if (hasBasicChanges && Object.keys(updateData).length > 0) {
+          saveObservable = this.userService.updateUser(userToUpdate.id, updateData);
+        }
+
+        // Si hay avatar, encadenar la subida
+        if (hasAvatarChange) {
+          const avatarFile = this.selectedAvatarFile();
+          if (avatarFile) {
+            saveObservable = saveObservable.pipe(
+              switchMap(() => this.userService.uploadAvatar(userToUpdate.id, avatarFile))
+            );
+          }
+        }
+
+        // Ejecutar las actualizaciones
+        saveObservable.subscribe({
           next: (updatedUser) => {
             // Emitir el usuario actualizado al componente padre
             this.userUpdated.emit(updatedUser);
 
-            // Sincronizar valores editables con el usuario actualizado
+            // Sincronizar valores editables
             this.editableStatus.set(updatedUser.status);
             this.editablePhone.set(updatedUser.phone || '');
+
+            // Limpiar avatar temporal
+            this.selectedAvatarFile.set(null);
+            this.avatarPreview.set(null);
 
             this.messageService.add({
               severity: 'success',
@@ -161,7 +245,7 @@ export class UserDetailComponent {
               detail: `Usuario ${updatedUser.firstName} ${updatedUser.lastName} actualizado correctamente`
             });
 
-            // Cerrar el dialog después de guardar exitosamente
+            // Cerrar el dialog
             this.closeDialog();
           },
           error: (error) => {

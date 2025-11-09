@@ -23,10 +23,16 @@
     <div class="user-detail-content">
       <!-- Avatar y nombre -->
       <div class="user-header">
-        @if (user()!.avatar) {
-          <img [src]="user()!.avatar" [alt]="user()!.firstName || 'User'" class="user-avatar-large" />
+        @if (user()!.avatar || avatarPreview()) {
+          <img
+            [src]="avatarPreview() || user()!.avatar"
+            [alt]="user()!.firstName || 'User'"
+            class="user-avatar-large avatar-clickable"
+            (click)="onAvatarClick()"
+            title="Click para ampliar"
+          />
         } @else {
-          <div class="user-avatar-large-placeholder">
+          <div class="user-avatar-large-placeholder avatar-clickable" (click)="onAvatarClick()" title="Click para ampliar">
             {{ user()!.firstName?.charAt(0) || 'U' }}{{ user()!.lastName?.charAt(0) || 'U' }}
           </div>
         }
@@ -153,3 +159,14 @@
 
 <!-- ConfirmDialog para confirmaciones -->
 <p-confirmDialog />
+
+<!-- Avatar Overlay -->
+<app-avatar-overlay
+  [visible]="showAvatarOverlay()"
+  (visibleChange)="showAvatarOverlay.set($event)"
+  [avatarUrl]="user()?.avatar || null"
+  [userInitials]="(user()?.firstName?.charAt(0) || 'U') + (user()?.lastName?.charAt(0) || 'U')"
+  [userName]="(user()?.firstName || '') + ' ' + (user()?.lastName || '')"
+  (avatarSelected)="onAvatarSelected($event)"
+  (validationError)="onAvatarValidationError($event)"
+/>

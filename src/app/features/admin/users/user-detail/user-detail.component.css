@@ -16,6 +16,14 @@
   @apply w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold flex items-center justify-center text-2xl;
 }
 
+.avatar-clickable {
+  @apply cursor-pointer transition-transform duration-200;
+}
+
+.avatar-clickable:hover {
+  @apply transform scale-105;
+}
+
 .user-header-info {
   @apply flex-1;
 }

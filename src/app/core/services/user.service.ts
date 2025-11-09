@@ -75,6 +75,19 @@ export class UserService {
   }
 
   /**
+   * Sube o actualiza el avatar de un usuario
+   * @param userId ID del usuario
+   * @param file Archivo de imagen (JPEG, PNG, WebP)
+   * @returns Observable con el usuario actualizado
+   */
+  uploadAvatar(userId: string, file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    return this.http.patch<User>(`${this.apiUrl}/${userId}/avatar`, formData);
+  }
+
+  /**
    * Elimina un usuario
    * @param userId ID del usuario a eliminar
    * @returns Observable vacío (204 No Content)
