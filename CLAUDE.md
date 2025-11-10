@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 5 completada (CRUD + Variantes + Imágenes), FASE 6 completada. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa.
+**Estado actual**: FASE 5, 6 y 7 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar.
 
 ---
 
@@ -74,7 +74,14 @@ src/app/
 │   │   │       ├── order-detail.component.ts
 │   │   │       ├── order-detail.component.html
 │   │   │       └── order-detail.component.css
-│   │   └── users/             # TODO FASE 7
+│   │   └── users/             # ✅ FASE 7: Gestión completa de usuarios
+│   │   │   ├── admin-users.component.ts      # Componente principal con tabla
+│   │   │   ├── admin-users.component.html    # Template con filtros y paginación
+│   │   │   ├── admin-users.component.css     # Estilos con Tailwind
+│   │   │   └── user-detail/                  # Subcomponente de detalle
+│   │   │       ├── user-detail.component.ts
+│   │   │       ├── user-detail.component.html
+│   │   │       └── user-detail.component.css
 │   ├── auth/                  # Autenticación
 │   │   └── login/
 │   │       ├── login.component.ts     # ✅ Componente de login
@@ -89,10 +96,14 @@ src/app/
 │   ├── utils/
 │   │   └── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
 │   ├── components/            # Componentes reutilizables
-│   │   └── image-upload/              # ✅ FASE 5 bis: Upload de imágenes
-│   │       ├── image-upload.component.ts
-│   │       ├── image-upload.component.html
-│   │       └── image-upload.component.css
+│   │   ├── image-upload/              # ✅ FASE 5 bis: Upload de imágenes
+│   │   │   ├── image-upload.component.ts
+│   │   │   ├── image-upload.component.html
+│   │   │   └── image-upload.component.css
+│   │   └── avatar-overlay/            # ✅ FASE 7: Overlay de avatar
+│   │       ├── avatar-overlay.component.ts
+│   │       ├── avatar-overlay.component.html
+│   │       └── avatar-overlay.component.css
 │   └── pipes/                 # TODO: Pipes personalizados
 │
 ├── app.config.ts              # Configuración global (providers, interceptors)
@@ -947,11 +958,98 @@ console.log(payload); // { sub, email, role, exp }
 - [x] Confirmación antes de cambiar estado
 - [x] Navegación lista ↔ detalle
 
-### FASE 7: Gestión de Usuarios (Admin)
-- [ ] Lista de usuarios con paginación
-- [ ] Cambiar rol de usuario
-- [ ] Activar/desactivar usuarios
-- [ ] Vista detalle de usuario
+### ✅ FASE 7: Gestión de Usuarios (Admin) (COMPLETADA)
+
+#### Backend
+- [x] Endpoint GET /users - Lista paginada con filtros (role, status, search)
+- [x] Endpoint GET /users/:id - Detalle de usuario
+- [x] Endpoint PATCH /users/:id - Actualizar usuario (status, phone)
+- [x] Endpoint PATCH /users/:id/avatar - Upload de avatar a Cloudinary
+- [x] Endpoint GET /auth/me - Retorna usuario completo desde BD (incluye avatar)
+- [x] UserMapper transforma `_id` a `id` para compatibilidad con frontend
+- [x] Validaciones: tipo de archivo (JPEG/PNG/WebP), tamaño máximo (2MB)
+- [x] Eliminación automática de avatar anterior en Cloudinary al subir uno nuevo
+
+#### Frontend - AdminUsersComponent
+- [x] Tabla responsive con columnas:
+  - Avatar (imagen o iniciales), Nombre, Email, Rol, Estado, Fecha registro
+- [x] Filtros:
+  - Rol (Admin/Usuario)
+  - Estado (Activo/Inactivo)
+  - Búsqueda por nombre, apellido o email
+- [x] Paginación server-side (lazy loading)
+- [x] Botón "Ver Detalle" que abre dialog modal
+- [x] Tags con colores según rol y estado
+- [x] Sincronización con AuthService cuando se edita el usuario actual logueado
+
+#### Frontend - UserDetailComponent
+- [x] Modal con toda la información del usuario:
+  - Avatar ampliado (clickeable)
+  - Información personal (nombre, email, teléfono)
+  - Rol (read-only, tag visual)
+  - Estado (editable con dropdown)
+  - Teléfono (editable con input)
+  - Email verificado (visual)
+  - Fecha de último login y registro
+  - ID técnico (código copiable)
+- [x] Edición acumulativa:
+  - Cambios se acumulan localmente
+  - Botón "Guardar Cambios" solo se habilita si hay cambios pendientes
+  - ConfirmDialog muestra lista detallada de cambios antes de guardar
+- [x] Avatar management:
+  - Click en avatar → Overlay fullscreen con imagen ampliada
+  - Botón "Cambiar Avatar" en overlay
+  - Preview inmediato de nueva imagen seleccionada
+  - Validaciones frontend (tipo, tamaño)
+  - Upload se ejecuta junto con otros cambios al hacer "Guardar Cambios"
+- [x] Manejo de errores con toasts descriptivos
+- [x] Computed signal `hasChanges()` detecta cambios pendientes
+- [x] Effect sincroniza valores editables cuando cambia el usuario
+
+#### Shared Components
+- [x] AvatarOverlayComponent (reutilizable):
+  - Overlay fullscreen con backdrop oscuro
+  - Muestra avatar ampliado (imagen o iniciales)
+  - Preview de nueva imagen antes de guardar
+  - Validaciones de archivo (tipo, tamaño)
+  - Botones: "Cambiar Avatar", "Cerrar"
+  - Animaciones suaves (fadeIn, scaleIn)
+  - Responsive design
+  - Emite eventos: `avatarSelected`, `validationError`
+
+#### AuthService Enhancements
+- [x] Método `getCurrentUser()`:
+  - Llama a GET /auth/me para obtener usuario completo
+  - Actualiza `currentUserSignal` automáticamente
+  - Se usa en `initializeAuth()` al recargar la página
+  - Se usa después de `refresh()` para sincronizar datos
+- [x] Método `updateCurrentUser(updatedUser)`:
+  - Actualiza signal solo si es el mismo usuario (por ID)
+  - Usado cuando admin edita su propio perfil
+  - Sincroniza header automáticamente
+- [x] initializeAuth() mejorado:
+  - Ya no decodifica solo el JWT (datos incompletos)
+  - Ahora llama a `/auth/me` para obtener datos completos (avatar, nombres, etc.)
+  - Restaura sesión con información completa al recargar
+
+#### AdminLayout Integration
+- [x] Avatar en header muestra imagen de BD si existe
+- [x] Fallback a iniciales si no hay avatar
+- [x] Actualización reactiva al editar perfil:
+  - AdminUsersComponent detecta si el usuario editado es el actual
+  - Llama a `authService.updateCurrentUser()`
+  - Header se actualiza instantáneamente sin reload
+- [x] Persistencia: Avatar se mantiene después de recargar (viene de BD vía `/auth/me`)
+
+#### UX Features
+- [x] Confirmación con vista previa de cambios antes de guardar
+- [x] Formato de confirmación con bullets indentados
+- [x] CSS `white-space: pre-line` para saltos de línea en ConfirmDialog
+- [x] Dialog se cierra automáticamente después de guardar exitosamente
+- [x] Loading states durante guardado
+- [x] Toasts descriptivos para todas las operaciones
+- [x] Avatar clickeable con hover effect (scale 1.05)
+- [x] Sin logs innecesarios en producción
 
 ### FASE 8: Catálogo Público (User)
 - [ ] Lista de productos (grid/list view)
@@ -1032,4 +1130,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-03 (FASE 5 completada con gestión de variantes e imágenes; FASE 6 completada)
+**Última actualización**: 2025-11-09 (FASE 7 completada: Gestión de usuarios con avatar upload, edición inline, y sincronización con AuthService)

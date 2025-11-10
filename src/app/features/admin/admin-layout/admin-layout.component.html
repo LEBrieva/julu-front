@@ -28,7 +28,8 @@
         </div>
 
         <p-avatar
-          [label]="getUserInitials()"
+          [image]="user.avatar"
+          [label]="!user.avatar ? getUserInitials() : undefined"
           shape="circle"
         />
 

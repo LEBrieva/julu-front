@@ -155,18 +155,11 @@ export class AuthService {
         console.log('🔄 Token renovado');
         localStorage.setItem('accessToken', response.accessToken);
 
-        // ⭐ Actualizar el signal del usuario decodificando el token
-        const payload = this.decodeToken(response.accessToken);
-        if (payload) {
-          const user: User = {
-            id: payload.sub,
-            email: payload.email,
-            role: payload.role,
-            status: UserStatus.ACTIVE // Asumimos que está activo
-          };
-          this.currentUserSignal.set(user);
-          console.log('✅ Usuario sincronizado después del refresh:', user.email);
-        }
+        // ⭐ Después de renovar el token, obtener usuario completo
+        this.getCurrentUser().subscribe({
+          next: () => console.log('✅ Usuario sincronizado después del refresh'),
+          error: () => console.log('⚠️ Error al sincronizar usuario después del refresh')
+        });
       }),
       catchError(error => {
         console.error('❌ Error al renovar token:', error);
@@ -176,6 +169,45 @@ export class AuthService {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Obtener el usuario actual completo desde el backend
+   *
+   * Llama a GET /auth/me para obtener todos los datos del usuario (avatar, nombres, etc.)
+   * Útil para restaurar sesión al recargar la página
+   */
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(
+      `${this.apiUrl}/auth/me`,
+      { withCredentials: true }
+    ).pipe(
+      tap(user => {
+        this.currentUserSignal.set(user);
+      }),
+      catchError(error => {
+        console.error('❌ Error al obtener usuario actual:', error);
+        this.clearSession();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Actualizar el usuario actual en el signal
+   *
+   * Útil cuando se editan datos del perfil (avatar, nombre, teléfono, etc.)
+   * Solo actualiza si es el mismo usuario (por ID)
+   *
+   * @param updatedUser Usuario actualizado desde el backend
+   */
+  updateCurrentUser(updatedUser: User): void {
+    const currentUser = this.currentUser();
+
+    // Solo actualizar si es el mismo usuario (por ID)
+    if (currentUser?.id === updatedUser.id) {
+      this.currentUserSignal.set(updatedUser);
+    }
   }
 
   /**
@@ -372,21 +404,19 @@ export class AuthService {
         }
       });
     } else {
-      console.log('Token válido, sesión activa');
-      // Decodificar el token para restaurar el user en el signal
-      const payload = this.decodeToken(token);
-      if (payload) {
-        // Crear un objeto User mínimo desde el payload
-        const user: User = {
-          id: payload.sub,
-          email: payload.email,
-          role: payload.role,
-          status: UserStatus.ACTIVE // Asumimos que está activo
-        };
-        this.currentUserSignal.set(user);
-        // Iniciar silent refresh
-        this.startSilentRefresh();
-      }
+      console.log('Token válido, restaurando sesión...');
+      // Obtener usuario completo desde el backend (incluye avatar, nombres, etc.)
+      this.getCurrentUser().subscribe({
+        next: () => {
+          console.log('✅ Sesión restaurada con datos completos');
+          // Iniciar silent refresh
+          this.startSilentRefresh();
+        },
+        error: () => {
+          console.log('❌ No se pudo restaurar la sesión');
+          this.clearSession();
+        }
+      });
     }
   }
 }

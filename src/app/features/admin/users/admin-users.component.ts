@@ -14,6 +14,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 // Services & Models
 import { UserService } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { User, UserRole, UserStatus, FilterUserDto } from '../../../core/models/user.model';
 
 // Components
@@ -51,6 +52,7 @@ import { UserDetailComponent } from './user-detail/user-detail.component';
 })
 export class AdminUsersComponent implements OnInit {
   private userService = inject(UserService);
+  private authService = inject(AuthService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
@@ -179,9 +181,16 @@ export class AdminUsersComponent implements OnInit {
    * Actualiza un usuario en la lista cuando se edita desde el dialog
    */
   onUserUpdated(updatedUser: User): void {
+    // Actualizar en la lista
     this.users.update(users =>
       users.map(u => u.id === updatedUser.id ? updatedUser : u)
     );
+
+    // Si el usuario actualizado es el usuario actual logueado, sincronizar AuthService
+    const currentUser = this.authService.currentUser();
+    if (currentUser?.id === updatedUser.id) {
+      this.authService.updateCurrentUser(updatedUser);
+    }
   }
 
   /**
