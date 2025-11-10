@@ -14,14 +14,16 @@ import { adminGuard } from './core/guards/admin.guard';
  * Los componentes se cargan mediante import() dinámico para optimizar el bundle
  */
 export const routes: Routes = [
-  // Ruta por defecto: redirect a productos
+  // ========== RUTAS PÚBLICAS ==========
+
+  // Home / Landing page
   {
     path: '',
-    redirectTo: '/products',
-    pathMatch: 'full'
+    loadComponent: () =>
+      import('./features/home/home.component').then(
+        (m) => m.HomeComponent
+      )
   },
-
-  // ========== RUTAS PÚBLICAS ==========
 
   // Login
   {
@@ -39,6 +41,16 @@ export const routes: Routes = [
       import('./features/products/product-list.component').then(
         (m) => m.ProductListComponent
       )
+  },
+
+  // Detalle de producto (público) - TODO FASE 8c
+  {
+    path: 'products/:id',
+    loadComponent: () =>
+      import('./features/products/product-list.component').then(
+        (m) => m.ProductListComponent
+      )
+    // ⭐ Placeholder - reemplazar con ProductDetailComponent en FASE 8c
   },
 
   // ========== RUTAS ADMIN (authGuard + adminGuard) ==========
@@ -66,6 +78,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: '/products' // Si la ruta no existe, ir a productos
+    redirectTo: '/' // Si la ruta no existe, ir a home
   }
 ];

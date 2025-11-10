@@ -1,0 +1,63 @@
+<p-card
+  (click)="navigateToDetail()"
+  class="product-card cursor-pointer hover:shadow-lg transition-shadow duration-300"
+>
+  <!-- Imagen del producto -->
+  <div class="relative mb-4">
+    @if (productImage()) {
+      <img
+        [src]="productImage()"
+        [alt]="product().name"
+        class="w-full h-64 object-cover rounded-lg"
+      />
+    } @else {
+      <!-- Placeholder si no hay imagen -->
+      <div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+        <i class="pi pi-image text-6xl text-gray-400"></i>
+      </div>
+    }
+
+    <!-- Badge "Destacado" si el producto está marcado -->
+    @if (product().destacado) {
+      <p-tag
+        value="Destacado"
+        severity="warn"
+        icon="pi pi-star-fill"
+        class="absolute top-2 right-2"
+      ></p-tag>
+    }
+  </div>
+
+  <!-- Información del producto -->
+  <div class="flex flex-col gap-2">
+    <!-- Nombre -->
+    <h3 class="text-lg font-semibold text-gray-800 line-clamp-2">
+      {{ product().name }}
+    </h3>
+
+    <!-- Código -->
+    <p class="text-sm text-gray-500">
+      Código: {{ product().code }}
+    </p>
+
+    <!-- Precio -->
+    <div class="flex items-center justify-between mt-2">
+      <span class="text-2xl font-bold text-primary-600">
+        {{ formattedPrice() }}
+      </span>
+    </div>
+
+    <!-- Tags (opcional) -->
+    @if (product().tags?.length) {
+      <div class="flex flex-wrap gap-1 mt-2">
+        @for (tag of product().tags!; track tag) {
+          <p-tag
+            [value]="tag"
+            severity="secondary"
+            class="text-xs"
+          ></p-tag>
+        }
+      </div>
+    }
+  </div>
+</p-card>

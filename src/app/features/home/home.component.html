@@ -1,0 +1,96 @@
+<div class="home-container">
+  <!-- Hero Section -->
+  <app-hero-section></app-hero-section>
+
+  <!-- Secciones del Catálogo -->
+  <section class="catalog-sections py-12 px-4 md:px-8 max-w-7xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800">
+      Explorá por Estilo
+    </h2>
+
+    <!-- Grid responsive de secciones -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (section of catalogSections; track section.title) {
+        <app-category-card
+          [title]="section.title"
+          [imageUrl]="section.imageUrl"
+          [queryParams]="section.queryParams"
+        ></app-category-card>
+      }
+    </div>
+  </section>
+
+  <!-- Productos Destacados -->
+  <section class="featured-products py-12 px-4 md:px-8 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-center mb-8">
+        <i class="pi pi-star-fill text-yellow-500 text-3xl mr-3"></i>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
+          Productos Destacados
+        </h2>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="flex justify-center items-center py-12">
+          <p-progressSpinner
+            [style]="{ width: '50px', height: '50px' }"
+            strokeWidth="4"
+          ></p-progressSpinner>
+        </div>
+      }
+
+      <!-- Error -->
+      @else if (error()) {
+        <div class="text-center py-12">
+          <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+          <p class="text-gray-600">{{ error() }}</p>
+        </div>
+      }
+
+      <!-- Carousel de productos -->
+      @else if (productosDestacados().length > 0) {
+        <p-carousel
+          [value]="productosDestacados()"
+          [numVisible]="4"
+          [numScroll]="1"
+          [circular]="true"
+          [autoplayInterval]="5000"
+          [responsiveOptions]="carouselResponsiveOptions"
+        >
+          <ng-template let-product pTemplate="item">
+            <div class="px-3">
+              <app-product-card [product]="product"></app-product-card>
+            </div>
+          </ng-template>
+        </p-carousel>
+      }
+
+      <!-- Empty state -->
+      @else {
+        <div class="text-center py-12">
+          <i class="pi pi-inbox text-gray-400 text-6xl mb-4"></i>
+          <p class="text-gray-600 text-lg">
+            No hay productos destacados por el momento
+          </p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Footer placeholder (newsletter, etc.) -->
+  <section class="footer-section py-12 px-4 md:px-8 bg-gray-800 text-white">
+    <div class="max-w-7xl mx-auto text-center">
+      <h3 class="text-2xl font-bold mb-4">
+        Suscribite a nuestro newsletter
+      </h3>
+      <p class="text-gray-300 mb-6">
+        Recibí las últimas novedades y ofertas exclusivas
+      </p>
+      <!-- TODO: Implementar formulario de newsletter en fase futura -->
+      <p class="text-sm text-gray-400">
+        Próximamente...
+      </p>
+    </div>
+  </section>
+</div>

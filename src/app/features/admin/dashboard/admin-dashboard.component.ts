@@ -51,8 +51,8 @@ import { CommonModule } from '@angular/common';
               <i class="pi pi-check-circle"></i>
               <span>FASE 6: Gestión de Órdenes</span>
             </li>
-            <li>
-              <i class="pi pi-circle"></i>
+            <li class="completed">
+              <i class="pi pi-check-circle"></i>
               <span>FASE 7: Gestión de Usuarios</span>
             </li>
             <li>

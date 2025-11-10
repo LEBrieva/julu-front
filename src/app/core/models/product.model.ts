@@ -170,6 +170,7 @@ export interface Product {
   category: ProductCategory;
   style: ProductStyle;
   tags?: string[];
+  destacado?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -189,6 +190,7 @@ export interface ProductListItem {
   totalVariants: number;
   totalStock: number;
   tags?: string[];
+  destacado?: boolean;
 }
 
 // ===========================
@@ -211,6 +213,7 @@ export interface CreateProductDto {
   style: ProductStyle;
   variants: CreateProductVariantDto[]; // Array de variantes (al menos 1)
   tags?: string[];
+  destacado?: boolean;
 }
 
 /**
@@ -238,6 +241,7 @@ export interface UpdateProductDto {
   tags?: string[];
   images?: string[];
   featuredImageIndex?: number;
+  destacado?: boolean;
 }
 
 /**

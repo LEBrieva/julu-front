@@ -1052,16 +1052,467 @@ console.log(payload); // { sub, email, role, exp }
 - [x] Sin logs innecesarios en producción
 
 ### FASE 8: Catálogo Público (User)
-- [ ] Lista de productos (grid/list view)
-- [ ] Filtros por categoría, precio, búsqueda
-- [ ] Vista detalle de producto
-- [ ] Agregar al carrito
+
+Dividida en 3 subfases para desarrollo incremental:
+
+#### FASE 8a: Home Landing Page
+- [ ] **Backend - Productos Destacados**:
+  - Agregar campo `featured: boolean` al modelo Product (default: false)
+  - Endpoint `GET /products/featured` - Retorna productos destacados activos
+  - Actualizar DTOs (CreateProductDto, UpdateProductDto)
+- [ ] **HomeComponent** (`/`):
+  - Hero section (banner principal con CTA "Explorar Catálogo")
+  - Grid de categorías (6 cards clickeables que filtran a `/shop?category=X`)
+  - Carousel de productos destacados (PrimeNG Carousel, hasta 12 productos)
+  - Footer con newsletter placeholder
+- [ ] **Componentes Reutilizables**:
+  - `HeroSectionComponent` - Banner principal responsive
+  - `CategoryCardComponent` - Card de categoría con imagen + nombre
+  - `ProductCardComponent` (shared) - Tarjeta de producto con imagen, nombre, precio base, badge "Destacado"
+- [ ] **Actualizar ProductListComponent**:
+  - Convertir de placeholder a catálogo público real
+  - Grid responsive de productos usando `ProductCardComponent`
+  - Búsqueda simple por nombre
+  - Integración con `getPublicCatalog()`
+- [ ] **Admin Products - Featured Toggle**:
+  - Columna "Destacado" en tabla con badge visual (star icon)
+  - Click en badge → toggle featured status (con ConfirmDialog)
+  - Validación: Máximo 12 productos destacados
+  - InputSwitch en product-form (modo editar)
+- [ ] **Rutas**:
+  - Cambiar redirect raíz de `''` a `'/'` (HomeComponent)
+  - Mantener `/products` para catálogo completo
+  - Crear placeholder `/products/:id` para detalle (FASE 8c)
+- [ ] **Assets**:
+  - Crear carpeta `src/assets/images/`
+  - Imagen hero banner placeholder
+  - 6 imágenes de categorías (remeras, pantalones, chaquetas, zapatillas, shorts, vestidos)
+
+#### FASE 8b: Shop Catalog (Catálogo Completo con Filtros)
+- [ ] **ShopComponent** (`/shop`):
+  - Grid/List toggle view (PrimeNG DataView)
+  - Sidebar con filtros avanzados:
+    - Categoría (multiselect)
+    - Rango de precios (PrimeNG Slider)
+    - Tallas disponibles (P, M, G, GG)
+    - Colores disponibles (chips visuales)
+    - Estado (activo/inactivo - solo admin)
+  - Barra de búsqueda global
+  - Ordenamiento (más nuevo, precio asc/desc, nombre A-Z)
+  - Paginación server-side
+  - Empty states cuando no hay resultados
+- [ ] **Filtros en Mobile**:
+  - Botón "Filtros" que abre PrimeNG Sidebar
+  - Botón "Aplicar" y "Limpiar Filtros"
+  - Badge con cantidad de filtros activos
+- [ ] **ProductService - Métodos de filtrado**:
+  - Actualizar `getPublicCatalog()` para soportar múltiples filtros
+  - Query params: `?category=remeras&minPrice=1000&maxPrice=5000&sizes=P,M&colors=black,white&sort=price_asc`
+
+#### FASE 8c: Product Detail (Detalle de Producto)
+- [ ] **ProductDetailComponent** (`/products/:id`):
+  - Galería de imágenes (PrimeNG Galleria con thumbnails)
+  - Información del producto:
+    - Nombre, código, descripción
+    - Precio base (o rango si las variantes varían)
+    - Categoría, estilo, tags
+  - **Selector de Variantes**:
+    - Selector de talla (P, M, G, GG) con badges
+    - Selector de color (chips con hex real)
+    - Precio y stock de la variante seleccionada
+    - Validación: Deshabilitar combinaciones sin stock
+  - **Agregar al Carrito**:
+    - Input de cantidad (PrimeNG InputNumber)
+    - Botón "Agregar al Carrito" (deshabilitado si sin stock)
+    - Toast de confirmación al agregar
+  - **Productos Relacionados**:
+    - Carousel de productos de la misma categoría
+    - Usando `ProductCardComponent`
+- [ ] **Breadcrumbs**:
+  - Home > [Categoría] > [Nombre Producto]
+  - Usando PrimeNG Breadcrumb
+- [ ] **Responsive Design**:
+  - Desktop: Galería izquierda (60%), info derecha (40%)
+  - Mobile: Stack vertical (galería arriba, info abajo)
+- [ ] **SEO y Meta Tags**:
+  - Title dinámico: `[Nombre Producto] - Tu Tienda`
+  - Meta description con descripción del producto
+  - Open Graph tags para redes sociales
+
+---
 
 ### FASE 9: Carrito y Checkout (User)
-- [ ] Vista del carrito
-- [ ] Modificar cantidades
-- [ ] Calcular totales
-- [ ] Proceso de checkout (crear orden)
+
+Sistema de carrito persistente con soporte para usuarios anónimos y autenticados.
+
+#### Estrategia: localStorage + Merge al Login
+
+**Arquitectura**:
+- **Usuario ANÓNIMO**: Carrito guardado en `localStorage` (frontend)
+- **Usuario AUTENTICADO**: Carrito guardado en BD (backend)
+- **Al hacer LOGIN**: Merge automático de carrito anónimo → carrito de usuario
+
+#### Backend - Endpoints de Carrito
+
+```typescript
+// Gestión de carrito (requiere autenticación)
+GET    /cart                    // Obtener carrito del usuario actual
+POST   /cart/items              // Agregar 1 item al carrito
+POST   /cart/items/batch        // ⭐ Agregar múltiples items (para merge)
+PATCH  /cart/items/:itemId      // Actualizar cantidad de item
+DELETE /cart/items/:itemId      // Remover item del carrito
+DELETE /cart                    // Vaciar carrito completo
+
+// Modelos
+interface CartItem {
+  id: string;                   // ID del item en el carrito
+  productId: string;
+  variantSku: string;           // SKU de la variante (ej: "REM-P-BLK")
+  quantity: number;
+  price: number;                // Precio snapshot al agregar
+  productSnapshot: {            // Info del producto al momento de agregar
+    name: string;
+    code: string;
+    image?: string;
+  };
+}
+
+interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  totalItems: number;           // Suma de quantities
+  subtotal: number;             // Suma de (price * quantity)
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Lógica de Merge**:
+```typescript
+// POST /cart/items/batch
+// Body: { items: [{ productId, variantSku, quantity }, ...] }
+// Backend:
+// - Si el usuario ya tiene un carrito:
+//   - Para cada item del batch:
+//     - Si la variante ya existe en el carrito: quantity += batch.quantity
+//     - Si no existe: agregar nuevo item
+// - Si no tiene carrito: crear nuevo con todos los items
+// - Respuesta: Cart completo actualizado
+```
+
+#### Frontend - CartService
+
+**Signals y Estado**:
+```typescript
+@Injectable({ providedIn: 'root' })
+export class CartService {
+  private authService = inject(AuthService);
+
+  // Signal para carrito de usuario anónimo (localStorage)
+  private guestCartSignal = signal<GuestCartItem[]>(this.loadGuestCart());
+
+  // Signal para carrito de usuario autenticado (BD)
+  private userCartSignal = signal<Cart | null>(null);
+
+  // Computed: muestra guest cart si anónimo, user cart si autenticado
+  readonly cart = computed(() =>
+    this.authService.isAuthenticated()
+      ? this.userCartSignal()
+      : this.guestCartSignal()
+  );
+
+  readonly totalItems = computed(() => {
+    const currentCart = this.cart();
+    if (!currentCart) return 0;
+
+    if (this.authService.isAuthenticated()) {
+      return (currentCart as Cart).totalItems;
+    } else {
+      return (currentCart as GuestCartItem[])
+        .reduce((sum, item) => sum + item.quantity, 0);
+    }
+  });
+
+  readonly subtotal = computed(() => {
+    const currentCart = this.cart();
+    if (!currentCart) return 0;
+
+    if (this.authService.isAuthenticated()) {
+      return (currentCart as Cart).subtotal;
+    } else {
+      return (currentCart as GuestCartItem[])
+        .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+  });
+}
+```
+
+**Métodos Principales**:
+```typescript
+// Cargar carrito de localStorage
+private loadGuestCart(): GuestCartItem[] {
+  const stored = localStorage.getItem('guest_cart');
+  return stored ? JSON.parse(stored) : [];
+}
+
+// Guardar carrito en localStorage
+private saveGuestCart(items: GuestCartItem[]): void {
+  localStorage.setItem('guest_cart', JSON.stringify(items));
+  this.guestCartSignal.set(items);
+}
+
+// Agregar item al carrito
+addItem(productId: string, variantSku: string, quantity: number): Observable<void> {
+  if (this.authService.isAuthenticated()) {
+    // Usuario autenticado → POST /cart/items
+    return this.http.post<Cart>('/cart/items', { productId, variantSku, quantity })
+      .pipe(
+        tap(cart => this.userCartSignal.set(cart)),
+        map(() => void 0)
+      );
+  } else {
+    // Usuario anónimo → actualizar localStorage
+    const currentCart = this.guestCartSignal();
+    const existingItem = currentCart.find(
+      item => item.variantSku === variantSku
+    );
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      // Necesitamos obtener info del producto primero
+      return this.productService.getPublicProductById(productId).pipe(
+        tap(product => {
+          const variant = product.variants.find(v => v.sku === variantSku);
+          const newItem: GuestCartItem = {
+            productId,
+            variantSku,
+            quantity,
+            price: variant.price,
+            productSnapshot: {
+              name: product.name,
+              code: product.code,
+              image: product.images?.[product.featuredImageIndex || 0]
+            }
+          };
+          this.saveGuestCart([...currentCart, newItem]);
+        }),
+        map(() => void 0)
+      );
+    }
+
+    this.saveGuestCart(currentCart);
+    return of(void 0);
+  }
+}
+
+// Merge de carrito anónimo al hacer login
+async mergeGuestCartOnLogin(): Promise<void> {
+  const guestItems = this.loadGuestCart();
+
+  if (guestItems.length === 0) {
+    // No hay items en carrito anónimo, solo cargar carrito de usuario
+    await firstValueFrom(this.loadUserCart());
+    return;
+  }
+
+  // Transformar guest items a formato de batch
+  const batchItems = guestItems.map(item => ({
+    productId: item.productId,
+    variantSku: item.variantSku,
+    quantity: item.quantity
+  }));
+
+  try {
+    // Enviar batch al backend
+    const mergedCart = await firstValueFrom(
+      this.http.post<Cart>('/cart/items/batch', { items: batchItems })
+    );
+
+    // Actualizar signal con carrito mergeado
+    this.userCartSignal.set(mergedCart);
+
+    // Limpiar localStorage
+    localStorage.removeItem('guest_cart');
+    this.guestCartSignal.set([]);
+
+    // Toast de éxito
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Carrito Sincronizado',
+      detail: `Se agregaron ${guestItems.length} productos a tu carrito`
+    });
+  } catch (error) {
+    console.error('Error al mergear carrito:', error);
+    // En caso de error, mantener items en localStorage
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error al Sincronizar',
+      detail: 'No se pudo sincronizar tu carrito. Intenta nuevamente.'
+    });
+  }
+}
+
+// Cargar carrito de usuario desde BD
+loadUserCart(): Observable<Cart> {
+  return this.http.get<Cart>('/cart').pipe(
+    tap(cart => this.userCartSignal.set(cart))
+  );
+}
+
+// Actualizar cantidad
+updateQuantity(itemId: string, quantity: number): Observable<void> {
+  if (this.authService.isAuthenticated()) {
+    return this.http.patch<Cart>(`/cart/items/${itemId}`, { quantity })
+      .pipe(
+        tap(cart => this.userCartSignal.set(cart)),
+        map(() => void 0)
+      );
+  } else {
+    // Guest cart: actualizar localStorage
+    const currentCart = this.guestCartSignal();
+    const item = currentCart.find(i => i.variantSku === itemId);
+    if (item) {
+      item.quantity = quantity;
+      this.saveGuestCart(currentCart);
+    }
+    return of(void 0);
+  }
+}
+
+// Remover item
+removeItem(itemId: string): Observable<void> {
+  if (this.authService.isAuthenticated()) {
+    return this.http.delete<Cart>(`/cart/items/${itemId}`)
+      .pipe(
+        tap(cart => this.userCartSignal.set(cart)),
+        map(() => void 0)
+      );
+  } else {
+    const currentCart = this.guestCartSignal();
+    const filtered = currentCart.filter(item => item.variantSku !== itemId);
+    this.saveGuestCart(filtered);
+    return of(void 0);
+  }
+}
+
+// Vaciar carrito
+clearCart(): Observable<void> {
+  if (this.authService.isAuthenticated()) {
+    return this.http.delete<void>('/cart');
+  } else {
+    localStorage.removeItem('guest_cart');
+    this.guestCartSignal.set([]);
+    return of(void 0);
+  }
+}
+```
+
+**Integración con AuthService**:
+```typescript
+// En AuthService.login() - después de login exitoso
+login(email: string, password: string): Observable<LoginResponse> {
+  return this.http.post<LoginResponse>('/auth/login', { email, password })
+    .pipe(
+      tap(response => {
+        localStorage.setItem('accessToken', response.accessToken);
+        this.currentUserSignal.set(response.user);
+      }),
+      switchMap(() => {
+        // ⭐ Mergear carrito anónimo
+        return from(this.cartService.mergeGuestCartOnLogin()).pipe(
+          map(() => response)
+        );
+      })
+    );
+}
+```
+
+#### Frontend - CartComponent (`/cart`)
+
+**Funcionalidades**:
+- [ ] Lista de items del carrito con:
+  - Imagen del producto (featuredImage)
+  - Nombre, código, variante (talla + color)
+  - Precio unitario
+  - Input de cantidad (con +/- buttons)
+  - Subtotal por item (precio × cantidad)
+  - Botón eliminar item
+- [ ] Empty state: "Tu carrito está vacío" con CTA a `/shop`
+- [ ] Resumen del carrito (sidebar en desktop, bottom en mobile):
+  - Subtotal
+  - Envío (calculado o "Gratis")
+  - Descuentos (si aplica)
+  - **Total**
+  - Botón "Proceder al Checkout" (deshabilitado si carrito vacío)
+- [ ] Loading states al actualizar cantidades
+- [ ] Confirmación al eliminar item (ConfirmDialog)
+- [ ] Validación de stock:
+  - Al cambiar cantidad, verificar stock disponible
+  - Si producto agotado: mostrar badge "Sin Stock" y deshabilitar checkout
+
+#### Frontend - Navbar Integration
+
+**Badge de Carrito**:
+```typescript
+// En navbar/header
+export class NavbarComponent {
+  private cartService = inject(CartService);
+
+  // Reactive badge count
+  cartItemCount = this.cartService.totalItems;
+}
+```
+
+```html
+<!-- Badge animado con cantidad de items -->
+<a routerLink="/cart" class="relative">
+  <i class="pi pi-shopping-cart text-2xl"></i>
+  @if (cartItemCount() > 0) {
+    <span class="absolute -top-2 -right-2 bg-red-500 text-white
+                 rounded-full w-5 h-5 flex items-center justify-center
+                 text-xs font-bold">
+      {{ cartItemCount() }}
+    </span>
+  }
+</a>
+```
+
+#### Checkout Flow (simplificado)
+
+- [ ] **CheckoutComponent** (`/checkout`):
+  - Guard: requiere autenticación (`authGuard`)
+  - Guard: requiere carrito no vacío (custom guard)
+  - **Step 1: Revisión de Productos**:
+    - Lista de items del carrito (read-only)
+    - Resumen de totales
+  - **Step 2: Dirección de Envío**:
+    - Formulario con validaciones (calle, número, ciudad, CP, etc.)
+    - Opción: Usar dirección guardada (si existe en perfil)
+  - **Step 3: Método de Pago**:
+    - Radio buttons: Efectivo / Transferencia / Mercado Pago (placeholder)
+    - Para MVP: Solo "Efectivo" habilitado
+  - **Step 4: Confirmación**:
+    - Resumen completo
+    - Botón "Confirmar Pedido"
+    - POST `/orders` → crea orden desde carrito
+    - Redirect a `/orders/:orderId/success`
+- [ ] **OrderSuccessComponent** (`/orders/:id/success`):
+  - Mensaje de éxito: "¡Pedido realizado!"
+  - Número de orden
+  - Resumen de la compra
+  - Estado inicial: PENDING
+  - CTA: "Ver mis pedidos" → `/profile/orders`
+
+#### Testing de Merge Flow
+
+**Escenarios a validar**:
+1. Usuario anónimo agrega productos → localStorage actualizado
+2. Usuario anónimo hace login → carrito se mergea correctamente
+3. Usuario con carrito existente hace login con items anónimos → cantidades se suman
+4. Usuario autenticado agrega productos → BD actualizada, localStorage vacío
+5. Usuario cierra sesión → carrito de BD no se pierde, localStorage limpio
 
 ---
 

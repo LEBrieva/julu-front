@@ -1,0 +1,36 @@
+/* Home - Estilos */
+
+.home-container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.catalog-sections {
+  background-color: #ffffff;
+}
+
+.featured-products {
+  min-height: 400px;
+}
+
+.footer-section {
+  margin-top: auto;
+}
+
+/* Ajustes del carousel */
+::ng-deep .p-carousel .p-carousel-content {
+  padding: 1rem 0;
+}
+
+::ng-deep .p-carousel .p-carousel-indicators {
+  padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .catalog-sections,
+  .featured-products {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

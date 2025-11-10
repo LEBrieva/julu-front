@@ -1,0 +1,23 @@
+<div
+  (click)="navigateToSection()"
+  class="category-card cursor-pointer hover:shadow-xl transition-all duration-300"
+>
+  <!-- Imagen de la sección -->
+  <div class="category-image-container relative overflow-hidden rounded-lg">
+    <img
+      [src]="imageUrl()"
+      [alt]="title()"
+      class="category-image w-full h-48 md:h-64 object-cover"
+    />
+
+    <!-- Overlay oscuro en hover -->
+    <div class="category-overlay absolute inset-0 bg-black opacity-0 hover:opacity-30 transition-opacity duration-300"></div>
+
+    <!-- Título de la sección (overlay) -->
+    <div class="category-name absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+      <h3 class="text-white text-xl md:text-2xl font-bold text-center">
+        {{ title() }}
+      </h3>
+    </div>
+  </div>
+</div>

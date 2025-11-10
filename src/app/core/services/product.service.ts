@@ -256,4 +256,34 @@ export class ProductService {
       { index: imageIndex }
     );
   }
+
+  // ===========================
+  // PRODUCTOS DESTACADOS
+  // ===========================
+
+  /**
+   * Obtiene los productos destacados para mostrar en el home (PÚBLICO)
+   * Endpoint: GET /products/destacados
+   *
+   * Retorna hasta 12 productos marcados como destacados y activos,
+   * ordenados por fecha de actualización (más recientes primero).
+   *
+   * @returns Array de productos destacados (máximo 12)
+   */
+  getProductosDestacados(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/destacados`);
+  }
+
+  /**
+   * Cuenta cuántos productos están marcados como destacados (ADMIN)
+   * Endpoint: GET /products/destacados/count
+   *
+   * Útil para validar antes de marcar un nuevo producto como destacado
+   * (límite: 12 productos destacados).
+   *
+   * @returns Objeto con la cantidad de productos destacados
+   */
+  countDestacados(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.apiUrl}/destacados/count`);
+  }
 }
