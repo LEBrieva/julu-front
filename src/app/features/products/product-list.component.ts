@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, HostListener, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -60,7 +60,10 @@ import { ActiveFiltersComponent } from '../../shared/components/active-filters/a
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
-export class ProductListComponent implements OnInit, OnDestroy {
+export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
+  // ViewChild para acceder al header
+  @ViewChild('catalogHeader', { read: ElementRef }) catalogHeader?: ElementRef;
+
   // Services
   private productService = inject(ProductService);
   private router = inject(Router);
@@ -97,8 +100,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Sidebar state (mobile)
   sidebarVisible = signal<boolean>(false);
 
-  // Scroll state para FAB flotante
-  isScrolled = signal<boolean>(false);
+  // Header sticky state
+  isHeaderSticky = signal<boolean>(false);
+  private headerOffsetTop = 0;
 
   // Contador de filtros activos (para badge)
   activeFiltersCount = computed(() => {
@@ -125,9 +129,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const initialFilters = this.parseQueryParamsToFilters(initialParams);
     this.activeFilters.set(initialFilters);
 
-    // Inicializar estado de scroll
-    this.checkScrollPosition();
-
     // Cargar sortBy desde query params
     this.sortBy = initialParams['sortBy'] || 'newest';
 
@@ -151,8 +152,29 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
+  ngAfterViewInit(): void {
+    // Obtener la posición inicial del header
+    if (this.catalogHeader) {
+      setTimeout(() => {
+        const headerElement = this.catalogHeader?.nativeElement;
+        if (headerElement) {
+          this.headerOffsetTop = headerElement.offsetTop;
+        }
+      }, 0);
+    }
+  }
+
   ngOnDestroy(): void {
     // No hay subscriptions manuales para completar
+  }
+
+  /**
+   * Detecta scroll para hacer el header sticky
+   */
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+    this.isHeaderSticky.set(scrollPosition >= this.headerOffsetTop);
   }
 
   /**
@@ -348,20 +370,4 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  /**
-   * Verifica la posición del scroll
-   */
-  private checkScrollPosition(): void {
-    const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-    const shouldShow = scrollPosition > 50;
-    this.isScrolled.set(shouldShow);
-  }
-
-  /**
-   * Detecta scroll para mostrar/ocultar botón flotante de filtros
-   */
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    this.checkScrollPosition();
-  }
 }

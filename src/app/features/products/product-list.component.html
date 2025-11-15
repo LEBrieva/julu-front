@@ -1,18 +1,4 @@
 
-<!-- BOTÓN FLOTANTE DE FILTROS (solo aparece al hacer scroll en mobile) -->
-<button
-  class="floating-filter-btn"
-  [class.visible]="isScrolled()"
-  (click)="toggleSidebar()"
-  type="button"
->
-  <i class="pi pi-filter"></i>
-  <span>Filtros</span>
-  @if (activeFiltersCount() > 0) {
-    <span class="filter-badge">{{ activeFiltersCount() }}</span>
-  }
-</button>
-
 <div class="catalog-layout">
   <!-- DRAWER DE FILTROS (se abre desde izquierda) -->
   <p-drawer
@@ -55,22 +41,20 @@
   <!-- CONTENIDO PRINCIPAL (FULL WIDTH) -->
   <main class="catalog-content">
     <!-- HEADER CON CONTROLES -->
-    <div class="catalog-header">
+    <div #catalogHeader class="catalog-header" [class.is-sticky]="isHeaderSticky()">
       <!-- Fila 1: Botón Filtros + Título + Ordenamiento + Toggle View -->
       <div class="header-controls-row">
-        <!-- Botón de Filtros (con badge) - Se oculta cuando se hace scroll en mobile -->
+        <!-- Botón de Filtros (con badge) -->
         <p-button
           icon="pi pi-filter"
           label="Filtros"
           (onClick)="toggleSidebar()"
           class="filter-button"
-          [class.hidden-on-scroll]="isScrolled()"
           [badge]="activeFiltersCount() > 0 ? activeFiltersCount().toString() : undefined"
-          badgeClass="p-badge-info"
         />
 
         <!-- Título -->
-        <h1 class="page-title">Remeras</h1>
+        <h1 class="page-title">REMERAS</h1>
 
         <!-- Controles derechos -->
         <div class="header-right-controls">
@@ -97,15 +81,6 @@
           />
         </div>
       </div>
-
-      <!-- Fila 2: Contador de resultados -->
-      @if (!loading() && !error()) {
-        <div class="results-counter">
-          <span class="text-gray-600">
-            Mostrando {{ products().length }} de {{ totalRecords() }} remeras
-          </span>
-        </div>
-      }
     </div>
 
     <!-- LOADING STATE -->
