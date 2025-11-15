@@ -191,6 +191,8 @@ export interface ProductListItem {
   totalStock: number;
   tags?: string[];
   destacado?: boolean;
+  images?: string[];
+  featuredImageIndex?: number;
 }
 
 // ===========================
