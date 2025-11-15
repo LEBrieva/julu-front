@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -97,6 +97,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Sidebar state (mobile)
   sidebarVisible = signal<boolean>(false);
 
+  // Scroll state para FAB flotante
+  isScrolled = signal<boolean>(false);
+
   // Contador de filtros activos (para badge)
   activeFiltersCount = computed(() => {
     const filters = this.activeFilters();
@@ -121,6 +124,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const initialParams = this.activatedRoute.snapshot.queryParams;
     const initialFilters = this.parseQueryParamsToFilters(initialParams);
     this.activeFilters.set(initialFilters);
+
+    // Inicializar estado de scroll
+    this.checkScrollPosition();
 
     // Cargar sortBy desde query params
     this.sortBy = initialParams['sortBy'] || 'newest';
@@ -340,5 +346,22 @@ export class ProductListComponent implements OnInit, OnDestroy {
    */
   retryLoad(): void {
     this.loadProducts();
+  }
+
+  /**
+   * Verifica la posición del scroll
+   */
+  private checkScrollPosition(): void {
+    const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+    const shouldShow = scrollPosition > 50;
+    this.isScrolled.set(shouldShow);
+  }
+
+  /**
+   * Detecta scroll para mostrar/ocultar botón flotante de filtros
+   */
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    this.checkScrollPosition();
   }
 }
