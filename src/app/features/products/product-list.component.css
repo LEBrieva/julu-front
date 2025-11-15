@@ -1,22 +1,20 @@
-/* ===== LAYOUT PRINCIPAL ===== */
+/* ===== LAYOUT PRINCIPAL (FULL WIDTH) ===== */
 .catalog-layout {
-  @apply flex min-h-screen bg-gray-50;
+  @apply min-h-screen bg-gray-50;
 }
 
-/* ===== SIDEBAR DE FILTROS ===== */
-/* Desktop: Fixed sidebar */
-.filter-sidebar-desktop {
-  @apply hidden lg:block w-80 bg-white border-r border-gray-200 sticky top-0 h-screen overflow-y-auto;
-}
-
-/* Mobile: Fullscreen sidebar (PrimeNG Sidebar handles styles) */
-:host ::ng-deep .filter-sidebar-mobile {
+/* ===== DRAWER DE FILTROS ===== */
+:host ::ng-deep .filter-drawer {
   @apply w-full max-w-md;
 }
 
-/* ===== CONTENIDO PRINCIPAL ===== */
+.drawer-filters {
+  @apply flex flex-col gap-0;
+}
+
+/* ===== CONTENIDO PRINCIPAL (Full width - sin sidebar) ===== */
 .catalog-content {
-  @apply flex-1 p-4 lg:p-6;
+  @apply w-full max-w-screen-2xl mx-auto p-4 lg:p-6;
 }
 
 /* ===== HEADER ===== */
@@ -24,34 +22,32 @@
   @apply bg-white rounded-lg shadow-sm p-4 mb-4;
 }
 
-.header-top {
-  @apply flex items-center justify-between mb-4 lg:justify-center;
+/* Fila 1: Botón Filtros + Título + Ordenamiento + Toggle */
+.header-controls-row {
+  @apply flex items-center gap-3 flex-wrap;
 }
 
-.filter-button-mobile {
-  @apply lg:hidden;
+.filter-button {
+  @apply flex-shrink-0;
 }
 
 .page-title {
-  @apply text-2xl lg:text-3xl font-bold text-gray-800;
+  @apply text-2xl lg:text-3xl font-bold text-gray-800 flex-grow;
 }
 
-.header-controls {
-  @apply flex gap-3 items-center flex-wrap;
+.header-right-controls {
+  @apply flex items-center gap-2;
 }
 
-.search-wrapper {
-  @apply flex-1 min-w-[200px] flex gap-2 items-center;
-}
-
-.search-input {
-  @apply flex-1;
+.sort-select {
+  @apply min-w-[180px];
 }
 
 .view-toggle-button {
-  @apply hidden sm:flex;
+  @apply hidden sm:flex flex-shrink-0;
 }
 
+/* Fila 2: Contador */
 .results-counter {
   @apply mt-3 pt-3 border-t border-gray-200;
 }
@@ -73,18 +69,19 @@
   @apply text-gray-600;
 }
 
-/* ===== DATAVIEW (Grid/List) ===== */
-:host ::ng-deep .p-dataview {
-  @apply bg-transparent;
+/* ===== PRODUCTOS (Grid/List) ===== */
+.products-wrapper {
+  @apply mb-6;
 }
 
-:host ::ng-deep .p-dataview .p-dataview-content {
-  @apply bg-transparent;
+/* Grid de productos (más columnas al tener full width) */
+.products-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4;
 }
 
-/* Grid layout ya viene de PrimeNG con .p-grid */
-:host ::ng-deep .p-grid {
-  @apply m-0;
+/* Lista de productos */
+.products-list {
+  @apply flex flex-col gap-4;
 }
 
 /* ===== PAGINADOR ===== */
@@ -105,15 +102,23 @@
   }
 
   .page-title {
-    @apply text-xl;
+    @apply text-xl flex-grow-0 order-2;
   }
 
-  .header-controls {
-    @apply flex-col gap-2 items-stretch;
+  .filter-button {
+    @apply order-1;
   }
 
-  .search-wrapper {
-    @apply min-w-full;
+  .header-right-controls {
+    @apply order-3 w-full justify-between mt-2;
+  }
+
+  .header-controls-row {
+    @apply items-stretch;
+  }
+
+  .sort-select {
+    @apply flex-1 min-w-0;
   }
 
   .results-counter {
@@ -122,6 +127,11 @@
 
   .state-container {
     @apply min-h-[300px] py-8;
+  }
+
+  /* En mobile mostrar menos columnas */
+  .products-grid {
+    @apply grid-cols-1;
   }
 }
 
@@ -134,15 +144,28 @@
   .page-title {
     @apply text-2xl;
   }
+
+  /* En tablet mostrar 3 columnas */
+  .products-grid {
+    @apply md:grid-cols-3;
+  }
 }
 
 /* Desktop (>=1024px) */
 @media (min-width: 1024px) {
-  .catalog-layout {
-    @apply max-w-[1920px] mx-auto;
+  /* Header en una sola línea */
+  .header-controls-row {
+    @apply flex-nowrap;
   }
 
-  .filter-sidebar-desktop {
-    @apply flex-shrink-0;
+  .page-title {
+    @apply flex-grow;
+  }
+}
+
+/* Extra large screens */
+@media (min-width: 1536px) {
+  .catalog-content {
+    @apply px-8;
   }
 }

@@ -9,20 +9,33 @@
 
   <div class="filters-container">
 
-    <!-- Ordenamiento (siempre visible arriba) -->
+    <!-- Búsqueda -->
     <div class="filter-section">
       <label class="filter-label">
-        <i class="pi pi-sort-alt"></i>
-        Ordenar por
+        <i class="pi pi-search"></i>
+        Buscar remeras
       </label>
-      <p-select
-        formControlName="sortBy"
-        [options]="sortOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Seleccionar orden"
-        styleClass="w-full"
-      />
+      <div class="search-wrapper">
+        <p-iconfield class="search-input">
+          <p-inputicon styleClass="pi pi-search"></p-inputicon>
+          <input
+            pInputText
+            type="text"
+            formControlName="search"
+            placeholder="Buscar remeras..."
+            class="w-full"
+          />
+        </p-iconfield>
+        @if (filterForm.get('search')?.value) {
+          <p-button
+            icon="pi pi-times"
+            (onClick)="clearSearch()"
+            severity="secondary"
+            [outlined]="true"
+            [rounded]="true"
+          />
+        }
+      </div>
     </div>
 
     <p-divider />

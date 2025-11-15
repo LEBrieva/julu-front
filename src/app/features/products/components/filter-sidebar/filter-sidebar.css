@@ -25,6 +25,15 @@
   @apply text-blue-600;
 }
 
+/* Búsqueda */
+.search-wrapper {
+  @apply flex items-center gap-2;
+}
+
+.search-input {
+  @apply flex-1;
+}
+
 /* Rango de precios */
 .price-range-container {
   @apply mt-4;

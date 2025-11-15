@@ -1,92 +1,88 @@
 <div class="catalog-layout">
-  <!-- SIDEBAR DE FILTROS (Desktop: fijo, Mobile: overlay) -->
-  <!-- Desktop -->
-  <aside class="filter-sidebar-desktop">
-    <app-filter-sidebar
-      [initialFilters]="activeFilters()"
-      (filtersApplied)="onFiltersApplied($event)"
-      (filtersCleared)="onFiltersClear()"
-    />
-  </aside>
-
-  <!-- Mobile -->
+  <!-- DRAWER DE FILTROS (se abre desde izquierda) -->
   <p-drawer
     [(visible)]="sidebarVisible"
     position="left"
-    styleClass="filter-sidebar-mobile"
+    [style]="{width: '20rem'}"
+    styleClass="filter-drawer"
   >
     <ng-template pTemplate="header">
-      <div class="flex items-center gap-2">
-        <i class="pi pi-filter"></i>
-        <span class="font-semibold">Filtros</span>
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-filter"></i>
+          <span class="font-semibold">Filtros</span>
+        </div>
+        @if (activeFiltersCount() > 0) {
+          <p-badge [value]="activeFiltersCount().toString()" severity="info"></p-badge>
+        }
       </div>
     </ng-template>
-    <app-filter-sidebar
-      [initialFilters]="activeFilters()"
-      (filtersApplied)="onFiltersApplied($event)"
-      (filtersCleared)="onFiltersClear()"
-    />
+
+    <!-- Active Filters dentro del drawer -->
+    <div class="drawer-filters">
+      <app-active-filters
+        [filters]="activeFilters()"
+        (filterRemoved)="onFilterRemoved($event)"
+        (allFiltersCleared)="onFiltersClear()"
+      />
+
+      <p-divider />
+
+      <!-- Filter Sidebar Component -->
+      <app-filter-sidebar
+        [initialFilters]="activeFilters()"
+        (filtersApplied)="onFiltersApplied($event)"
+        (filtersCleared)="onFiltersClear()"
+      />
+    </div>
   </p-drawer>
 
-  <!-- CONTENIDO PRINCIPAL -->
+  <!-- CONTENIDO PRINCIPAL (FULL WIDTH) -->
   <main class="catalog-content">
-    <!-- HEADER CON BÚSQUEDA Y CONTROLES -->
+    <!-- HEADER CON CONTROLES -->
     <div class="catalog-header">
-      <!-- Título y botón filtros (mobile) -->
-      <div class="header-top">
-        <button
-          pButton
-          type="button"
+      <!-- Fila 1: Botón Filtros + Título + Ordenamiento + Toggle View -->
+      <div class="header-controls-row">
+        <!-- Botón de Filtros (con badge) -->
+        <p-button
           icon="pi pi-filter"
           label="Filtros"
-          (click)="toggleSidebar()"
-          class="filter-button-mobile"
-          pBadge
-          [value]="activeFiltersCount() > 0 ? activeFiltersCount().toString() : ''"
-          severity="info"
-        ></button>
-        <h1 class="page-title">Remeras</h1>
-      </div>
-
-      <!-- Búsqueda y controles -->
-      <div class="header-controls">
-        <!-- Búsqueda -->
-        <div class="search-wrapper">
-          <p-iconfield class="search-input">
-            <p-inputicon styleClass="pi pi-search"></p-inputicon>
-            <input
-              pInputText
-              type="text"
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="onSearchChange($event)"
-              placeholder="Buscar remeras..."
-              class="w-full"
-            />
-          </p-iconfield>
-          @if (searchTerm) {
-            <p-button
-              icon="pi pi-times"
-              (onClick)="clearSearch()"
-              severity="secondary"
-              [outlined]="true"
-              [rounded]="true"
-            />
-          }
-        </div>
-
-        <!-- Toggle Grid/List (desktop) -->
-        <p-button
-          [icon]="viewMode() === 'grid' ? 'pi pi-th-large' : 'pi pi-list'"
-          (onClick)="toggleViewMode()"
-          [outlined]="true"
-          severity="secondary"
-          class="view-toggle-button"
-          pTooltip="Cambiar vista"
-          tooltipPosition="bottom"
+          (onClick)="toggleSidebar()"
+          class="filter-button"
+          [badge]="activeFiltersCount() > 0 ? activeFiltersCount().toString() : undefined"
+          badgeClass="p-badge-info"
         />
+
+        <!-- Título -->
+        <h1 class="page-title">Remeras</h1>
+
+        <!-- Controles derechos -->
+        <div class="header-right-controls">
+          <!-- Ordenamiento -->
+          <p-select
+            [(ngModel)]="sortBy"
+            (onChange)="onSortChange($event)"
+            [options]="sortOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Ordenar"
+            styleClass="sort-select"
+          />
+
+          <!-- Toggle Grid/List -->
+          <p-button
+            [icon]="viewMode() === 'grid' ? 'pi pi-th-large' : 'pi pi-list'"
+            (onClick)="toggleViewMode()"
+            [outlined]="true"
+            severity="secondary"
+            class="view-toggle-button"
+            pTooltip="Cambiar vista"
+            tooltipPosition="bottom"
+          />
+        </div>
       </div>
 
-      <!-- Contador de resultados -->
+      <!-- Fila 2: Contador de resultados -->
       @if (!loading() && !error()) {
         <div class="results-counter">
           <span class="text-gray-600">
@@ -95,13 +91,6 @@
         </div>
       }
     </div>
-
-    <!-- ACTIVE FILTERS (chips removibles) -->
-    <app-active-filters
-      [filters]="activeFilters()"
-      (filterRemoved)="onFilterRemoved($event)"
-      (allFiltersCleared)="onFiltersClear()"
-    />
 
     <!-- LOADING STATE -->
     @if (loading()) {
@@ -134,7 +123,7 @@
     @else if (products().length === 0) {
       <div class="state-container empty-state">
         <i class="pi pi-inbox text-8xl text-gray-400"></i>
-        @if (searchTerm || activeFiltersCount() > 0) {
+        @if (activeFiltersCount() > 0) {
           <p class="text-gray-700 mt-4 text-xl">No se encontraron remeras con estos filtros</p>
           <p class="text-gray-500 mt-2">Prueba con otros filtros o búsqueda</p>
           <p-button
@@ -153,30 +142,32 @@
 
     <!-- GRID/LIST DE PRODUCTOS -->
     @else {
-      @if (products().length > 0) {
-        <!-- Grid View -->
-        @if (viewMode() === 'grid') {
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (product of products(); track product.id) {
-              <app-product-card
-                [product]="product"
-                [viewMode]="'grid'"
-              />
-            }
-          </div>
+      <div class="products-wrapper">
+        @if (products().length > 0) {
+          <!-- Grid View -->
+          @if (viewMode() === 'grid') {
+            <div class="products-grid">
+              @for (product of products(); track product.id) {
+                <app-product-card
+                  [product]="product"
+                  [viewMode]="'grid'"
+                />
+              }
+            </div>
+          }
+          <!-- List View -->
+          @else {
+            <div class="products-list">
+              @for (product of products(); track product.id) {
+                <app-product-card
+                  [product]="product"
+                  [viewMode]="'list'"
+                />
+              }
+            </div>
+          }
         }
-        <!-- List View -->
-        @else {
-          <div class="flex flex-col gap-4">
-            @for (product of products(); track product.id) {
-              <app-product-card
-                [product]="product"
-                [viewMode]="'list'"
-              />
-            }
-          </div>
-        }
-      }
+      </div>
 
       <!-- PAGINADOR -->
       <div class="paginator-container">

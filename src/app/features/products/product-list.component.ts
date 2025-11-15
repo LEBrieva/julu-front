@@ -6,9 +6,6 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // PrimeNG imports
-import { InputTextModule } from 'primeng/inputtext';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
 import { Paginator } from 'primeng/paginator';
 import { DataViewModule } from 'primeng/dataview';
@@ -16,6 +13,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DrawerModule } from 'primeng/drawer';
 import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
+import { SelectModule } from 'primeng/select';
+import { DividerModule } from 'primeng/divider';
 
 // Services and models
 import { ProductService } from '../../core/services/product.service';
@@ -45,9 +44,6 @@ import { ActiveFiltersComponent } from '../../shared/components/active-filters/a
   imports: [
     CommonModule,
     FormsModule,
-    InputTextModule,
-    IconFieldModule,
-    InputIconModule,
     ButtonModule,
     Paginator,
     DataViewModule,
@@ -55,6 +51,8 @@ import { ActiveFiltersComponent } from '../../shared/components/active-filters/a
     DrawerModule,
     BadgeModule,
     TooltipModule,
+    SelectModule,
+    DividerModule,
     ProductCardComponent,
     FilterSidebarComponent,
     ActiveFiltersComponent
@@ -80,9 +78,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
   rowsPerPageOptions = [12, 24, 36];
   first = 0; // Para PrimeNG Paginator
 
-  // Búsqueda
-  searchTerm = '';
-  private searchSubject = new Subject<string>();
+  // Ordenamiento
+  sortBy = 'newest';
+  sortOptions = [
+    { label: 'Más Nuevos', value: 'newest' },
+    { label: 'Precio: Menor a Mayor', value: 'price_asc' },
+    { label: 'Precio: Mayor a Menor', value: 'price_desc' },
+    { label: 'Nombre: A-Z', value: 'name_asc' },
+    { label: 'Nombre: Z-A', value: 'name_desc' }
+  ];
 
   // Filtros activos (sincronizados con query params)
   activeFilters = signal<FilterProductDto>({});
@@ -118,10 +122,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const initialFilters = this.parseQueryParamsToFilters(initialParams);
     this.activeFilters.set(initialFilters);
 
+    // Cargar sortBy desde query params
+    this.sortBy = initialParams['sortBy'] || 'newest';
+
     // Suscribirse a cambios en query params (para futuros cambios)
     this.activatedRoute.queryParams.subscribe((params) => {
       const filters = this.parseQueryParamsToFilters(params);
       this.activeFilters.set(filters);
+
+      // Actualizar sortBy
+      this.sortBy = params['sortBy'] || 'newest';
 
       // Resetear paginación al cambiar filtros
       this.currentPage = 1;
@@ -131,23 +141,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.loadProducts();
     });
 
-    // Configurar debounce para búsqueda (300ms)
-    this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe((searchValue) => {
-        this.searchTerm = searchValue;
-        this.updateQueryParams({ search: searchValue || undefined });
-      });
-
     // Cargar productos inicialmente
     this.loadProducts();
   }
 
   ngOnDestroy(): void {
-    this.searchSubject.complete();
+    // No hay subscriptions manuales para completar
   }
 
   /**
@@ -161,7 +160,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       ...this.activeFilters(),
       page: this.currentPage,
       limit: this.rowsPerPage,
-      search: this.searchTerm || undefined
+      sortBy: this.sortBy as any
     };
 
     this.productService.getPublicCatalog(filters).subscribe({
@@ -189,7 +188,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
    * Limpia todos los filtros
    */
   onFiltersClear(): void {
-    this.searchTerm = '';
+    this.sortBy = 'newest';
     this.updateQueryParams({});
     this.sidebarVisible.set(false);
   }
@@ -227,18 +226,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Maneja el cambio de búsqueda con debounce
+   * Maneja el cambio de ordenamiento
    */
-  onSearchChange(value: string): void {
-    this.searchSubject.next(value);
-  }
-
-  /**
-   * Limpia la búsqueda
-   */
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.searchSubject.next('');
+  onSortChange(event: any): void {
+    const currentFilters = { ...this.activeFilters() };
+    currentFilters.sortBy = this.sortBy as any;
+    this.updateQueryParams(currentFilters);
   }
 
   /**
@@ -304,9 +297,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private parseQueryParamsToFilters(params: any): FilterProductDto {
     const filters: FilterProductDto = {};
 
-    // Búsqueda
+    // Búsqueda (ahora viene del FilterSidebar)
     if (params['search']) {
-      this.searchTerm = params['search'];
       filters.search = params['search'];
     }
 

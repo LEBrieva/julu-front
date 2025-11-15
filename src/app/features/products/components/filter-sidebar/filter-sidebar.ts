@@ -9,6 +9,8 @@ import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { ChipModule } from 'primeng/chip';
 import { BadgeModule } from 'primeng/badge';
 import { DividerModule } from 'primeng/divider';
@@ -25,12 +27,12 @@ import {
 } from '../../../../core/models/product.model';
 
 interface FilterForm {
+  search: FormControl<string | null>;
   styles: FormControl<ProductStyle[] | null>;
   sizes: FormControl<ProductSize[] | null>;
   colors: FormControl<ProductColor[] | null>;
   minPrice: FormControl<number | null>;
   maxPrice: FormControl<number | null>;
-  sortBy: FormControl<string | null>;
   destacado: FormControl<boolean | null>;
   tags: FormControl<string | null>;
 }
@@ -48,6 +50,8 @@ interface FilterForm {
     ToggleSwitchModule,
     ButtonModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     ChipModule,
     BadgeModule,
     DividerModule
@@ -65,12 +69,12 @@ export class FilterSidebarComponent {
 
   // Form
   filterForm = new FormGroup<FilterForm>({
+    search: new FormControl<string>(''),
     styles: new FormControl<ProductStyle[]>([]),
     sizes: new FormControl<ProductSize[]>([]),
     colors: new FormControl<ProductColor[]>([]),
     minPrice: new FormControl<number | null>(null),
     maxPrice: new FormControl<number | null>(null),
-    sortBy: new FormControl<string>('newest'),
     destacado: new FormControl<boolean>(false),
     tags: new FormControl<string>(''),
   });
@@ -96,14 +100,6 @@ export class FilterSidebarComponent {
     { label: 'Azul Marino', value: ProductColor.NAVY, hex: getColorHex(ProductColor.NAVY) },
     { label: 'Rojo', value: ProductColor.RED, hex: getColorHex(ProductColor.RED) },
     { label: 'Azul', value: ProductColor.BLUE, hex: getColorHex(ProductColor.BLUE) }
-  ];
-
-  sortOptions = [
-    { label: 'Más Nuevos', value: 'newest' },
-    { label: 'Precio: Menor a Mayor', value: 'price_asc' },
-    { label: 'Precio: Mayor a Menor', value: 'price_desc' },
-    { label: 'Nombre: A-Z', value: 'name_asc' },
-    { label: 'Nombre: Z-A', value: 'name_desc' }
   ];
 
   // Rango de precios
@@ -160,12 +156,12 @@ export class FilterSidebarComponent {
     const formValue = this.filterForm.value;
 
     const filters: FilterProductDto = {
+      search: formValue.search?.trim() || undefined,
       styles: formValue.styles?.length ? formValue.styles : undefined,
       sizes: formValue.sizes?.length ? formValue.sizes : undefined,
       colors: formValue.colors?.length ? formValue.colors : undefined,
       minPrice: formValue.minPrice ?? undefined,
       maxPrice: formValue.maxPrice ?? undefined,
-      sortBy: formValue.sortBy as any || 'newest',
       destacado: formValue.destacado ?? undefined,
       tags: formValue.tags ? formValue.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined
     };
@@ -174,16 +170,23 @@ export class FilterSidebarComponent {
   }
 
   /**
+   * Limpia el campo de búsqueda
+   */
+  clearSearch(): void {
+    this.filterForm.patchValue({ search: '' });
+  }
+
+  /**
    * Limpia todos los filtros
    */
   clearFilters(): void {
     this.filterForm.reset({
+      search: '',
       styles: [],
       sizes: [],
       colors: [],
       minPrice: null,
       maxPrice: null,
-      sortBy: 'newest',
       destacado: false,
       tags: ''
     });
@@ -193,7 +196,7 @@ export class FilterSidebarComponent {
   }
 
   /**
-   * Cuenta filtros activos (excluyendo sortBy que siempre tiene valor)
+   * Cuenta filtros activos
    */
   private countActiveFilters(): number {
     const formValue = this.filterForm.value;
@@ -205,7 +208,6 @@ export class FilterSidebarComponent {
     if (formValue.minPrice !== null || formValue.maxPrice !== null) count++;
     if (formValue.destacado) count++;
     if (formValue.tags && formValue.tags.trim().length > 0) count++;
-    // sortBy no cuenta porque siempre tiene valor default
 
     return count;
   }
@@ -215,12 +217,12 @@ export class FilterSidebarComponent {
    */
   private loadFiltersFromInput(filters: FilterProductDto): void {
     this.filterForm.patchValue({
+      search: filters.search || '',
       styles: filters.styles || [],
       sizes: filters.sizes || [],
       colors: filters.colors || [],
       minPrice: filters.minPrice ?? null,
       maxPrice: filters.maxPrice ?? null,
-      sortBy: filters.sortBy || 'newest',
       destacado: filters.destacado ?? false,
       tags: filters.tags?.join(', ') || ''
     });
