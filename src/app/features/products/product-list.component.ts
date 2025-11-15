@@ -102,6 +102,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Header sticky state
   isHeaderSticky = signal<boolean>(false);
+  headerHeight = signal<number>(0);
   private headerOffsetTop = 0;
 
   // Contador de filtros activos (para badge)
@@ -153,12 +154,13 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Obtener la posición inicial del header
+    // Obtener la posición inicial y altura del header
     if (this.catalogHeader) {
       setTimeout(() => {
         const headerElement = this.catalogHeader?.nativeElement;
         if (headerElement) {
           this.headerOffsetTop = headerElement.offsetTop;
+          this.headerHeight.set(headerElement.offsetHeight);
         }
       }, 0);
     }
@@ -174,7 +176,17 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:scroll', [])
   onWindowScroll(): void {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-    this.isHeaderSticky.set(scrollPosition >= this.headerOffsetTop);
+    const shouldBeSticky = scrollPosition >= this.headerOffsetTop;
+
+    // Actualizar altura si el header cambió (ej: responsive, filtros aplicados)
+    if (this.catalogHeader?.nativeElement && !shouldBeSticky) {
+      const currentHeight = this.catalogHeader.nativeElement.offsetHeight;
+      if (currentHeight !== this.headerHeight()) {
+        this.headerHeight.set(currentHeight);
+      }
+    }
+
+    this.isHeaderSticky.set(shouldBeSticky);
   }
 
   /**

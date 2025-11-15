@@ -40,6 +40,11 @@
 
   <!-- CONTENIDO PRINCIPAL (FULL WIDTH) -->
   <main class="catalog-content">
+    <!-- Placeholder para evitar salto cuando header se vuelve fixed -->
+    @if (isHeaderSticky()) {
+      <div class="header-placeholder" [style.height.px]="headerHeight()"></div>
+    }
+
     <!-- HEADER CON CONTROLES -->
     <div #catalogHeader class="catalog-header" [class.is-sticky]="isHeaderSticky()">
       <!-- Fila 1: Botón Filtros + Título + Ordenamiento + Toggle View -->

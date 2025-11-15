@@ -23,30 +23,40 @@
 .catalog-header {
   @apply bg-white shadow-sm p-4 mb-4;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-out;
 }
 
 .catalog-header.is-sticky {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  /* left: 0;
+  right: 0; */
+  width: 100%;
+  max-width: calc(100vw - 3rem);
   z-index: 1000;
-  margin: 0;
-  border-radius: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  animation: slideDown 0.3s ease;
+  animation: slideDown 0.4s ease-out;
+}
+
+@media (min-width: 1536px) {
+  .catalog-header.is-sticky {
+    max-width: 1536px; /* max-w-screen-2xl */
+  }
 }
 
 @keyframes slideDown {
   from {
-    transform: translateY(-100%);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Placeholder invisible que ocupa espacio */
+.header-placeholder {
+  width: 100%;
+  visibility: hidden;
 }
 
 /* Fila 1: Botón Filtros + Título + Ordenamiento + Toggle */
