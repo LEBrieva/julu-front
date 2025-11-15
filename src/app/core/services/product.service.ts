@@ -286,4 +286,19 @@ export class ProductService {
   countDestacados(): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.apiUrl}/destacados/count`);
   }
+
+  /**
+   * Alterna el estado de destacado de un producto (ADMIN)
+   * Endpoint: PATCH /products/:id/toggle-destacado
+   *
+   * El backend valida automáticamente que no se superen los 12 productos destacados.
+   * Si se intenta activar un producto y ya hay 12 destacados, el backend rechazará
+   * la operación con un error 400 BadRequest.
+   *
+   * @param id ID del producto
+   * @returns Producto actualizado con el nuevo estado de destacado
+   */
+  toggleDestacado(id: string): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/${id}/toggle-destacado`, {});
+  }
 }

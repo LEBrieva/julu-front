@@ -8,7 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { ImageModule } from 'primeng/image';
 
 // Models
-import { Product } from '../../../core/models/product.model';
+import { Product, ProductListItem } from '../../../core/models/product.model';
 
 /**
  * ProductCardComponent - Tarjeta reutilizable de producto
@@ -34,8 +34,8 @@ import { Product } from '../../../core/models/product.model';
 export class ProductCardComponent {
   private router = inject(Router);
 
-  /** Producto a mostrar en la tarjeta */
-  product = input.required<Product>();
+  /** Producto a mostrar en la tarjeta (acepta Product o ProductListItem) */
+  product = input.required<Product | ProductListItem>();
 
   /**
    * URL de la imagen principal del producto
@@ -43,12 +43,12 @@ export class ProductCardComponent {
    */
   productImage = computed(() => {
     const prod = this.product();
-    if (!prod.images || prod.images.length === 0) {
-      return undefined;
+    // Verificar si el producto tiene imágenes (solo Product tiene este campo)
+    if ('images' in prod && prod.images && prod.images.length > 0) {
+      const index = prod.featuredImageIndex ?? 0;
+      return prod.images[index];
     }
-
-    const index = prod.featuredImageIndex ?? 0;
-    return prod.images[index];
+    return undefined;
   });
 
   /**

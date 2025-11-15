@@ -1,25 +1,138 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+// PrimeNG imports
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { ButtonModule } from 'primeng/button';
+import { Paginator } from 'primeng/paginator';
+
+// Services and models
+import { ProductService } from '../../core/services/product.service';
+import { ProductListItem } from '../../core/models/product.model';
+
+// Shared components
+import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 /**
  * ProductListComponent - Catálogo público de productos
  *
- * PLACEHOLDER: Este componente será implementado en la FASE 8
- * Por ahora solo muestra un mensaje temporal
+ * Funcionalidades:
+ * - Grid responsive de productos
+ * - Búsqueda con debounce (300ms)
+ * - Paginación
+ * - Loading y empty states
  */
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50">
-      <div class="text-center">
-        <i class="pi pi-shopping-bag text-6xl text-gray-400 mb-4"></i>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Catálogo de Productos</h1>
-        <p class="text-gray-600">Esta página será implementada en la FASE 8</p>
-        <p class="text-sm text-gray-500 mt-4">(Componente placeholder)</p>
-      </div>
-    </div>
-  `
+  imports: [
+    CommonModule,
+    FormsModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    ButtonModule,
+    Paginator,
+    ProductCardComponent
+  ],
+  templateUrl: './product-list.component.html',
+  styleUrl: './product-list.component.css'
 })
-export class ProductListComponent {}
+export class ProductListComponent implements OnInit, OnDestroy {
+  // Services
+  private productService = inject(ProductService);
+
+  // State (usando signals)
+  products = signal<ProductListItem[]>([]);
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
+  // Paginación
+  totalRecords = signal<number>(0);
+  currentPage = 1;
+  rowsPerPage = 12; // 12 productos por página (3 columnas × 4 filas)
+  first = 0; // Para PrimeNG Paginator
+
+  // Búsqueda
+  searchTerm = '';
+  private searchSubject = new Subject<string>();
+
+  ngOnInit(): void {
+    // Configurar debounce para búsqueda (300ms)
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe((searchValue) => {
+        this.searchTerm = searchValue;
+        this.currentPage = 1;
+        this.first = 0;
+        this.loadProducts();
+      });
+
+    // Cargar productos iniciales
+    this.loadProducts();
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
+  }
+
+  /**
+   * Carga productos desde el backend
+   */
+  loadProducts(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    const filters = {
+      page: this.currentPage,
+      limit: this.rowsPerPage,
+      search: this.searchTerm || undefined
+    };
+
+    this.productService.getPublicCatalog(filters).subscribe({
+      next: (response) => {
+        this.products.set(response.data);
+        this.totalRecords.set(response.pagination.total);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando productos:', err);
+        this.error.set('No se pudieron cargar los productos. Intenta nuevamente.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  /**
+   * Maneja el cambio de búsqueda con debounce
+   */
+  onSearchChange(value: string): void {
+    this.searchSubject.next(value);
+  }
+
+  /**
+   * Limpia la búsqueda
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
+  /**
+   * Maneja el cambio de página del paginador
+   */
+  onPageChange(event: any): void {
+    this.currentPage = event.page + 1; // PrimeNG usa índice 0, backend usa 1
+    this.rowsPerPage = event.rows;
+    this.first = event.first;
+    this.loadProducts();
+  }
+}

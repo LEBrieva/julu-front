@@ -228,6 +228,57 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
+   * Toggle estado de destacado del producto
+   * Valida que no se supere el límite de 12 productos destacados (validación server-side)
+   */
+  onToggleDestacado(product: ProductListItem): void {
+    const isDestacado = product.destacado;
+    const action = isDestacado ? 'quitar de destacados' : 'marcar como destacado';
+    const actionCaps = isDestacado ? 'Quitar de Destacados' : 'Marcar como Destacado';
+
+    this.confirmationService.confirm({
+      message: `¿Estás seguro que deseas ${action} el producto "${product.name}"?${
+        !isDestacado ? '\n\nNota: Solo puede haber hasta 12 productos destacados. Si ya hay 12, debes desactivar otro primero.' : ''
+      }`,
+      header: actionCaps,
+      icon: isDestacado ? 'pi pi-star-fill' : 'pi pi-star',
+      acceptLabel: 'Confirmar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        this.loading = true;
+
+        this.productService.toggleDestacado(product.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: `Producto ${isDestacado ? 'quitado de destacados' : 'marcado como destacado'} correctamente`
+            });
+            // Recargar lista manteniendo paginación actual
+            this.loadProducts(this.currentPage, this.rowsPerPage);
+          },
+          error: (error) => {
+            console.error('Error cambiando estado de destacado:', error);
+
+            // Manejo específico del error de límite alcanzado
+            const errorMessage = error.error?.message || error.message;
+            const isLimitError = errorMessage?.includes('Máximo de productos destacados alcanzado');
+
+            this.messageService.add({
+              severity: 'error',
+              summary: isLimitError ? 'Límite Alcanzado' : 'Error',
+              detail: isLimitError
+                ? 'Ya hay 12 productos destacados. Desactiva otro producto primero.'
+                : 'No se pudo cambiar el estado de destacado. Intenta nuevamente.'
+            });
+            this.loading = false;
+          }
+        });
+      }
+    });
+  }
+
+  /**
    * Determina si el botón de toggle debe mostrar "Activar" o "Desactivar"
    */
   getToggleButtonLabel(status: string): string {

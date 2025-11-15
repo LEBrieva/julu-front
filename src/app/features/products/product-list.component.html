@@ -1,0 +1,96 @@
+<div class="product-list-container">
+  <!-- Header con búsqueda -->
+  <div class="header-section">
+    <h1 class="page-title">Catálogo de Productos</h1>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+      <p-iconfield class="search-input">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Buscar productos..."
+          class="w-full"
+        />
+      </p-iconfield>
+      @if (searchTerm) {
+        <p-button
+          label="Limpiar"
+          icon="pi pi-times"
+          (onClick)="clearSearch()"
+          severity="secondary"
+          [outlined]="true"
+        ></p-button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+      <p class="text-gray-600 mt-3">Cargando productos...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="error-state">
+      <i class="pi pi-exclamation-triangle text-4xl text-red-500"></i>
+      <p class="text-red-600 mt-3">{{ error() }}</p>
+      <p-button
+        label="Reintentar"
+        icon="pi pi-refresh"
+        (onClick)="loadProducts()"
+        severity="danger"
+        [outlined]="true"
+        class="mt-4"
+      ></p-button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (products().length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-inbox text-6xl text-gray-400"></i>
+      @if (searchTerm) {
+        <p class="text-gray-700 mt-4 text-lg">No se encontraron productos que coincidan con "{{ searchTerm }}"</p>
+        <p-button
+          label="Limpiar búsqueda"
+          icon="pi pi-times"
+          (onClick)="clearSearch()"
+          severity="secondary"
+          [text]="true"
+          class="mt-4"
+        ></p-button>
+      } @else {
+        <p class="text-gray-700 mt-4 text-lg">No hay productos disponibles en este momento</p>
+      }
+    </div>
+  }
+
+  <!-- Grid de Productos -->
+  @else {
+    <div class="products-grid">
+      @for (product of products(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+
+    <!-- Paginador -->
+    <div class="paginator-container">
+      <p-paginator
+        [first]="first"
+        [rows]="rowsPerPage"
+        [totalRecords]="totalRecords()"
+        [rowsPerPageOptions]="[12, 24, 36]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+      ></p-paginator>
+    </div>
+  }
+</div>

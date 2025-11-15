@@ -12,6 +12,7 @@ import { ImageUploadComponent } from '../../../../shared/components/image-upload
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -69,6 +70,7 @@ import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
     InputTextModule,
     TextareaModule,
     InputNumberModule,
+    ToggleSwitchModule,
     SelectModule,
     ButtonModule,
     CardModule,
@@ -164,7 +166,8 @@ export class ProductFormComponent implements OnInit {
       category: ['', Validators.required],
       style: ['', Validators.required],
       status: [ProductStatus.ACTIVE],
-      tags: [[]]  // Array de strings vacío por defecto
+      tags: [[]],  // Array de strings vacío por defecto
+      destacado: [false]  // Por defecto no es destacado
     });
 
     // Escuchar cambios en categoría para actualizar estilos disponibles
@@ -222,7 +225,8 @@ export class ProductFormComponent implements OnInit {
       category: product.category,
       style: product.style,
       status: product.status,
-      tags: product.tags || []
+      tags: product.tags || [],
+      destacado: product.destacado || false
     });
 
     // Inicializar imágenes (asegurar que sea un array válido)
@@ -366,7 +370,8 @@ export class ProductFormComponent implements OnInit {
       category: formValue.category,
       style: formValue.style,
       status: formValue.status,
-      tags: formValue.tags
+      tags: formValue.tags,
+      destacado: formValue.destacado
     };
 
     this.productService.updateProduct(this.productId, updateDto).subscribe({

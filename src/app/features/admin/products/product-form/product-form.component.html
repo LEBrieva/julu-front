@@ -217,6 +217,23 @@
               [showClear]="false"
             ></p-select>
           </div>
+
+          <!-- Destacado (solo en modo editar) -->
+          <div class="form-field">
+            <label for="destacado" class="form-label">
+              Producto Destacado
+              <app-tooltip-icon text="Los productos destacados aparecen en el home (máximo 12)"></app-tooltip-icon>
+            </label>
+            <div class="flex items-center gap-3">
+              <p-toggleSwitch
+                inputId="destacado"
+                formControlName="destacado"
+              />
+              <span class="text-sm text-gray-600">
+                {{ f['destacado'].value ? 'Sí, mostrar en home' : 'No mostrar en home' }}
+              </span>
+            </div>
+          </div>
         }
       </div>
 

@@ -77,7 +77,7 @@
       <!-- Template cuando no hay datos -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="9" class="text-center">
+          <td colspan="10" class="text-center">
             <div class="empty-state">
               <i class="pi pi-inbox"></i>
               @if (searchTerm) {
@@ -114,6 +114,7 @@
           <th>Precio Base</th>
           <th class="text-center">Variantes</th>
           <th class="text-center">Stock Total</th>
+          <th class="text-center">Destacado</th>
           <th class="text-center">Estado</th>
           <th class="text-center">Acciones</th>
         </tr>
@@ -173,6 +174,19 @@
             <span class="font-semibold" [class.text-danger]="product.totalStock === 0">
               {{ product.totalStock }}
             </span>
+          </td>
+
+          <!-- Destacado -->
+          <td class="text-center">
+            <p-tag
+              [value]="product.destacado ? 'Destacado' : 'Regular'"
+              [severity]="product.destacado ? 'warn' : 'secondary'"
+              [icon]="product.destacado ? 'pi pi-star-fill' : 'pi pi-star'"
+              class="cursor-pointer hover:scale-105 transition-transform"
+              (click)="onToggleDestacado(product)"
+              pTooltip="Click para cambiar"
+              tooltipPosition="top"
+            ></p-tag>
           </td>
 
           <!-- Estado -->
