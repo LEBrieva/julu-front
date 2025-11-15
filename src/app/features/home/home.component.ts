@@ -48,27 +48,27 @@ export class HomeComponent implements OnInit {
   catalogSections = [
     {
       title: 'Nueva Colección',
-      imageUrl: 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Nueva+Colecci%C3%B3n',
+      imageUrl: 'assets/images/categories/straight.jpg',
       queryParams: {} // TODO: Agregar filtro cuando exista campo 'nueva'
     },
     {
       title: 'Más Vendidas',
-      imageUrl: 'https://placehold.co/400x300/10B981/FFFFFF?text=M%C3%A1s+Vendidas',
+      imageUrl: 'assets/images/categories/slim.jpg',
       queryParams: {} // TODO: Agregar filtro cuando existan métricas
     },
     {
       title: 'Ofertas',
-      imageUrl: 'https://placehold.co/400x300/EF4444/FFFFFF?text=Ofertas',
+      imageUrl: 'assets/images/categories/skinny.jpg',
       queryParams: {} // TODO: Agregar filtro cuando exista campo 'enOferta'
     },
     {
       title: 'Regular',
-      imageUrl: 'https://placehold.co/400x300/8B5CF6/FFFFFF?text=Regular',
+      imageUrl: 'assets/images/categories/regular.jpg',
       queryParams: { style: ProductStyle.REGULAR }
     },
     {
       title: 'Oversize',
-      imageUrl: 'https://placehold.co/400x300/F59E0B/FFFFFF?text=Oversize',
+      imageUrl: 'assets/images/categories/oversize.jpg',
       queryParams: { style: ProductStyle.OVERSIZE }
     }
   ];
