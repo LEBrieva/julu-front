@@ -1,0 +1,176 @@
+<div class="filter-sidebar" [formGroup]="filterForm">
+  <!-- Header con badge de filtros activos -->
+  <div class="sidebar-header">
+    <h3 class="text-xl font-semibold">Filtros</h3>
+    @if (activeFiltersCount() > 0) {
+      <p-badge [value]="activeFiltersCount().toString()" severity="info"></p-badge>
+    }
+  </div>
+
+  <div class="filters-container">
+
+    <!-- Ordenamiento (siempre visible arriba) -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-sort-alt"></i>
+        Ordenar por
+      </label>
+      <p-select
+        formControlName="sortBy"
+        [options]="sortOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Seleccionar orden"
+        styleClass="w-full"
+      />
+    </div>
+
+    <p-divider />
+
+    <!-- Estilos -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-tag"></i>
+        Estilos
+      </label>
+      <p-multiselect
+        formControlName="styles"
+        [options]="styleOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Todos los estilos"
+        styleClass="w-full"
+        [showToggleAll]="false"
+        [maxSelectedLabels]="2"
+      />
+    </div>
+
+    <p-divider />
+
+    <!-- Tallas -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-th-large"></i>
+        Tallas
+      </label>
+      <p-multiselect
+        formControlName="sizes"
+        [options]="sizeOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Todas las tallas"
+        styleClass="w-full"
+        [showToggleAll]="false"
+        display="chip"
+      />
+    </div>
+
+    <p-divider />
+
+    <!-- Colores -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-palette"></i>
+        Colores
+      </label>
+      <p-multiselect
+        formControlName="colors"
+        [options]="colorOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Todos los colores"
+        styleClass="w-full"
+        [showToggleAll]="false"
+        [maxSelectedLabels]="2"
+      >
+        <ng-template let-option pTemplate="item">
+          <div class="flex items-center gap-2">
+            <div
+              class="w-5 h-5 rounded-full border border-gray-300"
+              [style.background-color]="option.hex"
+            ></div>
+            <span>{{ option.label }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+    </div>
+
+    <p-divider />
+
+    <!-- Rango de precios -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-dollar"></i>
+        Rango de Precio
+      </label>
+      <div class="price-range-container">
+        <p-slider
+          [(ngModel)]="priceRange"
+          [ngModelOptions]="{standalone: true}"
+          [range]="true"
+          [min]="MIN_PRICE"
+          [max]="MAX_PRICE"
+          [step]="PRICE_STEP"
+          (onChange)="onPriceRangeChange($event)"
+          styleClass="w-full"
+        />
+        <div class="price-labels">
+          <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[0]) }}</span>
+          <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[1]) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Tags -->
+    <div class="filter-section">
+      <label class="filter-label">
+        <i class="pi pi-tags"></i>
+        Tags (separados por comas)
+      </label>
+      <input
+        pInputText
+        type="text"
+        formControlName="tags"
+        placeholder="ej: casual, verano"
+        class="w-full"
+      />
+      <small class="text-gray-500">Ej: casual, verano, deportivo</small>
+    </div>
+
+    <p-divider />
+
+    <!-- Productos destacados -->
+    <div class="filter-section">
+      <div class="flex items-center justify-between">
+        <label class="filter-label mb-0">
+          <i class="pi pi-star"></i>
+          Solo Destacados
+        </label>
+        <p-toggleSwitch formControlName="destacado" />
+      </div>
+      <small class="text-gray-500">Mostrar solo productos destacados en el home</small>
+    </div>
+
+  </div>
+
+  <!-- Acciones (sticky al final) -->
+  <div class="sidebar-actions">
+    <p-button
+      label="Aplicar Filtros"
+      icon="pi pi-check"
+      (onClick)="applyFilters()"
+      styleClass="w-full"
+      severity="primary"
+    />
+    <p-button
+      label="Limpiar Todo"
+      icon="pi pi-times"
+      (onClick)="clearFilters()"
+      styleClass="w-full"
+      severity="secondary"
+      [outlined]="true"
+    />
+  </div>
+</div>

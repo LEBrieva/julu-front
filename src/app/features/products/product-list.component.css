@@ -1,91 +1,148 @@
-.product-list-container {
-  min-height: calc(100vh - 4rem);
-  padding: 2rem 1rem;
-  max-width: 1400px;
-  margin: 0 auto;
+/* ===== LAYOUT PRINCIPAL ===== */
+.catalog-layout {
+  @apply flex min-h-screen bg-gray-50;
 }
 
-/* Header Section */
-.header-section {
-  margin-bottom: 2rem;
+/* ===== SIDEBAR DE FILTROS ===== */
+/* Desktop: Fixed sidebar */
+.filter-sidebar-desktop {
+  @apply hidden lg:block w-80 bg-white border-r border-gray-200 sticky top-0 h-screen overflow-y-auto;
+}
+
+/* Mobile: Fullscreen sidebar (PrimeNG Sidebar handles styles) */
+:host ::ng-deep .filter-sidebar-mobile {
+  @apply w-full max-w-md;
+}
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+.catalog-content {
+  @apply flex-1 p-4 lg:p-6;
+}
+
+/* ===== HEADER ===== */
+.catalog-header {
+  @apply bg-white rounded-lg shadow-sm p-4 mb-4;
+}
+
+.header-top {
+  @apply flex items-center justify-between mb-4 lg:justify-center;
+}
+
+.filter-button-mobile {
+  @apply lg:hidden;
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  @apply text-2xl lg:text-3xl font-bold text-gray-800;
 }
 
-.search-container {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  max-width: 600px;
-  margin: 0 auto;
+.header-controls {
+  @apply flex gap-3 items-center flex-wrap;
+}
+
+.search-wrapper {
+  @apply flex-1 min-w-[200px] flex gap-2 items-center;
 }
 
 .search-input {
-  flex: 1;
+  @apply flex-1;
 }
 
-/* Products Grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+.view-toggle-button {
+  @apply hidden sm:flex;
 }
 
-/* States */
-.loading-state,
-.error-state,
+.results-counter {
+  @apply mt-3 pt-3 border-t border-gray-200;
+}
+
+/* ===== ESTADOS (Loading, Error, Empty) ===== */
+.state-container {
+  @apply flex flex-col items-center justify-center min-h-[400px] text-center py-12;
+}
+
+.loading-state {
+  @apply text-blue-600;
+}
+
+.error-state {
+  @apply text-red-600;
+}
+
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  text-align: center;
-  padding: 2rem;
+  @apply text-gray-600;
 }
 
-/* Paginator */
+/* ===== DATAVIEW (Grid/List) ===== */
+:host ::ng-deep .p-dataview {
+  @apply bg-transparent;
+}
+
+:host ::ng-deep .p-dataview .p-dataview-content {
+  @apply bg-transparent;
+}
+
+/* Grid layout ya viene de PrimeNG con .p-grid */
+:host ::ng-deep .p-grid {
+  @apply m-0;
+}
+
+/* ===== PAGINADOR ===== */
 .paginator-container {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
+  @apply mt-6 flex justify-center;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .product-list-container {
-    padding: 1rem 0.75rem;
+/* ===== RESPONSIVE ===== */
+
+/* Mobile (<768px) */
+@media (max-width: 767px) {
+  .catalog-content {
+    @apply p-3;
+  }
+
+  .catalog-header {
+    @apply p-3;
   }
 
   .page-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    @apply text-xl;
   }
 
-  .search-container {
-    flex-direction: column;
-    max-width: 100%;
+  .header-controls {
+    @apply flex-col gap-2 items-stretch;
   }
 
-  .search-input {
-    width: 100%;
+  .search-wrapper {
+    @apply min-w-full;
   }
 
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1rem;
+  .results-counter {
+    @apply text-sm;
+  }
+
+  .state-container {
+    @apply min-h-[300px] py-8;
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .catalog-content {
+    @apply p-5;
+  }
+
+  .page-title {
+    @apply text-2xl;
+  }
+}
+
+/* Desktop (>=1024px) */
+@media (min-width: 1024px) {
+  .catalog-layout {
+    @apply max-w-[1920px] mx-auto;
+  }
+
+  .filter-sidebar-desktop {
+    @apply flex-shrink-0;
   }
 }

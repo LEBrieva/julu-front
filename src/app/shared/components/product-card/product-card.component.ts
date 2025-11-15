@@ -37,6 +37,9 @@ export class ProductCardComponent {
   /** Producto a mostrar en la tarjeta (acepta Product o ProductListItem) */
   product = input.required<Product | ProductListItem>();
 
+  /** Modo de vista: 'grid' (card vertical) o 'list' (layout horizontal) */
+  viewMode = input<'grid' | 'list'>('grid');
+
   /**
    * URL de la imagen principal del producto
    * Usa featuredImageIndex si está definido, sino la primera imagen

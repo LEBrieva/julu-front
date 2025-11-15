@@ -1,0 +1,29 @@
+@if (activeFilters().length > 0) {
+  <div class="active-filters-container">
+    <div class="filters-chips">
+      @for (filter of activeFilters(); track filter.key) {
+        <p-chip
+          [label]="filter.label"
+          [removable]="filter.removable"
+          (onRemove)="removeFilter(filter.key)"
+          styleClass="filter-chip"
+        >
+          @if (filter.icon) {
+            <i [class]="'pi ' + filter.icon + ' mr-2'"></i>
+          }
+        </p-chip>
+      }
+    </div>
+
+    @if (removableFiltersCount() > 1) {
+      <p-button
+        label="Limpiar Todo"
+        icon="pi pi-times"
+        (onClick)="clearAll()"
+        size="small"
+        [outlined]="true"
+        severity="secondary"
+      />
+    }
+  </div>
+}

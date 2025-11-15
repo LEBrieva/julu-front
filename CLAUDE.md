@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASE 5, 6 y 7 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar.
+**Estado actual**: FASES 5, 6, 7 y 8a completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, y catálogo público con filtros por query params.
 
 ---
 
@@ -121,228 +121,45 @@ src/app/
 
 ## 🔐 Sistema de Autenticación
 
-### Overview
-Sistema JWT completo con refresh tokens en httpOnly cookies, auto-refresh en 401, y notificaciones toast.
-
-### Tokens
-1. **Access Token (JWT)**:
-   - Almacenado en `localStorage` (corta duración: 15 min)
-   - Se envía en header `Authorization: Bearer <token>`
-   - Contiene: `{ sub: userId, email, role, exp }`
-
-2. **Refresh Token**:
-   - Almacenado en **httpOnly cookie** (larga duración: 7 días)
-   - El navegador lo envía automáticamente en requests con `withCredentials: true`
-   - Solo accesible por el backend (protegido contra XSS)
-
-### Flujo de Autenticación
-
-```typescript
-// 1. Login
-POST /auth/login { email, password }
-→ Response: { accessToken: "eyJ...", user: {...} }
-→ Cookie: refreshToken=xyz (httpOnly, secure, sameSite=strict)
-→ Frontend guarda accessToken en localStorage
-→ AuthService actualiza signal currentUser
-
-// 2. Request con autenticación
-GET /orders
-→ auth.interceptor inyecta: Authorization: Bearer <accessToken>
-→ auth.interceptor agrega: withCredentials: true (para cookies)
-→ Backend valida JWT y responde
-
-// 3. Token expirado (401)
-GET /orders → 401 Unauthorized
-→ error.interceptor detecta 401
-→ Toast info: "Renovando sesión..."
-→ POST /auth/refresh (con refreshToken cookie)
-→ Response: { accessToken: "new_token" }
-→ Reintenta request original con nuevo token
-→ Toast success: "Sesión renovada"
-
-// 4. Refresh token expirado
-POST /auth/refresh → 401
-→ Toast warn: "Sesión expirada. Inicia sesión nuevamente"
-→ authService.logout()
-→ Redirect a /login
-```
+### Arquitectura JWT + Refresh Tokens
+- **Access Token**: localStorage, 15 min, header `Authorization: Bearer <token>`
+- **Refresh Token**: httpOnly cookie, 7 días, auto-enviado con `withCredentials: true`
+- **Auto-refresh**: Error interceptor detecta 401 → llama `/auth/refresh` → reintenta request
 
 ### AuthService (Signal-based)
-
-```typescript
-@Injectable({ providedIn: 'root' })
-export class AuthService {
-  // Signal privado (mutable)
-  private currentUserSignal = signal<User | null>(null);
-
-  // Signal público (readonly)
-  readonly currentUser = this.currentUserSignal.asReadonly();
-
-  // Computed signals (se recalculan automáticamente)
-  readonly isAuthenticated = computed(() => this.currentUser() !== null);
-  readonly isAdmin = computed(() => this.currentUser()?.role === UserRole.ADMIN);
-
-  // Métodos principales
-  login(email, password): Observable<LoginResponse> // POST /auth/login
-  logout(): Observable<void>                        // POST /auth/logout
-  refresh(): Observable<RefreshResponse>            // POST /auth/refresh
-  initializeAuth(): void                            // Restaura sesión al iniciar app
-}
-```
-
-**Uso en componentes**:
-```typescript
-export class HeaderComponent {
-  private authService = inject(AuthService);
-
-  // Acceso reactivo a los signals
-  currentUser = this.authService.currentUser;      // Signal<User | null>
-  isAuthenticated = this.authService.isAuthenticated; // Signal<boolean>
-  isAdmin = this.authService.isAdmin;              // Signal<boolean>
-}
-```
-
-```html
-<!-- En template (se actualiza automáticamente) -->
-@if (isAuthenticated()) {
-  <p>Bienvenido {{ currentUser()?.email }}</p>
-  @if (isAdmin()) {
-    <a routerLink="/admin">Panel Admin</a>
-  @endif
-}
-```
+Ver `core/services/auth.service.ts`
+- **Signals**: `currentUser`, `isAuthenticated`, `isAdmin` (todos computed/readonly)
+- **Métodos**: `login()`, `logout()`, `refresh()`, `initializeAuth()`, `getCurrentUser()`
+- **Activity tracking**: Silent refresh cada 55 min si usuario activo, logout diferenciado por rol si inactivo
+- **Uso en componentes**: `authService.currentUser()`, `isAuthenticated()`, `isAdmin()`
 
 ### Interceptors
 
-#### 1. `auth.interceptor.ts` (Inyecta JWT)
-```typescript
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return next(req);
+#### `auth.interceptor.ts`
+Inyecta JWT en headers + `withCredentials: true` para enviar cookies httpOnly.
 
-  // Clonar request y agregar Authorization header + withCredentials
-  const clonedRequest = req.clone({
-    setHeaders: { Authorization: `Bearer ${token}` },
-    withCredentials: true // ⭐ Crucial para enviar httpOnly cookies
-  });
+#### `error.interceptor.ts`
+Manejo global de errores HTTP con toasts automáticos:
+- **400**: Errores de validación
+- **401**: Auto-refresh con toasts informativos (info → success/warn)
+- **403**: Acceso denegado
+- **404**: No encontrado
+- **409**: Conflicto (duplicado)
+- **429**: Rate limiting (muestra tiempo de espera desde header `X-RateLimit-Reset`)
+- **500+**: Error del servidor
+- **Network**: Sin conexión
 
-  return next(clonedRequest);
-};
-```
+**Lógica de refresh**: Detecta endpoint para evitar loop infinito → muestra toast → llama `refresh()` → reintenta request → maneja éxito/error
 
-#### 2. `error.interceptor.ts` (Manejo de errores + Toasts)
-Captura TODOS los errores HTTP y muestra notificaciones toast:
+### Guards
 
-| Status | Severity | Acción |
-|--------|----------|--------|
-| 400 | warn | Muestra errores de validación del backend |
-| 401 | info → success/warn | Intenta refresh automático + toast de estado |
-| 403 | error | "Acceso Denegado - No tienes permisos" |
-| 404 | warn | "No Encontrado - El recurso no existe" |
-| 409 | warn | "Conflicto - El recurso ya existe" |
-| 429 | warn | "Demasiadas Peticiones - Intenta en X segundos" (extrae header `X-RateLimit-Reset`) |
-| 500+ | error | "Error del Servidor - Intenta más tarde" |
-| Network | error | "Error de Conexión - Verifica tu internet" |
+#### `auth.guard.ts`
+Verifica `isAuthenticated()` → si false, redirect a `/login?returnUrl=<url_original>`
 
-**Auto-refresh en 401**:
-```typescript
-function handle401Error(...): Observable<HttpEvent<unknown>> {
-  // 1. Verificar que NO sea endpoint de refresh/login (evitar loop infinito)
-  if (req.url.includes('/auth/refresh') || req.url.includes('/auth/login')) {
-    // Mostrar toast de error y logout
-    return throwError(() => originalError);
-  }
+#### `admin.guard.ts`
+Verifica `currentUser.role === ADMIN` → si false, toast de error + redirect a `/products`
 
-  // 2. Mostrar toast: "Renovando sesión..."
-  messageService.add({ severity: 'info', summary: 'Renovando Sesión' });
-
-  // 3. Llamar a refresh()
-  return authService.refresh().pipe(
-    switchMap((): Observable<HttpEvent<unknown>> => {
-      // Refresh OK → Toast success + reintentar request original
-      messageService.add({ severity: 'success', summary: 'Sesión Renovada' });
-      return next(req); // El interceptor auth agregará el nuevo token
-    }),
-    catchError(refreshError => {
-      // Refresh falló → Toast warn + logout + redirect
-      messageService.add({ severity: 'warn', summary: 'Sesión Expirada' });
-      authService.logout().subscribe(() => router.navigate(['/login']));
-      return throwError(() => refreshError);
-    })
-  );
-}
-```
-
-### Guards (Protección de Rutas)
-
-#### 1. `auth.guard.ts` (Requiere autenticación)
-```typescript
-export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  if (authService.isAuthenticated()) {
-    return true; // Usuario autenticado → permitir acceso
-  }
-
-  // Usuario NO autenticado → redirect a /login
-  // Guardar URL original en query param para redirect post-login
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-  return false;
-};
-```
-
-#### 2. `admin.guard.ts` (Requiere rol ADMIN)
-```typescript
-export const adminGuard: CanActivateFn = (route, state) => {
-  const authService = inject(AuthService);
-  const messageService = inject(MessageService);
-  const router = inject(Router);
-
-  const currentUser = authService.currentUser();
-
-  if (currentUser?.role === UserRole.ADMIN) {
-    return true; // Es admin → permitir acceso
-  }
-
-  // NO es admin → Toast de error + redirect a /products
-  messageService.add({
-    severity: 'warn',
-    summary: 'Acceso Restringido',
-    detail: 'No tienes permisos para acceder al panel de administración.'
-  });
-  router.navigate(['/products']);
-  return false;
-};
-```
-
-**Uso en rutas** (ejemplo futuro):
-```typescript
-export const routes: Routes = [
-  // Rutas públicas
-  { path: 'login', component: LoginComponent },
-  { path: 'products', component: ProductListComponent },
-
-  // Rutas autenticadas (cualquier rol)
-  {
-    path: 'cart',
-    component: CartComponent,
-    canActivate: [authGuard]
-  },
-
-  // Rutas admin (requiere autenticación + rol ADMIN)
-  {
-    path: 'admin',
-    canActivate: [authGuard, adminGuard], // ⭐ Ambos guards
-    children: [
-      { path: 'dashboard', component: AdminDashboardComponent },
-      { path: 'products', component: AdminProductsComponent },
-      { path: 'orders', component: AdminOrdersComponent },
-      { path: 'users', component: AdminUsersComponent }
-    ]
-  }
-];
-```
+**Uso en rutas**: Ver `app.routes.ts` y `admin.routes.ts` para ejemplos de protección con guards combinados
 
 ---
 
@@ -436,118 +253,32 @@ export class AuthService {
 
 ## 🧩 Modelos de Datos
 
-### User & Auth Models
+Ver archivos en `core/models/` para detalles completos:
+
+### Enums Principales
 ```typescript
-// core/models/user.model.ts
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user'
-}
+// user.model.ts
+UserRole: 'admin' | 'user'
+UserStatus: 'active' | 'inactive'
 
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive'
-}
+// product.model.ts
+ProductSize: 'P' | 'M' | 'G' | 'GG'
+ProductColor: 'black' | 'white' | 'gray' | 'navy' | 'red' | 'blue'
+ProductStyle: 'regular' | 'oversize' | 'slim_fit' | 'straight' | 'skinny' | etc.
+ProductCategory: 'remera' | 'pantalon' | 'chaqueta' | 'zapatillas' | 'botas' | etc.
+ProductStatus: 'active' | 'inactive'
 
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  status: UserStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface LoginResponse {
-  accessToken: string; // JWT para localStorage
-  user: User;
-}
-
-export interface RefreshResponse {
-  accessToken: string; // Nuevo JWT después de refresh
-}
-
-export interface JwtPayload {
-  sub: string;      // userId
-  email: string;
-  role: UserRole;
-  exp?: number;     // Timestamp de expiración
-}
+// order.model.ts
+OrderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+PaymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
 ```
 
-### API Response Models
-```typescript
-// core/models/api-response.model.ts
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: PaginationInfo;
-}
-
-export interface PaginationInfo {
-  total: number;        // Total de items
-  page: number;         // Página actual (1-indexed)
-  limit: number;        // Items por página
-  totalPages: number;   // Total de páginas
-}
-
-export interface ApiError {
-  statusCode: number;
-  message: string | string[]; // String o array de errores de validación
-  error: string;              // Ej: "Bad Request", "Unauthorized"
-  timestamp: string;
-}
-```
-
-### Product Models
-```typescript
-// core/models/product.model.ts
-export enum ProductCategory {
-  ELECTRONICS = 'electronics',
-  CLOTHING = 'clothing',
-  HOME = 'home',
-  SPORTS = 'sports',
-  BOOKS = 'books',
-  OTHER = 'other'
-}
-
-export enum ProductStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive'
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: ProductCategory;
-  status: ProductStatus;
-  imageUrl?: string;        // Opcional (FASE 5 bis)
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateProductDto {
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category: ProductCategory;
-  status?: ProductStatus;   // Opcional, default: ACTIVE
-}
-
-export interface UpdateProductDto {
-  name?: string;
-  description?: string;
-  price?: number;
-  stock?: number;
-  category?: ProductCategory;
-  status?: ProductStatus;
-}
-```
+### Interfaces Clave
+- **User**: Ver `user.model.ts` (incluye avatar, phone, emailVerified)
+- **Product**: Ver `product.model.ts` (con variants[], images[], featuredImageIndex, destacado)
+- **ProductVariant**: `{ sku, size, color, stock, price }`
+- **Order**: Ver `order.model.ts` (con items[], shippingAddress, status, totals)
+- **PaginatedResponse<T>**: `{ data: T[], pagination: PaginationInfo }`
 
 ---
 
@@ -690,403 +421,70 @@ readonly isAuthenticated = computed(() => this.currentUser() !== null);
 
 ## 🐛 Debugging Tips
 
-### Ver Token JWT decodificado
-```typescript
-// En DevTools Console
-const token = localStorage.getItem('accessToken');
-const payload = JSON.parse(atob(token.split('.')[1]));
-console.log(payload); // { sub, email, role, exp }
-```
-
-### Testear Refresh Automático
-```typescript
-// 1. Login normal
-// 2. DevTools → Application → Local Storage → Cambiar accessToken por uno expirado
-// 3. Hacer cualquier petición (ej: GET /products)
-// 4. Deberías ver toasts:
-//    - Info: "Renovando sesión..."
-//    - Success: "Sesión renovada correctamente"
-```
-
-### Ver Cookies httpOnly
-```typescript
-// DevTools → Application → Cookies → http://localhost:4200
-// Deberías ver: refreshToken (httpOnly: true)
-```
-
-### Inspeccionar Requests
-```typescript
-// DevTools → Network → Headers
-// Verificar:
-// - Request Headers: Authorization: Bearer eyJ...
-// - Request Headers: Cookie: refreshToken=xyz
-// - Response Headers: Set-Cookie: refreshToken=new_xyz; HttpOnly; Secure
-```
+- **Ver JWT decodificado**: DevTools Console → `JSON.parse(atob(localStorage.getItem('accessToken').split('.')[1]))`
+- **Testear auto-refresh**: Cambiar accessToken en localStorage por uno expirado → hacer request → ver toasts de refresh
+- **Ver cookies**: DevTools → Application → Cookies → verificar `refreshToken` (httpOnly: true)
+- **Inspeccionar requests**: DevTools → Network → Headers → verificar `Authorization: Bearer ...` y `Cookie: refreshToken=...`
 
 ---
 
 ## 🔮 Próximos Pasos (Roadmap)
 
-### ✅ FASE 3: Login Component (COMPLETADA)
-- [x] Crear componente `features/auth/login` con standalone components
-- [x] Formulario reactivo con validaciones (email, password)
-- [x] Sistema de validación centralizado en `shared/`:
-  - `shared/constants/validation-messages.ts` - Mensajes reutilizables
-  - `shared/utils/form-errors.util.ts` - Helper para extraer errores
-- [x] Integración completa con AuthService.login()
-- [x] Redirección post-login según rol (admin → /admin/dashboard, user → /products)
-- [x] Loading state durante autenticación (botón con spinner)
-- [x] Manejo de errores con toasts (automático vía error.interceptor)
-- [x] UI con PrimeNG usando clases oficiales (`p-password-fluid`)
-- [x] Estilos con TailwindCSS (sin hacks ni `!important`)
-- [x] Rutas configuradas con lazy loading
-- [x] Componentes placeholder (ProductList, AdminDashboard)
-- [x] Conexión verificada con backend (CORS configurado)
-- [x] Guía de estilos documentada (`STYLING-GUIDELINES.md`)
+### ✅ FASES COMPLETADAS (Resumen)
 
-### ✅ FASE 3 bis: Silent Token Refresh (COMPLETADA)
-- [x] Activity tracking para detectar actividad del usuario:
-  - Eventos monitoreados: `click`, `keypress`, `scroll`
-  - Timestamp de última interacción actualizado en cada evento
-  - No incluye `mousemove` para evitar sensibilidad excesiva
-- [x] Constantes centralizadas en `core/constants/auth.constants.ts`:
-  - `ACCESS_TOKEN_EXPIRATION` - 1 hora (debe coincidir con backend)
-  - `SILENT_REFRESH_INTERVAL` - 55 minutos (refresh antes de expirar)
-  - `USER_INACTIVITY_THRESHOLD` - 15 minutos (umbral de inactividad)
-  - `ACTIVITY_EVENTS` - Array de eventos monitoreados
-  - Valores de testing comentados para desarrollo rápido
-- [x] Silent refresh automático cada 55 minutos:
-  - Verifica actividad del usuario antes de refrescar
-  - Si usuario activo (< 15 min inactivo): Refresh automático del token
-  - Si usuario inactivo (> 15 min): Logout diferenciado por rol
-- [x] Logout diferenciado por rol:
-  - **ADMIN inactivo**: Logout completo + redirect a `/login` (seguridad)
-  - **USER inactivo**: Logout silencioso sin redirect (se queda en la vista actual)
-  - USER puede seguir navegando rutas públicas (`/products`)
-  - authGuard redirige a `/login` al intentar acceder a rutas protegidas
-- [x] Métodos en AuthService:
-  - `setupActivityTracking()` - Configura listeners de eventos
-  - `getTimeSinceLastInteraction()` - Calcula tiempo de inactividad
-  - `silentLogout()` - Limpia sesión sin POST al backend
-  - `startSilentRefresh()` - Inicia intervalo de refresh automático
-  - `stopSilentRefresh()` - Detiene intervalo (en logout)
-- [x] Integración completa:
-  - `initializeAuth()` configura activity tracking al cargar la app
-  - `login()` inicia silent refresh después de autenticación exitosa
-  - `logout()` detiene silent refresh
-  - `refresh()` actualiza token y signal del usuario
-- [x] Logs detallados para debugging:
-  - `👁️ Activity tracking iniciado`
-  - `⏰ Silent refresh iniciado (intervalo: X min, inactividad: Y min)`
-  - `🔄 Usuario activo → Refresh automático del token`
-  - `⚠️ Usuario inactivo por X minutos`
-  - `🔐 ADMIN inactivo → Logout + redirect`
-  - `👤 USER inactivo → Logout silencioso`
-- [x] Performance optimizations:
-  - Event listeners con `{ passive: true }`
-  - Previene intervalos duplicados con `stopSilentRefresh()` antes de crear nuevo
-  - Limpia recursos al hacer logout
+#### FASE 3: Login Component
+Sistema de autenticación completo con formularios reactivos, validaciones centralizadas (`shared/constants/validation-messages.ts`, `shared/utils/form-errors.util.ts`), redirección según rol, loading states, y manejo de errores con toasts. Ver `features/auth/login/`.
 
-### ✅ FASE 4: Admin Layout (COMPLETADA)
-- [x] Crear AdminLayoutComponent con estructura header + sidebar + content
-- [x] Implementar lazy loading a nivel de feature module (loadChildren)
-- [x] Rutas admin protegidas con authGuard + adminGuard
-- [x] Header responsivo con:
-  - Logo y título adaptable a mobile/desktop
-  - User info (nombre, email) visible solo en desktop (≥1024px)
-  - Avatar con iniciales del usuario
-  - Dropdown menu con p-menu (Perfil, Cerrar Sesión)
-  - Fix de posicionamiento para viewport angosto (`position: fixed` + `right: 0.5rem`)
-- [x] Sidebar colapsable con:
-  - Toggle button para mobile (hamburger menu)
-  - Navegación: Dashboard (activo), Products, Orders, Users (deshabilitados con badge "Próximamente")
-  - Items deshabilitados usando `<span>` (no clickeables) vs `<a>` con routerLink
-  - Backdrop overlay en mobile cuando está abierto
-- [x] Dashboard placeholder limpio (sin header/logout redundante)
-- [x] Responsive design:
-  - Mobile (< 1024px): Sidebar colapsado por defecto, header compacto
-  - Desktop (≥ 1024px): Sidebar fijo, header con info completa
-  - Sin scroll horizontal en ningún viewport (fix con `overflow-x: hidden` + `max-width: 100vw`)
-- [x] Fix enum mismatch: UserRole values lowercase ('admin', 'user') para coincidir con backend
-- [x] Arquitectura de lazy loading optimizada:
-  - `app.routes.ts` → `loadChildren` a `admin.routes.ts`
-  - `admin.routes.ts` → `loadComponent` para AdminLayoutComponent (wrapper)
-  - Children routes con lazy loading individual
-  - Chunks generados: admin-layout (~22KB), admin-dashboard (~11KB), admin-routes (~1KB)
+#### FASE 3 bis: Silent Token Refresh
+Activity tracking (`click`, `keypress`, `scroll`) + refresh automático cada 55 min si usuario activo. Logout diferenciado: ADMIN inactivo → redirect a `/login`, USER inactivo → logout silencioso. Constantes en `core/constants/auth.constants.ts`.
 
-### ✅ FASE 5: CRUD de Productos con Gestión de Variantes e Imágenes (Admin) (COMPLETADA)
+#### FASE 4: Admin Layout
+Layout responsivo con header (avatar, dropdown menu) + sidebar colapsable (mobile hamburger menu, desktop fijo). Lazy loading optimizado con `loadChildren` y chunks separados. Ver `features/admin/layout/`.
 
-#### Modelos de Datos
-- [x] Enums actualizados:
-  - `ProductSize` (P, M, G, GG) - valores en MAYÚSCULAS
-  - `ProductColor` (black, white, gray, navy, red, blue)
-  - `ProductStyle` (regular, oversize, slim_fit, straight, skinny, etc.)
-  - `ProductCategory` (remera, pantalon, chaqueta, zapatillas, botas, shorts, vestido, blusa)
-- [x] Interface `ProductVariant { sku, size, color, stock, price }`
-- [x] DTOs para variantes:
-  - `CreateProductVariantDto` - Para crear producto con variantes iniciales
-  - `AddVariantDto` - Para agregar variante a producto existente
-  - `UpdateSingleVariantDto` - Para actualizar stock/price de variante
-- [x] Constante `CATEGORY_STYLE_MAP` - Mapeo categoría → estilos válidos
-- [x] Helpers de formateo y visualización:
-  - `formatSize()` - Retorna tamaño en MAYÚSCULAS (P, M, G, GG)
-  - `formatColor()` - Retorna color en español (Negro, Blanco, Gris, etc.)
-  - `formatStyle()` - Retorna estilo en español (Regular, Oversize, etc.)
-  - `getColorHex()` - Retorna código hex del color para badges (#000000, #FFFFFF, etc.)
-  - `getTextColor()` - Retorna color de texto apropiado según fondo
-  - `getSizeSeverity()` - Retorna severity de PrimeNG según tamaño (P=info, M/G=success, GG=danger)
+#### FASE 5: CRUD de Productos con Variantes
+**Modelos**: ProductVariant con `{ sku, size, color, stock, price }`. Helpers de formateo (`formatSize`, `formatColor`, `getColorHex`, etc.). Ver `core/models/product.model.ts`.
 
-#### ProductService
-- [x] Métodos CRUD básicos:
-  - `getProducts(params)` - Listado paginado con filtros
-  - `getProductById(id)` - Detalle de producto
-  - `createProduct(dto)` - Crear producto con variantes
-  - `updateProduct(id, dto)` - Actualizar datos básicos del producto
-  - `activateProduct(id)` / `deactivateProduct(id)` - Cambiar estado
-- [x] **Métodos de gestión de variantes**:
-  - `addVariant(productId, variant)` → POST `/products/:id/variants`
-  - `updateVariant(productId, sku, data)` → PATCH `/products/:id/variants/:sku`
-  - `deleteVariant(productId, sku)` → DELETE `/products/:id/variants/:sku`
+**AdminProductsComponent**: Tabla con filtros, paginación, búsqueda. Columnas: código, nombre+tags, categoría, estilo, variantes (badge count), stock total, estado, acciones.
 
-#### AdminProductsComponent (Lista)
-- [x] Tabla responsive con columnas:
-  - Código, Nombre (con tags), Categoría, Estilo, Precio Base
-  - **Variantes** (badge redondeado con count total)
-  - **Stock Total** (suma de todas las variantes, rojo si es 0)
-  - Estado, Acciones
-- [x] Paginación server-side (lazy loading)
-- [x] Búsqueda por nombre/código/descripción
-- [x] Botones: Ver detalle, Editar, Activar/Desactivar
+**ProductFormComponent**:
+- **Modo CREAR**: Datos básicos + tabla de variantes (min 1 requerida, validación duplicados size+color). Submit envía todo al backend.
+- **Modo EDITAR**: Edición inline granular de stock/price (guardan al instante vía API). Botón "Agregar Variante" expande formulario. Botón "Actualizar Producto" solo para datos básicos.
 
-#### ProductFormComponent - Modo CREAR
-- [x] Formulario de datos básicos:
-  - code (requerido, único), name, description, basePrice
-  - category (dropdown), style (dropdown dinámico según categoría)
-  - tags (chips input opcional)
-- [x] **Sección "Variantes"** (PrimeNG Fieldset colapsable):
-  - **Formulario inline** para agregar variantes:
-    - Size: Dropdown con P, M, G, GG en MAYÚSCULAS
-    - Color: Dropdown en español (Negro, Blanco, Gris, Azul Marino, Rojo, Azul)
-    - Stock: Input number con botones +/-
-    - Price: Input currency (BRL)
-  - **Validaciones**:
-    - Mínimo 1 variante requerida antes de crear producto
-    - No permitir duplicados size+color (validación frontend)
-    - Stock y price ≥ 0
-  - **Tabla de variantes agregadas** con headers claros:
-    - Columnas: Tamaño | Color | Stock | Precio | Acción
-    - Badges de tamaño con severity (P=info, M/G=success, GG=danger)
-    - Chips de color con hex real del color y texto contrastante
-    - Botón eliminar por variante (solo elimina del array local, sin toasts)
-  - **Empty state** cuando no hay variantes
-  - **Responsive**: Headers ocultos en mobile, labels inline
-- [x] Submit: Envía datos básicos + array de variantes al backend
+**ProductService**: `getProducts()`, `createProduct()`, `addVariant()`, `updateVariant()`, `deleteVariant()`, `activateProduct()`, `deactivateProduct()`.
 
-#### ProductFormComponent - Modo EDITAR
-- [x] Campos básicos editables (name, description, basePrice, category, style, status, tags)
-- [x] Code read-only (no se puede cambiar)
-- [x] **Tabla de Variantes** (PrimeNG Table editable):
-  - **Columnas**: Tamaño (badge) | Color (chip) | SKU (read-only) | Stock | Precio | Acciones
-  - **Edición inline granular** (estilo admin-orders):
-    - Click en stock/price → input editable
-    - Blur/Enter → guarda **inmediatamente** vía API (PATCH `/products/:id/variants/:sku`)
-    - Escape → cancela y restaura valor original
-    - Loading state durante guardado
-  - **Botón "Agregar Nueva Variante"**:
-    - Expande/contrae formulario inline (igual al de modo CREAR)
-    - Validación de duplicados size+color
-    - Llamada a API: POST `/products/:id/variants`
-    - Toast de éxito al agregar
-  - **Eliminación de variantes**:
-    - PrimeNG ConfirmDialog antes de eliminar
-    - Llamada a API: DELETE `/products/:id/variants/:sku`
-    - Manejo automático de errores (ej: variante con órdenes asociadas no se puede eliminar)
-    - Toast de éxito/error
-  - **Empty state** si no hay variantes
-- [x] **Guardado granular**: Cada cambio de variante se guarda al instante, independiente del botón "Actualizar Producto"
-- [x] Botón "Actualizar Producto" solo actualiza datos básicos (no variantes, ya están guardadas)
+#### FASE 5 bis: Upload de Imágenes
+`ImageUploadComponent` reutilizable en `shared/components/`. Upload múltiple (máx 5 imágenes), validaciones (JPEG/PNG/WebP, 5MB), preview con PrimeNG Image, eliminación con confirmación. Integrado solo en modo EDITAR de ProductForm.
 
-#### UI/UX
-- [x] **Toasts inteligentes**:
-  - Modo CREAR: Sin toasts al agregar/eliminar variantes (es array local)
-  - Modo EDITAR: Toasts en operaciones API (agregar, actualizar, eliminar variantes)
-- [x] Confirmaciones para eliminaciones
-- [x] Loading states en todas las operaciones
-- [x] Empty states informativos
-- [x] Validaciones frontend antes de llamar al backend
-- [x] Diseño responsive completo (mobile-first)
+#### FASE 6: Gestión de Órdenes
+`AdminOrdersComponent`: Tabla con filtros (estado orden, pago, fechas), búsqueda por número. `OrderDetailComponent`: Modal con info de cliente, dirección, productos (snapshot de precios), totales. Cambio de estado inline con validaciones (solo no-finales) y headless ConfirmDialog.
 
-#### Integración Backend
-- [x] Endpoints alineados con NestJS
-- [x] Validación de duplicados size+color
-- [x] Manejo de errores del backend:
-  - Code duplicado (409 Conflict)
-  - Variante con órdenes no se puede eliminar (400/409)
-  - Errores de validación (400 Bad Request)
-- [x] Actualización automática del producto completo después de operaciones de variantes
+#### FASE 7: Gestión de Usuarios
+**Backend**: Endpoints `/users`, `/users/:id`, `/users/:id/avatar` (upload Cloudinary), `/auth/me` (retorna usuario completo).
 
-### ✅ FASE 5 bis: Upload de Imágenes de Productos (COMPLETADA)
-- [x] Componente reutilizable `ImageUploadComponent` en `shared/components/`
-- [x] Upload de múltiples imágenes (hasta 5) con PrimeNG FileUpload
-- [x] Validaciones completas:
-  - Tipos de archivo permitidos: JPEG, PNG, WebP
-  - Tamaño máximo: 5MB por archivo
-  - Máximo 5 imágenes por producto
-- [x] Preview interactivo con grid responsive (PrimeNG Image component)
-- [x] Eliminación de imágenes con confirmación (PrimeNG ConfirmDialog)
-- [x] Loading states y progress bar durante upload
-- [x] Empty states informativos (sin imágenes, límite alcanzado, disabled)
-- [x] Integración en ProductFormComponent (solo modo EDITAR)
-- [x] Modelo Product.images[] implementado
-- [x] Métodos en ProductService:
-  - `uploadImages(productId, files)` → POST `/products/:id/images`
-  - `deleteImage(productId, imageIndex)` → DELETE `/products/:id/images/:index`
-- [x] UI/UX completa:
-  - Signal reactivo `productImages()`
-  - Handler `onImagesChanged()`
-  - Toasts descriptivos para errores y éxitos
-  - Responsive design (2 columnas mobile, flexible desktop)
-  - Hover states y animaciones suaves
+**AdminUsersComponent**: Tabla con avatar, filtros (rol, estado, búsqueda), paginación. Botón "Ver Detalle" abre modal.
 
-### ✅ FASE 6: Gestión de Órdenes (Admin) (COMPLETADA)
-- [x] Lista de órdenes con filtros (estado orden, estado pago, rango de fechas)
-- [x] Búsqueda por número de orden
-- [x] Vista detalle de orden (cliente, dirección, productos, totales)
-- [x] Cambio de estado de orden (inline desde lista + desde detalle)
-- [x] Vista de productos de la orden (tabla con precios snapshot)
-- [x] Validaciones (solo órdenes no finales pueden cambiar estado)
-- [x] Confirmación antes de cambiar estado
-- [x] Navegación lista ↔ detalle
+**UserDetailComponent**: Edición acumulativa (status, phone, avatar). Botón "Guardar" habilitado solo si hay cambios. Avatar clickeable → `AvatarOverlayComponent` fullscreen con preview. Sincronización con `AuthService.updateCurrentUser()` cuando admin edita su propio perfil.
 
-### ✅ FASE 7: Gestión de Usuarios (Admin) (COMPLETADA)
+**Shared**: `AvatarOverlayComponent` reutilizable con preview, validaciones, eventos.
 
-#### Backend
-- [x] Endpoint GET /users - Lista paginada con filtros (role, status, search)
-- [x] Endpoint GET /users/:id - Detalle de usuario
-- [x] Endpoint PATCH /users/:id - Actualizar usuario (status, phone)
-- [x] Endpoint PATCH /users/:id/avatar - Upload de avatar a Cloudinary
-- [x] Endpoint GET /auth/me - Retorna usuario completo desde BD (incluye avatar)
-- [x] UserMapper transforma `_id` a `id` para compatibilidad con frontend
-- [x] Validaciones: tipo de archivo (JPEG/PNG/WebP), tamaño máximo (2MB)
-- [x] Eliminación automática de avatar anterior en Cloudinary al subir uno nuevo
-
-#### Frontend - AdminUsersComponent
-- [x] Tabla responsive con columnas:
-  - Avatar (imagen o iniciales), Nombre, Email, Rol, Estado, Fecha registro
-- [x] Filtros:
-  - Rol (Admin/Usuario)
-  - Estado (Activo/Inactivo)
-  - Búsqueda por nombre, apellido o email
-- [x] Paginación server-side (lazy loading)
-- [x] Botón "Ver Detalle" que abre dialog modal
-- [x] Tags con colores según rol y estado
-- [x] Sincronización con AuthService cuando se edita el usuario actual logueado
-
-#### Frontend - UserDetailComponent
-- [x] Modal con toda la información del usuario:
-  - Avatar ampliado (clickeable)
-  - Información personal (nombre, email, teléfono)
-  - Rol (read-only, tag visual)
-  - Estado (editable con dropdown)
-  - Teléfono (editable con input)
-  - Email verificado (visual)
-  - Fecha de último login y registro
-  - ID técnico (código copiable)
-- [x] Edición acumulativa:
-  - Cambios se acumulan localmente
-  - Botón "Guardar Cambios" solo se habilita si hay cambios pendientes
-  - ConfirmDialog muestra lista detallada de cambios antes de guardar
-- [x] Avatar management:
-  - Click en avatar → Overlay fullscreen con imagen ampliada
-  - Botón "Cambiar Avatar" en overlay
-  - Preview inmediato de nueva imagen seleccionada
-  - Validaciones frontend (tipo, tamaño)
-  - Upload se ejecuta junto con otros cambios al hacer "Guardar Cambios"
-- [x] Manejo de errores con toasts descriptivos
-- [x] Computed signal `hasChanges()` detecta cambios pendientes
-- [x] Effect sincroniza valores editables cuando cambia el usuario
-
-#### Shared Components
-- [x] AvatarOverlayComponent (reutilizable):
-  - Overlay fullscreen con backdrop oscuro
-  - Muestra avatar ampliado (imagen o iniciales)
-  - Preview de nueva imagen antes de guardar
-  - Validaciones de archivo (tipo, tamaño)
-  - Botones: "Cambiar Avatar", "Cerrar"
-  - Animaciones suaves (fadeIn, scaleIn)
-  - Responsive design
-  - Emite eventos: `avatarSelected`, `validationError`
-
-#### AuthService Enhancements
-- [x] Método `getCurrentUser()`:
-  - Llama a GET /auth/me para obtener usuario completo
-  - Actualiza `currentUserSignal` automáticamente
-  - Se usa en `initializeAuth()` al recargar la página
-  - Se usa después de `refresh()` para sincronizar datos
-- [x] Método `updateCurrentUser(updatedUser)`:
-  - Actualiza signal solo si es el mismo usuario (por ID)
-  - Usado cuando admin edita su propio perfil
-  - Sincroniza header automáticamente
-- [x] initializeAuth() mejorado:
-  - Ya no decodifica solo el JWT (datos incompletos)
-  - Ahora llama a `/auth/me` para obtener datos completos (avatar, nombres, etc.)
-  - Restaura sesión con información completa al recargar
-
-#### AdminLayout Integration
-- [x] Avatar en header muestra imagen de BD si existe
-- [x] Fallback a iniciales si no hay avatar
-- [x] Actualización reactiva al editar perfil:
-  - AdminUsersComponent detecta si el usuario editado es el actual
-  - Llama a `authService.updateCurrentUser()`
-  - Header se actualiza instantáneamente sin reload
-- [x] Persistencia: Avatar se mantiene después de recargar (viene de BD vía `/auth/me`)
-
-#### UX Features
-- [x] Confirmación con vista previa de cambios antes de guardar
-- [x] Formato de confirmación con bullets indentados
-- [x] CSS `white-space: pre-line` para saltos de línea en ConfirmDialog
-- [x] Dialog se cierra automáticamente después de guardar exitosamente
-- [x] Loading states durante guardado
-- [x] Toasts descriptivos para todas las operaciones
-- [x] Avatar clickeable con hover effect (scale 1.05)
-- [x] Sin logs innecesarios en producción
+**UX**: Headless ConfirmDialogs en todo el panel admin (user-detail, admin-orders, admin-products) con íconos circulares grandes y mensajes contextuales.
 
 ### FASE 8: Catálogo Público (User)
 
 Dividida en 3 subfases para desarrollo incremental:
 
-#### FASE 8a: Home Landing Page
-- [ ] **Backend - Productos Destacados**:
-  - Agregar campo `featured: boolean` al modelo Product (default: false)
-  - Endpoint `GET /products/featured` - Retorna productos destacados activos
-  - Actualizar DTOs (CreateProductDto, UpdateProductDto)
-- [ ] **HomeComponent** (`/`):
-  - Hero section (banner principal con CTA "Explorar Catálogo")
-  - Grid de categorías (6 cards clickeables que filtran a `/shop?category=X`)
-  - Carousel de productos destacados (PrimeNG Carousel, hasta 12 productos)
-  - Footer con newsletter placeholder
-- [ ] **Componentes Reutilizables**:
-  - `HeroSectionComponent` - Banner principal responsive
-  - `CategoryCardComponent` - Card de categoría con imagen + nombre
-  - `ProductCardComponent` (shared) - Tarjeta de producto con imagen, nombre, precio base, badge "Destacado"
-- [ ] **Actualizar ProductListComponent**:
-  - Convertir de placeholder a catálogo público real
-  - Grid responsive de productos usando `ProductCardComponent`
-  - Búsqueda simple por nombre
-  - Integración con `getPublicCatalog()`
-- [ ] **Admin Products - Featured Toggle**:
-  - Columna "Destacado" en tabla con badge visual (star icon)
-  - Click en badge → toggle featured status (con ConfirmDialog)
-  - Validación: Máximo 12 productos destacados
-  - InputSwitch en product-form (modo editar)
-- [ ] **Rutas**:
-  - Cambiar redirect raíz de `''` a `'/'` (HomeComponent)
-  - Mantener `/products` para catálogo completo
-  - Crear placeholder `/products/:id` para detalle (FASE 8c)
-- [ ] **Assets**:
-  - Crear carpeta `src/assets/images/`
-  - Imagen hero banner placeholder
-  - 6 imágenes de categorías (remeras, pantalones, chaquetas, zapatillas, shorts, vestidos)
+#### ✅ FASE 8a: Home Landing Page
+**Backend**: Campo `destacado: boolean` en Product, endpoint `GET /products/destacados` (máx 12). Validación: máximo 12 productos destacados.
+
+**HomeComponent** (`/`): Hero section con CTA, grid de categorías (5 cards con imágenes locales en `public/assets/images/`), carousel de destacados (PrimeNG Carousel), footer placeholder.
+
+**Componentes**: `HeroSectionComponent`, `CategoryCardComponent`, `ProductCardComponent` (shared, reutilizable con badge "Destacado").
+
+**ProductListComponent** actualizado: Catálogo público real con grid responsive, búsqueda con debounce (300ms), filtros por query params (`/products?style=X&category=Y`), paginación server-side.
+
+**Admin**: Columna "Destacado" con star icon clickeable, InputSwitch en product-form, headless ConfirmDialog al toggle.
+
+**Assets**: Imágenes hero banner + 6 categorías (regular, oversize, slim, straight, skinny) en `public/assets/images/`.
 
 #### FASE 8b: Shop Catalog (Catálogo Completo con Filtros)
 - [ ] **ShopComponent** (`/shop`):
@@ -1143,376 +541,50 @@ Dividida en 3 subfases para desarrollo incremental:
 
 ### FASE 9: Carrito y Checkout (User)
 
-Sistema de carrito persistente con soporte para usuarios anónimos y autenticados.
+#### Estrategia de Persistencia
+- **Usuario ANÓNIMO**: Carrito en `localStorage` (frontend)
+- **Usuario AUTENTICADO**: Carrito en BD (backend)
+- **Al LOGIN**: Merge automático vía `POST /cart/items/batch`
 
-#### Estrategia: localStorage + Merge al Login
-
-**Arquitectura**:
-- **Usuario ANÓNIMO**: Carrito guardado en `localStorage` (frontend)
-- **Usuario AUTENTICADO**: Carrito guardado en BD (backend)
-- **Al hacer LOGIN**: Merge automático de carrito anónimo → carrito de usuario
-
-#### Backend - Endpoints de Carrito
-
-```typescript
-// Gestión de carrito (requiere autenticación)
-GET    /cart                    // Obtener carrito del usuario actual
-POST   /cart/items              // Agregar 1 item al carrito
-POST   /cart/items/batch        // ⭐ Agregar múltiples items (para merge)
-PATCH  /cart/items/:itemId      // Actualizar cantidad de item
-DELETE /cart/items/:itemId      // Remover item del carrito
-DELETE /cart                    // Vaciar carrito completo
-
-// Modelos
-interface CartItem {
-  id: string;                   // ID del item en el carrito
-  productId: string;
-  variantSku: string;           // SKU de la variante (ej: "REM-P-BLK")
-  quantity: number;
-  price: number;                // Precio snapshot al agregar
-  productSnapshot: {            // Info del producto al momento de agregar
-    name: string;
-    code: string;
-    image?: string;
-  };
-}
-
-interface Cart {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  totalItems: number;           // Suma de quantities
-  subtotal: number;             // Suma de (price * quantity)
-  createdAt: Date;
-  updatedAt: Date;
-}
+#### Backend - Endpoints
+```
+GET    /cart                    # Obtener carrito del usuario
+POST   /cart/items              # Agregar item
+POST   /cart/items/batch        # Agregar múltiples items (para merge)
+PATCH  /cart/items/:itemId      # Actualizar cantidad
+DELETE /cart/items/:itemId      # Remover item
+DELETE /cart                    # Vaciar carrito
 ```
 
-**Lógica de Merge**:
-```typescript
-// POST /cart/items/batch
-// Body: { items: [{ productId, variantSku, quantity }, ...] }
-// Backend:
-// - Si el usuario ya tiene un carrito:
-//   - Para cada item del batch:
-//     - Si la variante ya existe en el carrito: quantity += batch.quantity
-//     - Si no existe: agregar nuevo item
-// - Si no tiene carrito: crear nuevo con todos los items
-// - Respuesta: Cart completo actualizado
-```
+**Modelos**: Ver `core/models/cart.model.ts` para `Cart`, `CartItem`, `GuestCartItem`
 
 #### Frontend - CartService
+- [ ] **Signals reactivos**:
+  - `guestCartSignal` (localStorage)
+  - `userCartSignal` (BD)
+  - `cart` computed (switch según autenticación)
+  - `totalItems` y `subtotal` computed
+- [ ] **Métodos principales**:
+  - `addItem(productId, variantSku, quantity)` - Detecta anónimo vs autenticado
+  - `mergeGuestCartOnLogin()` - Llamado desde `AuthService.login()`
+  - `updateQuantity()`, `removeItem()`, `clearCart()` - Con soporte dual
+- [ ] **Integración con AuthService**: Mergear carrito post-login vía `switchMap`
 
-**Signals y Estado**:
-```typescript
-@Injectable({ providedIn: 'root' })
-export class CartService {
-  private authService = inject(AuthService);
+#### CartComponent (`/cart`)
+- [ ] Lista de items con imagen, variante (talla + color), cantidad editable, subtotal
+- [ ] Empty state con CTA a `/shop`
+- [ ] Resumen: Subtotal, envío, total, botón "Proceder al Checkout"
+- [ ] Validación de stock al cambiar cantidades
+- [ ] ConfirmDialog al eliminar items
+- [ ] Badge reactivo en navbar con `cartService.totalItems()`
 
-  // Signal para carrito de usuario anónimo (localStorage)
-  private guestCartSignal = signal<GuestCartItem[]>(this.loadGuestCart());
-
-  // Signal para carrito de usuario autenticado (BD)
-  private userCartSignal = signal<Cart | null>(null);
-
-  // Computed: muestra guest cart si anónimo, user cart si autenticado
-  readonly cart = computed(() =>
-    this.authService.isAuthenticated()
-      ? this.userCartSignal()
-      : this.guestCartSignal()
-  );
-
-  readonly totalItems = computed(() => {
-    const currentCart = this.cart();
-    if (!currentCart) return 0;
-
-    if (this.authService.isAuthenticated()) {
-      return (currentCart as Cart).totalItems;
-    } else {
-      return (currentCart as GuestCartItem[])
-        .reduce((sum, item) => sum + item.quantity, 0);
-    }
-  });
-
-  readonly subtotal = computed(() => {
-    const currentCart = this.cart();
-    if (!currentCart) return 0;
-
-    if (this.authService.isAuthenticated()) {
-      return (currentCart as Cart).subtotal;
-    } else {
-      return (currentCart as GuestCartItem[])
-        .reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    }
-  });
-}
-```
-
-**Métodos Principales**:
-```typescript
-// Cargar carrito de localStorage
-private loadGuestCart(): GuestCartItem[] {
-  const stored = localStorage.getItem('guest_cart');
-  return stored ? JSON.parse(stored) : [];
-}
-
-// Guardar carrito en localStorage
-private saveGuestCart(items: GuestCartItem[]): void {
-  localStorage.setItem('guest_cart', JSON.stringify(items));
-  this.guestCartSignal.set(items);
-}
-
-// Agregar item al carrito
-addItem(productId: string, variantSku: string, quantity: number): Observable<void> {
-  if (this.authService.isAuthenticated()) {
-    // Usuario autenticado → POST /cart/items
-    return this.http.post<Cart>('/cart/items', { productId, variantSku, quantity })
-      .pipe(
-        tap(cart => this.userCartSignal.set(cart)),
-        map(() => void 0)
-      );
-  } else {
-    // Usuario anónimo → actualizar localStorage
-    const currentCart = this.guestCartSignal();
-    const existingItem = currentCart.find(
-      item => item.variantSku === variantSku
-    );
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      // Necesitamos obtener info del producto primero
-      return this.productService.getPublicProductById(productId).pipe(
-        tap(product => {
-          const variant = product.variants.find(v => v.sku === variantSku);
-          const newItem: GuestCartItem = {
-            productId,
-            variantSku,
-            quantity,
-            price: variant.price,
-            productSnapshot: {
-              name: product.name,
-              code: product.code,
-              image: product.images?.[product.featuredImageIndex || 0]
-            }
-          };
-          this.saveGuestCart([...currentCart, newItem]);
-        }),
-        map(() => void 0)
-      );
-    }
-
-    this.saveGuestCart(currentCart);
-    return of(void 0);
-  }
-}
-
-// Merge de carrito anónimo al hacer login
-async mergeGuestCartOnLogin(): Promise<void> {
-  const guestItems = this.loadGuestCart();
-
-  if (guestItems.length === 0) {
-    // No hay items en carrito anónimo, solo cargar carrito de usuario
-    await firstValueFrom(this.loadUserCart());
-    return;
-  }
-
-  // Transformar guest items a formato de batch
-  const batchItems = guestItems.map(item => ({
-    productId: item.productId,
-    variantSku: item.variantSku,
-    quantity: item.quantity
-  }));
-
-  try {
-    // Enviar batch al backend
-    const mergedCart = await firstValueFrom(
-      this.http.post<Cart>('/cart/items/batch', { items: batchItems })
-    );
-
-    // Actualizar signal con carrito mergeado
-    this.userCartSignal.set(mergedCart);
-
-    // Limpiar localStorage
-    localStorage.removeItem('guest_cart');
-    this.guestCartSignal.set([]);
-
-    // Toast de éxito
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Carrito Sincronizado',
-      detail: `Se agregaron ${guestItems.length} productos a tu carrito`
-    });
-  } catch (error) {
-    console.error('Error al mergear carrito:', error);
-    // En caso de error, mantener items en localStorage
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error al Sincronizar',
-      detail: 'No se pudo sincronizar tu carrito. Intenta nuevamente.'
-    });
-  }
-}
-
-// Cargar carrito de usuario desde BD
-loadUserCart(): Observable<Cart> {
-  return this.http.get<Cart>('/cart').pipe(
-    tap(cart => this.userCartSignal.set(cart))
-  );
-}
-
-// Actualizar cantidad
-updateQuantity(itemId: string, quantity: number): Observable<void> {
-  if (this.authService.isAuthenticated()) {
-    return this.http.patch<Cart>(`/cart/items/${itemId}`, { quantity })
-      .pipe(
-        tap(cart => this.userCartSignal.set(cart)),
-        map(() => void 0)
-      );
-  } else {
-    // Guest cart: actualizar localStorage
-    const currentCart = this.guestCartSignal();
-    const item = currentCart.find(i => i.variantSku === itemId);
-    if (item) {
-      item.quantity = quantity;
-      this.saveGuestCart(currentCart);
-    }
-    return of(void 0);
-  }
-}
-
-// Remover item
-removeItem(itemId: string): Observable<void> {
-  if (this.authService.isAuthenticated()) {
-    return this.http.delete<Cart>(`/cart/items/${itemId}`)
-      .pipe(
-        tap(cart => this.userCartSignal.set(cart)),
-        map(() => void 0)
-      );
-  } else {
-    const currentCart = this.guestCartSignal();
-    const filtered = currentCart.filter(item => item.variantSku !== itemId);
-    this.saveGuestCart(filtered);
-    return of(void 0);
-  }
-}
-
-// Vaciar carrito
-clearCart(): Observable<void> {
-  if (this.authService.isAuthenticated()) {
-    return this.http.delete<void>('/cart');
-  } else {
-    localStorage.removeItem('guest_cart');
-    this.guestCartSignal.set([]);
-    return of(void 0);
-  }
-}
-```
-
-**Integración con AuthService**:
-```typescript
-// En AuthService.login() - después de login exitoso
-login(email: string, password: string): Observable<LoginResponse> {
-  return this.http.post<LoginResponse>('/auth/login', { email, password })
-    .pipe(
-      tap(response => {
-        localStorage.setItem('accessToken', response.accessToken);
-        this.currentUserSignal.set(response.user);
-      }),
-      switchMap(() => {
-        // ⭐ Mergear carrito anónimo
-        return from(this.cartService.mergeGuestCartOnLogin()).pipe(
-          map(() => response)
-        );
-      })
-    );
-}
-```
-
-#### Frontend - CartComponent (`/cart`)
-
-**Funcionalidades**:
-- [ ] Lista de items del carrito con:
-  - Imagen del producto (featuredImage)
-  - Nombre, código, variante (talla + color)
-  - Precio unitario
-  - Input de cantidad (con +/- buttons)
-  - Subtotal por item (precio × cantidad)
-  - Botón eliminar item
-- [ ] Empty state: "Tu carrito está vacío" con CTA a `/shop`
-- [ ] Resumen del carrito (sidebar en desktop, bottom en mobile):
-  - Subtotal
-  - Envío (calculado o "Gratis")
-  - Descuentos (si aplica)
-  - **Total**
-  - Botón "Proceder al Checkout" (deshabilitado si carrito vacío)
-- [ ] Loading states al actualizar cantidades
-- [ ] Confirmación al eliminar item (ConfirmDialog)
-- [ ] Validación de stock:
-  - Al cambiar cantidad, verificar stock disponible
-  - Si producto agotado: mostrar badge "Sin Stock" y deshabilitar checkout
-
-#### Frontend - Navbar Integration
-
-**Badge de Carrito**:
-```typescript
-// En navbar/header
-export class NavbarComponent {
-  private cartService = inject(CartService);
-
-  // Reactive badge count
-  cartItemCount = this.cartService.totalItems;
-}
-```
-
-```html
-<!-- Badge animado con cantidad de items -->
-<a routerLink="/cart" class="relative">
-  <i class="pi pi-shopping-cart text-2xl"></i>
-  @if (cartItemCount() > 0) {
-    <span class="absolute -top-2 -right-2 bg-red-500 text-white
-                 rounded-full w-5 h-5 flex items-center justify-center
-                 text-xs font-bold">
-      {{ cartItemCount() }}
-    </span>
-  }
-</a>
-```
-
-#### Checkout Flow (simplificado)
-
-- [ ] **CheckoutComponent** (`/checkout`):
-  - Guard: requiere autenticación (`authGuard`)
-  - Guard: requiere carrito no vacío (custom guard)
-  - **Step 1: Revisión de Productos**:
-    - Lista de items del carrito (read-only)
-    - Resumen de totales
-  - **Step 2: Dirección de Envío**:
-    - Formulario con validaciones (calle, número, ciudad, CP, etc.)
-    - Opción: Usar dirección guardada (si existe en perfil)
-  - **Step 3: Método de Pago**:
-    - Radio buttons: Efectivo / Transferencia / Mercado Pago (placeholder)
-    - Para MVP: Solo "Efectivo" habilitado
-  - **Step 4: Confirmación**:
-    - Resumen completo
-    - Botón "Confirmar Pedido"
-    - POST `/orders` → crea orden desde carrito
-    - Redirect a `/orders/:orderId/success`
-- [ ] **OrderSuccessComponent** (`/orders/:id/success`):
-  - Mensaje de éxito: "¡Pedido realizado!"
-  - Número de orden
-  - Resumen de la compra
-  - Estado inicial: PENDING
-  - CTA: "Ver mis pedidos" → `/profile/orders`
-
-#### Testing de Merge Flow
-
-**Escenarios a validar**:
-1. Usuario anónimo agrega productos → localStorage actualizado
-2. Usuario anónimo hace login → carrito se mergea correctamente
-3. Usuario con carrito existente hace login con items anónimos → cantidades se suman
-4. Usuario autenticado agrega productos → BD actualizada, localStorage vacío
-5. Usuario cierra sesión → carrito de BD no se pierde, localStorage limpio
+#### CheckoutComponent (`/checkout`)
+- [ ] Guards: `authGuard` + custom `cartNotEmptyGuard`
+- [ ] **Step 1**: Revisión de productos (read-only)
+- [ ] **Step 2**: Dirección de envío (formulario con validaciones)
+- [ ] **Step 3**: Método de pago (MVP: solo "Efectivo")
+- [ ] **Step 4**: Confirmación → `POST /orders` → redirect a success
+- [ ] **OrderSuccessComponent**: Mensaje de éxito, número de orden, CTA a perfil
 
 ---
 
@@ -1581,4 +653,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-09 (FASE 7 completada: Gestión de usuarios con avatar upload, edición inline, y sincronización con AuthService)
+**Última actualización**: 2025-11-15 (FASE 8a completada: Home Landing Page con hero section, grid de categorías con imágenes locales, carousel de productos destacados, catálogo público con filtros por query params, y headless ConfirmDialogs en todo el panel admin)

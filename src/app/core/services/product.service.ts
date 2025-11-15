@@ -130,20 +130,65 @@ export class ProductService {
   getPublicCatalog(filters?: FilterProductDto): Observable<PaginatedResponse<ProductListItem>> {
     let params = new HttpParams();
 
+    // Paginación
     if (filters?.page) {
       params = params.set('page', filters.page.toString());
     }
     if (filters?.limit) {
       params = params.set('limit', filters.limit.toString());
     }
+
+    // Búsqueda
     if (filters?.search) {
       params = params.set('search', filters.search);
     }
+
+    // Filtros singulares (retrocompatibilidad)
     if (filters?.category) {
       params = params.set('category', filters.category);
     }
     if (filters?.style) {
       params = params.set('style', filters.style);
+    }
+    if (filters?.size) {
+      params = params.set('size', filters.size);
+    }
+    if (filters?.color) {
+      params = params.set('color', filters.color);
+    }
+    if (filters?.tags && filters.tags.length > 0) {
+      params = params.set('tags', filters.tags.join(','));
+    }
+
+    // FILTROS AVANZADOS (FASE 8b)
+
+    // Rango de precios
+    if (filters?.minPrice !== undefined) {
+      params = params.set('minPrice', filters.minPrice.toString());
+    }
+    if (filters?.maxPrice !== undefined) {
+      params = params.set('maxPrice', filters.maxPrice.toString());
+    }
+
+    // Ordenamiento
+    if (filters?.sortBy) {
+      params = params.set('sortBy', filters.sortBy);
+    }
+
+    // Filtros múltiples (arrays a CSV)
+    if (filters?.sizes && filters.sizes.length > 0) {
+      params = params.set('sizes', filters.sizes.join(','));
+    }
+    if (filters?.colors && filters.colors.length > 0) {
+      params = params.set('colors', filters.colors.join(','));
+    }
+    if (filters?.styles && filters.styles.length > 0) {
+      params = params.set('styles', filters.styles.join(','));
+    }
+
+    // Filtro de destacados
+    if (filters?.destacado !== undefined) {
+      params = params.set('destacado', filters.destacado.toString());
     }
 
     return this.http.get<PaginatedResponse<ProductListItem>>(`${this.apiUrl}/catalog`, { params });

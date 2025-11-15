@@ -5,6 +5,7 @@
   width: 100%;
 }
 
+/* ===== MODO GRID (vertical card) ===== */
 .product-card {
   height: 100%;
   transition: all 0.3s ease;
@@ -14,6 +15,28 @@
   transform: translateY(-4px);
 }
 
+/* Asegurar que la imagen mantenga aspect ratio */
+.product-card img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+/* ===== MODO LIST (horizontal layout) ===== */
+.product-card-list {
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.product-card-list:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-card-list img {
+  object-fit: cover;
+}
+
+/* ===== UTILIDADES ===== */
 /* Line clamp para limitar texto a 2 líneas */
 .line-clamp-2 {
   display: -webkit-box;
@@ -22,8 +45,14 @@
   overflow: hidden;
 }
 
-/* Asegurar que la imagen mantenga aspect ratio */
-.product-card img {
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+/* Responsive: Mobile */
+@media (max-width: 640px) {
+  /* En modo list, stackear verticalmente en mobile */
+  .product-card-list .flex {
+    flex-direction: column;
+  }
+
+  .product-card-list .w-48 {
+    width: 100%;
+  }
 }

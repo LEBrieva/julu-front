@@ -1,0 +1,59 @@
+.filter-sidebar {
+  @apply flex flex-col h-full bg-white;
+}
+
+/* Header */
+.sidebar-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50;
+}
+
+/* Contenedor de filtros (scrolleable) */
+.filters-container {
+  @apply flex-1 overflow-y-auto px-4 py-3;
+}
+
+/* Secci�n individual de filtro */
+.filter-section {
+  @apply mb-4;
+}
+
+.filter-label {
+  @apply block font-medium text-gray-700 mb-2 flex items-center gap-2;
+}
+
+.filter-label i {
+  @apply text-blue-600;
+}
+
+/* Rango de precios */
+.price-range-container {
+  @apply mt-4;
+}
+
+.price-labels {
+  @apply flex justify-between mt-2;
+}
+
+/* Acciones (fijas al final) */
+.sidebar-actions {
+  @apply flex flex-col gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50;
+}
+
+/* Responsive: Mobile */
+@media (max-width: 768px) {
+  .filter-sidebar {
+    @apply max-w-none;
+  }
+
+  .sidebar-header h3 {
+    @apply text-lg;
+  }
+
+  .filters-container {
+    @apply px-3;
+  }
+
+  .sidebar-actions {
+    @apply px-3;
+  }
+}

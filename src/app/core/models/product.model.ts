@@ -183,6 +183,7 @@ export interface ProductListItem {
   id: string;
   name: string;
   code: string;
+  description?: string; // FASE 8b: Agregado para modo list view
   basePrice: number;
   status: string;
   category?: string;
@@ -268,12 +269,16 @@ export interface UpdateSingleVariantDto {
 
 /**
  * DTO para filtrar productos (query params)
- * Usado en: GET /products?page=1&limit=10&search=...
+ * Usado en: GET /products/catalog?page=1&limit=10&search=...
+ * FASE 8b: Agregados filtros avanzados para shop catalog
  */
 export interface FilterProductDto {
+  // Filtros básicos
   search?: string;      // Búsqueda por texto (nombre/descripción)
   page?: number;        // Número de página (default: 1)
   limit?: number;       // Items por página (default: 10)
+
+  // Filtros singulares (retrocompatibilidad)
   category?: ProductCategory;
   style?: ProductStyle;
   code?: string;
@@ -281,6 +286,22 @@ export interface FilterProductDto {
   tags?: string[];
   size?: ProductSize;
   color?: ProductColor;
+
+  // FILTROS AVANZADOS (FASE 8b)
+  // Rango de precios
+  minPrice?: number;
+  maxPrice?: number;
+
+  // Ordenamiento dinámico
+  sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+
+  // Filtros múltiples (arrays)
+  sizes?: ProductSize[];        // Tallas múltiples (P, M, G, GG)
+  colors?: ProductColor[];      // Colores múltiples
+  styles?: ProductStyle[];      // Estilos múltiples (solo remeras: regular, oversize, slim_fit)
+
+  // Filtro de destacados
+  destacado?: boolean;
 }
 
 // ===========================

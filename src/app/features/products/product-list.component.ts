@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -11,22 +11,33 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
 import { Paginator } from 'primeng/paginator';
+import { DataViewModule } from 'primeng/dataview';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DrawerModule } from 'primeng/drawer';
+import { BadgeModule } from 'primeng/badge';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Services and models
 import { ProductService } from '../../core/services/product.service';
-import { ProductListItem } from '../../core/models/product.model';
+import { ProductListItem, FilterProductDto } from '../../core/models/product.model';
 
 // Shared components
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { FilterSidebarComponent } from './components/filter-sidebar/filter-sidebar';
+import { ActiveFiltersComponent } from '../../shared/components/active-filters/active-filters';
 
 /**
- * ProductListComponent - Catálogo público de productos
+ * ProductListComponent - Catálogo público de productos con filtros avanzados
  *
- * Funcionalidades:
- * - Grid responsive de productos
+ * FASE 8b Features:
+ * - Grid/List view toggle con PrimeNG DataView
+ * - Sidebar de filtros avanzados (precio, tallas, colores, estilos, tags, destacados)
+ * - Active filters chips (removibles)
+ * - Sincronización con query params del router (URL compartible)
+ * - Persistencia de preferencia de vista en localStorage
  * - Búsqueda con debounce (300ms)
- * - Paginación
- * - Loading y empty states
+ * - Paginación server-side
+ * - Responsive (sidebar overlay en mobile)
  */
 @Component({
   selector: 'app-product-list',
@@ -39,7 +50,14 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
     InputIconModule,
     ButtonModule,
     Paginator,
-    ProductCardComponent
+    DataViewModule,
+    ProgressSpinnerModule,
+    DrawerModule,
+    BadgeModule,
+    TooltipModule,
+    ProductCardComponent,
+    FilterSidebarComponent,
+    ActiveFiltersComponent
   ],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
@@ -47,6 +65,7 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
 export class ProductListComponent implements OnInit, OnDestroy {
   // Services
   private productService = inject(ProductService);
+  private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
   // State (usando signals)
@@ -57,25 +76,52 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Paginación
   totalRecords = signal<number>(0);
   currentPage = 1;
-  rowsPerPage = 12; // 12 productos por página (3 columnas × 4 filas)
+  rowsPerPage = 12; // 12 productos por página
+  rowsPerPageOptions = [12, 24, 36];
   first = 0; // Para PrimeNG Paginator
 
   // Búsqueda
   searchTerm = '';
   private searchSubject = new Subject<string>();
 
-  // Filtros de query params (ej: ?style=regular&category=remera)
-  private currentFilters: any = {};
+  // Filtros activos (sincronizados con query params)
+  activeFilters = signal<FilterProductDto>({});
+
+  // View mode (Grid / List)
+  viewMode = signal<'grid' | 'list'>('grid');
+
+  // Sidebar state (mobile)
+  sidebarVisible = signal<boolean>(false);
+
+  // Contador de filtros activos (para badge)
+  activeFiltersCount = computed(() => {
+    const filters = this.activeFilters();
+    let count = 0;
+    if (filters.styles?.length) count++;
+    if (filters.sizes?.length) count++;
+    if (filters.colors?.length) count++;
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
+    if (filters.destacado) count++;
+    if (filters.tags?.length) count++;
+    return count;
+  });
 
   ngOnInit(): void {
-    // Suscribirse a query params (ej: /products?style=regular&category=remera)
+    // Cargar preferencia de vista desde localStorage
+    const savedViewMode = localStorage.getItem('catalogViewMode') as 'grid' | 'list' | null;
+    if (savedViewMode) {
+      this.viewMode.set(savedViewMode);
+    }
+
+    // Procesar query params iniciales
+    const initialParams = this.activatedRoute.snapshot.queryParams;
+    const initialFilters = this.parseQueryParamsToFilters(initialParams);
+    this.activeFilters.set(initialFilters);
+
+    // Suscribirse a cambios en query params (para futuros cambios)
     this.activatedRoute.queryParams.subscribe((params) => {
-      // Extraer filtros de query params
-      this.currentFilters = {};
-      if (params['style']) this.currentFilters.style = params['style'];
-      if (params['category']) this.currentFilters.category = params['category'];
-      if (params['minPrice']) this.currentFilters.minPrice = params['minPrice'];
-      if (params['maxPrice']) this.currentFilters.maxPrice = params['maxPrice'];
+      const filters = this.parseQueryParamsToFilters(params);
+      this.activeFilters.set(filters);
 
       // Resetear paginación al cambiar filtros
       this.currentPage = 1;
@@ -93,10 +139,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
       )
       .subscribe((searchValue) => {
         this.searchTerm = searchValue;
-        this.currentPage = 1;
-        this.first = 0;
-        this.loadProducts();
+        this.updateQueryParams({ search: searchValue || undefined });
       });
+
+    // Cargar productos inicialmente
+    this.loadProducts();
   }
 
   ngOnDestroy(): void {
@@ -104,18 +151,17 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Carga productos desde el backend
-   * Incluye filtros de query params, búsqueda y paginación
+   * Carga productos desde el backend con filtros activos
    */
   loadProducts(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    const filters = {
+    const filters: FilterProductDto = {
+      ...this.activeFilters(),
       page: this.currentPage,
       limit: this.rowsPerPage,
-      search: this.searchTerm || undefined,
-      ...this.currentFilters // Agregar filtros de query params (style, category, etc.)
+      search: this.searchTerm || undefined
     };
 
     this.productService.getPublicCatalog(filters).subscribe({
@@ -125,11 +171,59 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error cargando productos:', err);
         this.error.set('No se pudieron cargar los productos. Intenta nuevamente.');
         this.loading.set(false);
       }
     });
+  }
+
+  /**
+   * Aplica filtros desde el sidebar
+   */
+  onFiltersApplied(filters: FilterProductDto): void {
+    this.updateQueryParams(filters);
+    this.sidebarVisible.set(false); // Cerrar sidebar en mobile
+  }
+
+  /**
+   * Limpia todos los filtros
+   */
+  onFiltersClear(): void {
+    this.searchTerm = '';
+    this.updateQueryParams({});
+    this.sidebarVisible.set(false);
+  }
+
+  /**
+   * Remueve un filtro individual desde ActiveFiltersComponent
+   */
+  onFilterRemoved(filterKey: string): void {
+    const currentFilters = { ...this.activeFilters() };
+
+    // Remover el filtro específico
+    switch (filterKey) {
+      case 'styles':
+        delete currentFilters.styles;
+        break;
+      case 'sizes':
+        delete currentFilters.sizes;
+        break;
+      case 'colors':
+        delete currentFilters.colors;
+        break;
+      case 'price':
+        delete currentFilters.minPrice;
+        delete currentFilters.maxPrice;
+        break;
+      case 'destacado':
+        delete currentFilters.destacado;
+        break;
+      case 'tags':
+        delete currentFilters.tags;
+        break;
+    }
+
+    this.updateQueryParams(currentFilters);
   }
 
   /**
@@ -154,6 +248,105 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.currentPage = event.page + 1; // PrimeNG usa índice 0, backend usa 1
     this.rowsPerPage = event.rows;
     this.first = event.first;
+    this.loadProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+  }
+
+  /**
+   * Toggle view mode (Grid / List)
+   */
+  toggleViewMode(): void {
+    const newMode = this.viewMode() === 'grid' ? 'list' : 'grid';
+    this.viewMode.set(newMode);
+    localStorage.setItem('catalogViewMode', newMode);
+  }
+
+  /**
+   * Toggle sidebar (mobile)
+   */
+  toggleSidebar(): void {
+    this.sidebarVisible.set(!this.sidebarVisible());
+  }
+
+  /**
+   * Actualiza query params del router (sincronización URL)
+   */
+  private updateQueryParams(filters: Partial<FilterProductDto>): void {
+    const queryParams: any = {};
+
+    // Filtros básicos
+    if (filters.search) queryParams.search = filters.search;
+    if (filters.sortBy && filters.sortBy !== 'newest') queryParams.sortBy = filters.sortBy;
+
+    // Filtros avanzados (arrays a CSV)
+    if (filters.styles?.length) queryParams.styles = filters.styles.join(',');
+    if (filters.sizes?.length) queryParams.sizes = filters.sizes.join(',');
+    if (filters.colors?.length) queryParams.colors = filters.colors.join(',');
+    if (filters.tags?.length) queryParams.tags = filters.tags.join(',');
+
+    // Rango de precios
+    if (filters.minPrice !== undefined) queryParams.minPrice = filters.minPrice;
+    if (filters.maxPrice !== undefined) queryParams.maxPrice = filters.maxPrice;
+
+    // Destacados
+    if (filters.destacado) queryParams.destacado = 'true';
+
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams,
+      // NO usar 'merge' para evitar mantener filtros viejos
+    });
+  }
+
+  /**
+   * Parsea query params a FilterProductDto
+   */
+  private parseQueryParamsToFilters(params: any): FilterProductDto {
+    const filters: FilterProductDto = {};
+
+    // Búsqueda
+    if (params['search']) {
+      this.searchTerm = params['search'];
+      filters.search = params['search'];
+    }
+
+    // Ordenamiento
+    if (params['sortBy']) filters.sortBy = params['sortBy'];
+
+    // Estilos (CSV a array)
+    if (params['styles']) {
+      filters.styles = params['styles'].split(',');
+    }
+
+    // Tallas (CSV a array)
+    if (params['sizes']) {
+      filters.sizes = params['sizes'].split(',');
+    }
+
+    // Colores (CSV a array)
+    if (params['colors']) {
+      filters.colors = params['colors'].split(',');
+    }
+
+    // Tags (CSV a array)
+    if (params['tags']) {
+      filters.tags = params['tags'].split(',');
+    }
+
+    // Rango de precios
+    if (params['minPrice']) filters.minPrice = Number(params['minPrice']);
+    if (params['maxPrice']) filters.maxPrice = Number(params['maxPrice']);
+
+    // Destacados
+    if (params['destacado'] === 'true') filters.destacado = true;
+
+    return filters;
+  }
+
+  /**
+   * Retry al fallar la carga
+   */
+  retryLoad(): void {
     this.loadProducts();
   }
 }
