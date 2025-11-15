@@ -51,6 +51,11 @@ export class AdminLayoutComponent {
       command: () => this.goToProfile()
     },
     {
+      label: 'Ir a Home',
+      icon: 'pi pi-home',
+      command: () => this.goToHome()
+    },
+    {
       separator: true
     },
     {
@@ -100,6 +105,13 @@ export class AdminLayoutComponent {
   goToProfile(): void {
     // TODO: Implementar página de perfil
     console.log('Navigate to profile');
+  }
+
+  /**
+   * Navegar al home público del ecommerce (sin cerrar sesión)
+   */
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 
   /**

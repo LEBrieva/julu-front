@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -46,6 +47,7 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
 export class ProductListComponent implements OnInit, OnDestroy {
   // Services
   private productService = inject(ProductService);
+  private activatedRoute = inject(ActivatedRoute);
 
   // State (usando signals)
   products = signal<ProductListItem[]>([]);
@@ -62,7 +64,27 @@ export class ProductListComponent implements OnInit, OnDestroy {
   searchTerm = '';
   private searchSubject = new Subject<string>();
 
+  // Filtros de query params (ej: ?style=regular&category=remera)
+  private currentFilters: any = {};
+
   ngOnInit(): void {
+    // Suscribirse a query params (ej: /products?style=regular&category=remera)
+    this.activatedRoute.queryParams.subscribe((params) => {
+      // Extraer filtros de query params
+      this.currentFilters = {};
+      if (params['style']) this.currentFilters.style = params['style'];
+      if (params['category']) this.currentFilters.category = params['category'];
+      if (params['minPrice']) this.currentFilters.minPrice = params['minPrice'];
+      if (params['maxPrice']) this.currentFilters.maxPrice = params['maxPrice'];
+
+      // Resetear paginación al cambiar filtros
+      this.currentPage = 1;
+      this.first = 0;
+
+      // Recargar productos con nuevos filtros
+      this.loadProducts();
+    });
+
     // Configurar debounce para búsqueda (300ms)
     this.searchSubject
       .pipe(
@@ -75,9 +97,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.first = 0;
         this.loadProducts();
       });
-
-    // Cargar productos iniciales
-    this.loadProducts();
   }
 
   ngOnDestroy(): void {
@@ -86,6 +105,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   /**
    * Carga productos desde el backend
+   * Incluye filtros de query params, búsqueda y paginación
    */
   loadProducts(): void {
     this.loading.set(true);
@@ -94,7 +114,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const filters = {
       page: this.currentPage,
       limit: this.rowsPerPage,
-      search: this.searchTerm || undefined
+      search: this.searchTerm || undefined,
+      ...this.currentFilters // Agregar filtros de query params (style, category, etc.)
     };
 
     this.productService.getPublicCatalog(filters).subscribe({
