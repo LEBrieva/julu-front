@@ -30,3 +30,20 @@
 :host ::ng-deep .p-datatable .p-datatable-emptymessage {
   background: transparent;
 }
+
+/* ===========================
+   ConfirmDialog - Headless Template
+   =========================== */
+
+/* Información de cambio de estado en el dialog */
+.status-change-info {
+  background-color: #f8f9fa;
+  border-left: 3px solid #0d6efd;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  max-width: 400px;
+}
+
+.status-change-info .text-primary {
+  color: #0d6efd;
+}

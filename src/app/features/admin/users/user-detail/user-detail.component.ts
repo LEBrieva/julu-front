@@ -79,6 +79,9 @@ export class UserDetailComponent {
   avatarPreview = signal<string | null>(null);
   showAvatarOverlay = signal(false);
 
+  // Cambios pendientes para el headless dialog
+  pendingChanges: string[] = [];
+
   // Detecta si hay cambios pendientes
   hasChanges = computed(() => {
     const currentUser = this.user();
@@ -161,25 +164,24 @@ export class UserDetailComponent {
       return;
     }
 
-    // Construir mensaje de confirmación dinámico con bullets
-    const changes: string[] = [];
+    // Construir lista de cambios para el headless dialog
+    this.pendingChanges = [];
     if (this.editableStatus() !== currentUser.status) {
-      changes.push(`   • Estado: ${this.editableStatus() === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'}`);
+      this.pendingChanges.push(`Estado: ${this.editableStatus() === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'}`);
     }
     if (this.editablePhone() !== (currentUser.phone || '')) {
       const phoneValue = this.editablePhone() || '(vacío)';
-      changes.push(`   • Teléfono: ${phoneValue}`);
+      this.pendingChanges.push(`Teléfono: ${phoneValue}`);
     }
     if (this.selectedAvatarFile()) {
-      changes.push(`   • Avatar: Nueva imagen seleccionada`);
+      this.pendingChanges.push(`Avatar: Nueva imagen seleccionada`);
     }
 
-    const message = `¿Desea guardar los siguientes cambios para ${currentUser.firstName} ${currentUser.lastName}?\n\n${changes.join('\n')}`;
-
     this.confirmationService.confirm({
-      message: message,
+      key: 'saveChanges',
+      message: `¿Desea guardar los siguientes cambios para ${currentUser.firstName} ${currentUser.lastName}?`,
       header: 'Confirmar Cambios',
-      icon: 'pi pi-exclamation-triangle',
+      icon: 'pi pi-save',
       acceptLabel: 'Sí, guardar',
       rejectLabel: 'Cancelar',
       accept: () => {

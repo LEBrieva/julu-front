@@ -1,8 +1,72 @@
 <!-- Toasts para notificaciones -->
 <p-toast></p-toast>
 
-<!-- Confirmación para activar/desactivar -->
-<p-confirmDialog></p-confirmDialog>
+<!-- Confirmación para activar/desactivar con template headless -->
+<p-confirmDialog key="toggleStatus">
+  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+    <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
+      <div class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20">
+        <i [class]="message.icon || 'pi pi-question-circle'" class="!text-5xl"></i>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
+      <p class="mb-0 text-center text-gray-700">{{ message.message }}</p>
+
+      @if (pendingStatusChange) {
+        <div class="status-change-info mt-4">
+          <p class="product-name">{{ pendingStatusChange.productName }}</p>
+          <p class="action-label">{{ pendingStatusChange.action }}</p>
+        </div>
+      }
+
+      <div class="flex items-center gap-2 mt-6">
+        <p-button
+          [label]="message.acceptLabel || 'Confirmar'"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+
+<!-- Confirmación para destacar productos con template headless -->
+<p-confirmDialog key="destacado">
+  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+    <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
+      <div class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20">
+        <i [class]="message.icon || 'pi pi-star'" class="!text-5xl"></i>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
+      <p class="mb-0 text-center">{{ message.message }}</p>
+
+      @if (showDestacadoNote) {
+        <div class="destacado-note mt-4">
+          <p class="mb-0">Solo puede haber hasta 12 productos destacados. Si ya hay 12, debes desactivar otro primero.</p>
+        </div>
+      }
+
+      <div class="flex items-center gap-2 mt-6">
+        <p-button
+          [label]="message.acceptLabel || 'Confirmar'"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
 
 <!-- Contenedor principal -->
 <div class="products-container">

@@ -80,6 +80,9 @@ export class AdminOrdersComponent implements OnInit {
   editingOrderId: string | null = null;
   originalStatus: OrderStatus | null = null;
 
+  // Para headless dialog
+  pendingStatusChange: { from: string; to: string } | null = null;
+
   // Filtros
   searchTerm = '';
   selectedStatus: OrderStatus | null = null;
@@ -257,11 +260,18 @@ export class AdminOrdersComponent implements OnInit {
     const newStatusLabel = formatOrderStatus(newStatus);
     const currentStatusLabel = formatOrderStatus(this.originalStatus!);
 
-    // Mostrar confirmación
+    // Guardar cambio pendiente para mostrar en el headless dialog
+    this.pendingStatusChange = {
+      from: currentStatusLabel,
+      to: newStatusLabel
+    };
+
+    // Mostrar confirmación con headless template
     this.confirmationService.confirm({
-      message: `¿Cambiar estado de "${currentStatusLabel}" a "${newStatusLabel}"?`,
-      header: 'Confirmar Cambio',
-      icon: 'pi pi-exclamation-triangle',
+      key: 'changeStatus',
+      message: `¿Desea cambiar el estado de la orden ${order.orderNumber}?`,
+      header: 'Confirmar Cambio de Estado',
+      icon: 'pi pi-refresh',
       acceptLabel: 'Sí, cambiar',
       rejectLabel: 'Cancelar',
       accept: () => {

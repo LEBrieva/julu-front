@@ -226,3 +226,49 @@
 .text-danger {
   color: #dc3545;
 }
+
+/* ===========================
+   ConfirmDialog - Headless Templates
+   =========================== */
+
+/* Información de cambio de estado (activar/desactivar) */
+.status-change-info {
+  background-color: #f8f9fa;
+  border-left: 3px solid #0d6efd;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  max-width: 400px;
+  text-align: center;
+}
+
+.status-change-info .product-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.status-change-info .action-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0d6efd;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Nota informativa en el dialog de destacado */
+.destacado-note {
+  background-color: #f8f9fa;
+  border-left: 3px solid #0d6efd;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  max-width: 400px;
+}
+
+.destacado-note p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #6c757d;
+  text-align: center;
+}

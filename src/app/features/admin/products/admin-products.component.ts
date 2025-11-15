@@ -66,6 +66,12 @@ export class AdminProductsComponent implements OnInit {
   loading = false;
   searchTerm = '';
 
+  // Dialog destacado - mostrar nota solo cuando se está activando
+  showDestacadoNote = false;
+
+  // Para headless dialog de activar/desactivar
+  pendingStatusChange: { productName: string; action: string } | null = null;
+
   // Pagination
   totalRecords = 0;
   currentPage = 1;
@@ -190,10 +196,17 @@ export class AdminProductsComponent implements OnInit {
     const action = isActive ? 'desactivar' : 'activar';
     const actionCaps = isActive ? 'Desactivar' : 'Activar';
 
+    // Guardar información del cambio para el headless dialog
+    this.pendingStatusChange = {
+      productName: product.name,
+      action: actionCaps
+    };
+
     this.confirmationService.confirm({
-      message: `¿Estás seguro que deseas ${action} el producto "${product.name}"?`,
+      key: 'toggleStatus',
+      message: `¿Estás seguro que deseas ${action} el producto?`,
       header: `${actionCaps} Producto`,
-      icon: 'pi pi-exclamation-triangle',
+      icon: isActive ? 'pi pi-times-circle' : 'pi pi-check-circle',
       acceptLabel: actionCaps,
       rejectLabel: 'Cancelar',
       accept: () => {
@@ -236,14 +249,15 @@ export class AdminProductsComponent implements OnInit {
     const action = isDestacado ? 'quitar de destacados' : 'marcar como destacado';
     const actionCaps = isDestacado ? 'Quitar de Destacados' : 'Marcar como Destacado';
 
+    // Mostrar nota solo cuando se está activando (marcar como destacado)
+    this.showDestacadoNote = !isDestacado;
+
     this.confirmationService.confirm({
-      message: `¿Estás seguro que deseas ${action} el producto "${product.name}"?${
-        !isDestacado ? '\n\nNota: Solo puede haber hasta 12 productos destacados. Si ya hay 12, debes desactivar otro primero.' : ''
-      }`,
+      key: 'destacado',
+      message: `¿Estás seguro que deseas ${action} el producto "${product.name}"?`,
       header: actionCaps,
       icon: isDestacado ? 'pi pi-star-fill' : 'pi pi-star',
       acceptLabel: 'Confirmar',
-      rejectLabel: 'Cancelar',
       accept: () => {
         this.loading = true;
 

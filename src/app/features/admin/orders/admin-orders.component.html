@@ -1,8 +1,42 @@
 <!-- Toast para notificaciones -->
 <p-toast />
 
-<!-- Dialog de confirmación -->
-<p-confirmdialog />
+<!-- Dialog de confirmación con headless template -->
+<p-confirmDialog key="changeStatus">
+  <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
+    <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
+      <div class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20">
+        <i [class]="message.icon || 'pi pi-refresh'" class="!text-5xl"></i>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
+      <p class="mb-0 text-center text-gray-700">{{ message.message }}</p>
+
+      @if (pendingStatusChange) {
+        <div class="status-change-info mt-4">
+          <div class="flex items-center justify-center gap-3">
+            <span class="text-lg font-semibold text-gray-700">{{ pendingStatusChange.from }}</span>
+            <i class="pi pi-arrow-right text-primary text-xl"></i>
+            <span class="text-lg font-semibold text-primary">{{ pendingStatusChange.to }}</span>
+          </div>
+        </div>
+      }
+
+      <div class="flex items-center gap-2 mt-6">
+        <p-button
+          [label]="message.acceptLabel || 'Confirmar'"
+          (onClick)="onAccept()"
+          styleClass="w-32"
+        ></p-button>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          (onClick)="onReject()"
+          styleClass="w-32"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
 
 <!-- Contenedor principal -->
 <div class="p-4">
