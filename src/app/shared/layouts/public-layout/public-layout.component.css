@@ -1,0 +1,13 @@
+/* ========== PUBLIC LAYOUT ========== */
+.public-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== CONTENIDO PRINCIPAL ========== */
+.public-content {
+  flex: 1;
+  /* El contenido ocupa todo el espacio disponible */
+  /* No añadimos padding aquí porque cada página (Home, ProductList) maneja su propio spacing */
+}

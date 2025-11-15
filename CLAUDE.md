@@ -486,26 +486,29 @@ Dividida en 3 subfases para desarrollo incremental:
 
 **Assets**: Imágenes hero banner + 6 categorías (regular, oversize, slim, straight, skinny) en `public/assets/images/`.
 
-#### FASE 8b: Shop Catalog (Catálogo Completo con Filtros)
-- [ ] **ShopComponent** (`/shop`):
-  - Grid/List toggle view (PrimeNG DataView)
-  - Sidebar con filtros avanzados:
-    - Categoría (multiselect)
-    - Rango de precios (PrimeNG Slider)
-    - Tallas disponibles (P, M, G, GG)
-    - Colores disponibles (chips visuales)
-    - Estado (activo/inactivo - solo admin)
-  - Barra de búsqueda global
-  - Ordenamiento (más nuevo, precio asc/desc, nombre A-Z)
-  - Paginación server-side
-  - Empty states cuando no hay resultados
-- [ ] **Filtros en Mobile**:
-  - Botón "Filtros" que abre PrimeNG Sidebar
-  - Botón "Aplicar" y "Limpiar Filtros"
-  - Badge con cantidad de filtros activos
-- [ ] **ProductService - Métodos de filtrado**:
-  - Actualizar `getPublicCatalog()` para soportar múltiples filtros
-  - Query params: `?category=remeras&minPrice=1000&maxPrice=5000&sizes=P,M&colors=black,white&sort=price_asc`
+#### ✅ FASE 8b: Shop Catalog (Catálogo Completo con Filtros)
+**ProductListComponent** (`/products`):
+  - ✅ Grid/List toggle view (grid simple con Tailwind)
+  - ✅ Sidebar con filtros avanzados:
+    - ✅ Rango de precios (PrimeNG Slider)
+    - ✅ Tallas disponibles (P, M, G, GG) - multiselect
+    - ✅ Colores disponibles (chips visuales) - multiselect
+    - ✅ Estilos (Regular, Oversize, Slim Fit) - multiselect
+    - ✅ Tags (input de texto separado por comas)
+    - ✅ Productos destacados (toggle switch)
+  - ✅ Barra de búsqueda global con debounce (300ms)
+  - ✅ Ordenamiento (más nuevo, precio asc/desc, nombre A-Z)
+  - ✅ Paginación server-side
+  - ✅ Empty states cuando no hay resultados
+  - ✅ Filtros en Mobile:
+    - ✅ Botón "Filtros" que abre PrimeNG Drawer
+    - ✅ Botones "Aplicar Filtros" y "Limpiar Todo"
+    - ✅ Badge con cantidad de filtros activos
+  - ✅ Active filters chips removibles (componente compartido)
+  - ✅ Sincronización con query params (URL compartible)
+  - ✅ Persistencia de preferencia de vista (grid/list) en localStorage
+  - ✅ ProductService actualizado con soporte para múltiples filtros
+  - ✅ Query params: `?minPrice=1000&maxPrice=5000&sizes=P,M&colors=black,white&styles=regular,oversize&sortBy=price_asc&destacado=true`
 
 #### FASE 8c: Product Detail (Detalle de Producto)
 - [ ] **ProductDetailComponent** (`/products/:id`):

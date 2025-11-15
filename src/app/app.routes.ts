@@ -6,7 +6,8 @@ import { adminGuard } from './core/guards/admin.guard';
  * Configuración de rutas de la aplicación
  *
  * ESTRUCTURA:
- * - Rutas públicas: /login, /products
+ * - Rutas públicas con layout: /, /products (usan PublicLayoutComponent)
+ * - Login: /login (sin layout, página standalone)
  * - Rutas autenticadas: /cart, /orders (requieren authGuard)
  * - Rutas admin: /admin/* (requieren authGuard + adminGuard)
  *
@@ -14,43 +15,51 @@ import { adminGuard } from './core/guards/admin.guard';
  * Los componentes se cargan mediante import() dinámico para optimizar el bundle
  */
 export const routes: Routes = [
-  // ========== RUTAS PÚBLICAS ==========
+  // ========== RUTAS PÚBLICAS CON LAYOUT (Header + Content) ==========
 
-  // Home / Landing page
   {
     path: '',
     loadComponent: () =>
-      import('./features/home/home.component').then(
-        (m) => m.HomeComponent
-      )
+      import('./shared/layouts/public-layout/public-layout.component').then(
+        (m) => m.PublicLayoutComponent
+      ),
+    children: [
+      // Home / Landing page
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/home/home.component').then((m) => m.HomeComponent)
+      },
+
+      // Catálogo de productos (público)
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/products/product-list.component').then(
+            (m) => m.ProductListComponent
+          )
+      },
+
+      // Detalle de producto (público) - TODO FASE 8c
+      {
+        path: 'products/:id',
+        loadComponent: () =>
+          import('./features/products/product-list.component').then(
+            (m) => m.ProductListComponent
+          )
+        // ⭐ Placeholder - reemplazar con ProductDetailComponent en FASE 8c
+      }
+    ]
   },
 
-  // Login
+  // ========== LOGIN (sin layout, standalone) ==========
+
   {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then(
         (m) => m.LoginComponent
       )
-  },
-
-  // Catálogo de productos (público)
-  {
-    path: 'products',
-    loadComponent: () =>
-      import('./features/products/product-list.component').then(
-        (m) => m.ProductListComponent
-      )
-  },
-
-  // Detalle de producto (público) - TODO FASE 8c
-  {
-    path: 'products/:id',
-    loadComponent: () =>
-      import('./features/products/product-list.component').then(
-        (m) => m.ProductListComponent
-      )
-    // ⭐ Placeholder - reemplazar con ProductDetailComponent en FASE 8c
   },
 
   // ========== RUTAS ADMIN (authGuard + adminGuard) ==========

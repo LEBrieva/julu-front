@@ -1,0 +1,72 @@
+<header class="public-header">
+  <div class="header-container">
+    <!-- Logo y marca -->
+    <div class="header-brand">
+      <a routerLink="/" class="brand-link">
+        <i class="pi pi-shopping-bag brand-icon"></i>
+        <span class="brand-name">Urban Style</span>
+      </a>
+    </div>
+
+    <!-- Navegación principal (desktop) -->
+    <nav class="header-nav desktop-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+        <i class="pi pi-home"></i>
+        <span>Home</span>
+      </a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-link">
+        <i class="pi pi-list"></i>
+        <span>Productos</span>
+      </a>
+    </nav>
+
+    <!-- Acciones (carrito + user) -->
+    <div class="header-actions">
+      <!-- Carrito -->
+      <button
+        class="cart-button"
+        (click)="goToCart()"
+        aria-label="Ver carrito"
+      >
+        @if (cartItemsCount > 0) {
+          <i class="pi pi-shopping-cart" pBadge [value]="cartItemsCount.toString()" severity="danger"></i>
+        } @else {
+          <i class="pi pi-shopping-cart"></i>
+        }
+      </button>
+
+      <!-- User menu (si está logueado) -->
+      @if (isAuthenticated(); as authenticated) {
+        <div class="user-menu">
+          <p-avatar
+            [image]="currentUser()?.avatar"
+            [label]="!currentUser()?.avatar ? getUserInitials() : undefined"
+            shape="circle"
+            size="normal"
+            [style]="{ cursor: 'pointer' }"
+            (click)="userMenu.toggle($event)"
+          />
+
+          <p-menu
+            #userMenu
+            [model]="userMenuItems"
+            [popup]="true"
+            appendTo="body"
+          />
+        </div>
+      } @else {
+        <!-- Botón de login (si NO está logueado) -->
+        <p-button
+          label="Iniciar Sesión"
+          icon="pi pi-sign-in"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="goToLogin()"
+        />
+      }
+    </div>
+
+    <!-- Hamburger menu (mobile) -->
+    <!-- TODO: Implementar menú mobile si es necesario -->
+  </div>
+</header>
