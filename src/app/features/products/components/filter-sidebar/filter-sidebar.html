@@ -1,171 +1,198 @@
 <div class="filter-sidebar" [formGroup]="filterForm">
-  <!-- Header con badge de filtros activos -->
-  <div class="sidebar-header">
-    <h3 class="text-xl font-semibold">Filtros</h3>
-    @if (activeFiltersCount() > 0) {
-      <p-badge [value]="activeFiltersCount().toString()" severity="info"></p-badge>
-    }
-  </div>
-
   <div class="filters-container">
+    @if (showAccordion()) {
+      <p-accordion [multiple]="true" [value]="activeIndex()">
 
-    <!-- Búsqueda -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-search"></i>
-        Buscar remeras
-      </label>
-      <div class="search-wrapper">
-        <p-iconfield class="search-input">
-          <p-inputicon styleClass="pi pi-search"></p-inputicon>
-          <input
-            pInputText
-            type="text"
-            formControlName="search"
-            placeholder="Buscar remeras..."
-            class="w-full"
-          />
-        </p-iconfield>
-        @if (filterForm.get('search')?.value) {
-          <p-button
-            icon="pi pi-times"
-            (onClick)="clearSearch()"
-            severity="secondary"
-            [outlined]="true"
-            [rounded]="true"
-          />
-        }
-      </div>
-    </div>
-
-    <p-divider />
-
-    <!-- Estilos -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-tag"></i>
-        Estilos
-      </label>
-      <p-multiselect
-        formControlName="styles"
-        [options]="styleOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Todos los estilos"
-        styleClass="w-full"
-        [showToggleAll]="false"
-        [maxSelectedLabels]="2"
-      />
-    </div>
-
-    <p-divider />
-
-    <!-- Tallas -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-th-large"></i>
-        Tallas
-      </label>
-      <p-multiselect
-        formControlName="sizes"
-        [options]="sizeOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Todas las tallas"
-        styleClass="w-full"
-        [showToggleAll]="false"
-        display="chip"
-      />
-    </div>
-
-    <p-divider />
-
-    <!-- Colores -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-palette"></i>
-        Colores
-      </label>
-      <p-multiselect
-        formControlName="colors"
-        [options]="colorOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Todos los colores"
-        styleClass="w-full"
-        [showToggleAll]="false"
-        [maxSelectedLabels]="2"
-      >
-        <ng-template let-option pTemplate="item">
+      <!-- Panel 0: Búsqueda -->
+      <p-accordion-panel value="0">
+        <p-accordion-header>
           <div class="flex items-center gap-2">
-            <div
-              class="w-5 h-5 rounded-full border border-gray-300"
-              [style.background-color]="option.hex"
-            ></div>
-            <span>{{ option.label }}</span>
+            <i class="pi pi-search text-blue-600"></i>
+            <span class="font-medium">Búsqueda</span>
           </div>
-        </ng-template>
-      </p-multiselect>
-    </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <div class="search-wrapper">
+              <p-iconfield class="search-input">
+                <p-inputicon styleClass="pi pi-search"></p-inputicon>
+                <input
+                  pInputText
+                  type="text"
+                  formControlName="search"
+                  placeholder="Buscar remeras..."
+                  class="w-full"
+                />
+              </p-iconfield>
+              @if (filterForm.get('search')?.value) {
+                <p-button
+                  icon="pi pi-times"
+                  (onClick)="clearSearch()"
+                  severity="secondary"
+                  [outlined]="true"
+                  [rounded]="true"
+                />
+              }
+            </div>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <p-divider />
+      <!-- Panel 1: Estilos -->
+      <p-accordion-panel value="1">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-tag text-blue-600"></i>
+            <span class="font-medium">Estilos</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <p-multiselect
+              formControlName="styles"
+              [options]="styleOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los estilos"
+              styleClass="w-full"
+              [showToggleAll]="false"
+              [maxSelectedLabels]="2"
+            />
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <!-- Rango de precios -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-dollar"></i>
-        Rango de Precio
-      </label>
-      <div class="price-range-container">
-        <p-slider
-          [(ngModel)]="priceRange"
-          [ngModelOptions]="{standalone: true}"
-          [range]="true"
-          [min]="MIN_PRICE"
-          [max]="MAX_PRICE"
-          [step]="PRICE_STEP"
-          (onChange)="onPriceRangeChange($event)"
-          styleClass="w-full"
-        />
-        <div class="price-labels">
-          <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[0]) }}</span>
-          <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[1]) }}</span>
-        </div>
-      </div>
-    </div>
+      <!-- Panel 2: Tallas -->
+      <p-accordion-panel value="2">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-th-large text-blue-600"></i>
+            <span class="font-medium">Tallas</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <p-multiselect
+              formControlName="sizes"
+              [options]="sizeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las tallas"
+              styleClass="w-full"
+              [showToggleAll]="false"
+              display="chip"
+            />
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <p-divider />
+      <!-- Panel 3: Colores -->
+      <p-accordion-panel value="3">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-palette text-blue-600"></i>
+            <span class="font-medium">Colores</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <p-multiselect
+              formControlName="colors"
+              [options]="colorOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los colores"
+              styleClass="w-full"
+              [showToggleAll]="false"
+              [maxSelectedLabels]="2"
+            >
+              <ng-template let-option pTemplate="item">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-5 h-5 rounded-full border border-gray-300"
+                    [style.background-color]="option.hex"
+                  ></div>
+                  <span>{{ option.label }}</span>
+                </div>
+              </ng-template>
+            </p-multiselect>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <!-- Tags -->
-    <div class="filter-section">
-      <label class="filter-label">
-        <i class="pi pi-tags"></i>
-        Tags (separados por comas)
-      </label>
-      <input
-        pInputText
-        type="text"
-        formControlName="tags"
-        placeholder="ej: casual, verano"
-        class="w-full"
-      />
-      <small class="text-gray-500">Ej: casual, verano, deportivo</small>
-    </div>
+      <!-- Panel 4: Rango de Precio -->
+      <p-accordion-panel value="4">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-dollar text-blue-600"></i>
+            <span class="font-medium">Rango de Precio</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <div class="price-range-container">
+              <p-slider
+                [(ngModel)]="priceRange"
+                [ngModelOptions]="{standalone: true}"
+                [range]="true"
+                [min]="MIN_PRICE"
+                [max]="MAX_PRICE"
+                [step]="PRICE_STEP"
+                (onChange)="onPriceRangeChange($event)"
+                styleClass="w-full"
+              />
+              <div class="price-labels">
+                <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[0]) }}</span>
+                <span class="text-sm text-gray-600">{{ formatPrice(priceRange()[1]) }}</span>
+              </div>
+            </div>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <p-divider />
+      <!-- Panel 5: Tags -->
+      <p-accordion-panel value="5">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-tags text-blue-600"></i>
+            <span class="font-medium">Tags</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <input
+              pInputText
+              type="text"
+              formControlName="tags"
+              placeholder="ej: casual, verano"
+              class="w-full"
+            />
+            <small class="text-gray-500 block mt-2">Ej: casual, verano, deportivo</small>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
-    <!-- Productos destacados -->
-    <div class="filter-section">
-      <div class="flex items-center justify-between">
-        <label class="filter-label mb-0">
-          <i class="pi pi-star"></i>
-          Solo Destacados
-        </label>
-        <p-toggleSwitch formControlName="destacado" />
-      </div>
-      <small class="text-gray-500">Mostrar solo productos destacados en el home</small>
-    </div>
+      <!-- Panel 6: Productos Destacados -->
+      <p-accordion-panel value="6">
+        <p-accordion-header>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-star text-blue-600"></i>
+            <span class="font-medium">Solo Destacados</span>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <div class="filter-section">
+            <div class="flex items-center justify-between">
+              <label class="text-gray-700">Mostrar solo destacados</label>
+              <p-toggleSwitch formControlName="destacado" />
+            </div>
+            <small class="text-gray-500 block mt-2">Mostrar solo productos destacados en el home</small>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
 
+    </p-accordion>
+    }
   </div>
 
   <!-- Acciones (sticky al final) -->

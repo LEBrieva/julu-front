@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // PrimeNG
+import { AccordionModule } from 'primeng/accordion';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SliderModule } from 'primeng/slider';
 import { SelectModule } from 'primeng/select';
@@ -44,6 +45,7 @@ interface FilterForm {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AccordionModule,
     MultiSelectModule,
     SliderModule,
     SelectModule,
@@ -110,6 +112,12 @@ export class FilterSidebarComponent {
 
   // Contador de filtros activos
   activeFiltersCount = signal<number>(0);
+
+  // Control de paneles del acordeón (0 = Búsqueda expandida por defecto)
+  activeIndex = signal<string[]>(['0']);
+  
+  // Flag para controlar la visibilidad del acordeón y forzar su recreación
+  showAccordion = signal<boolean>(true);
 
   constructor() {
     // Actualizar contador cuando cambia el form
@@ -243,5 +251,20 @@ export class FilterSidebarComponent {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  }
+
+  /**
+   * Resetea el acordeón a su estado inicial (solo el primer panel abierto)
+   * Este método debe ser llamado cuando se abre el drawer
+   */
+  resetAccordion(): void {
+    // Ocultar el acordeón momentáneamente para destruirlo
+    this.showAccordion.set(false);
+    
+    // Esperar a que Angular procese el cambio, luego resetear y mostrar
+    setTimeout(() => {
+      this.activeIndex.set(['0']);
+      this.showAccordion.set(true);
+    }, 0);
   }
 }

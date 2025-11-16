@@ -9,8 +9,17 @@
   @apply w-full max-w-md;
 }
 
+/* Asegurar que la cadena de altura funcione para el sticky footer */
+:host ::ng-deep .filter-drawer .p-drawer-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .drawer-filters {
   @apply flex flex-col gap-0;
+  height: 100%;
+  overflow-y: auto;
 }
 
 

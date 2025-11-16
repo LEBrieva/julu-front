@@ -63,6 +63,9 @@ import { ActiveFiltersComponent } from '../../shared/components/active-filters/a
 export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   // ViewChild para acceder al header
   @ViewChild('catalogHeader', { read: ElementRef }) catalogHeader?: ElementRef;
+  
+  // ViewChild para acceder al componente de filtros
+  @ViewChild(FilterSidebarComponent) filterSidebar?: FilterSidebarComponent;
 
   // Services
   private productService = inject(ProductService);
@@ -298,7 +301,15 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
    * Toggle sidebar (mobile)
    */
   toggleSidebar(): void {
-    this.sidebarVisible.set(!this.sidebarVisible());
+    const newVisibility = !this.sidebarVisible();
+    this.sidebarVisible.set(newVisibility);
+    
+    // Si se está abriendo el drawer, resetear el acordeón después de un pequeño delay
+    if (newVisibility) {
+      setTimeout(() => {
+        this.filterSidebar?.resetAccordion();
+      }, 100);
+    }
   }
 
   /**

@@ -2,19 +2,35 @@
   @apply flex flex-col h-full bg-white;
 }
 
-/* Header */
-.sidebar-header {
-  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50;
-}
-
 /* Contenedor de filtros (scrolleable) */
 .filters-container {
-  @apply flex-1 overflow-y-auto px-4 py-3;
+  @apply flex-1 overflow-y-auto pb-6;
 }
 
-/* Secci�n individual de filtro */
+/* Ajustes para el acordeón */
+.filters-container :host ::ng-deep .p-accordion {
+  @apply border-0;
+}
+
+.filters-container :host ::ng-deep .p-accordion-panel {
+  @apply border-0 border-b border-gray-200;
+}
+
+.filters-container :host ::ng-deep .p-accordion-panel:last-child {
+  @apply border-b-0;
+}
+
+.filters-container :host ::ng-deep .p-accordion-header-link {
+  @apply px-4 py-3;
+}
+
+.filters-container :host ::ng-deep .p-accordion-content {
+  @apply px-4 pb-3 pt-2;
+}
+
+/* Sección individual de filtro dentro del acordeón */
 .filter-section {
-  @apply mb-4;
+  @apply mb-0;
 }
 
 .filter-label {
@@ -43,19 +59,19 @@
   @apply flex justify-between mt-2;
 }
 
-/* Acciones (fijas al final) */
+/* Acciones (sticky footer - siempre visible) */
 .sidebar-actions {
   @apply flex flex-col gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive: Mobile */
 @media (max-width: 768px) {
   .filter-sidebar {
     @apply max-w-none;
-  }
-
-  .sidebar-header h3 {
-    @apply text-lg;
   }
 
   .filters-container {
