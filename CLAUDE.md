@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASES 5, 6, 7 y 8a completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, y catálogo público con filtros por query params.
+**Estado actual**: FASES 5, 6, 7, 8a, 8b y 8c completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos.
 
 ---
 
@@ -87,14 +87,21 @@ src/app/
 │   │       ├── login.component.ts     # ✅ Componente de login
 │   │       ├── login.component.html   # ✅ Template con PrimeNG
 │   │       └── login.component.css    # ✅ Estilos con Tailwind
-│   └── products/
-│       └── product-list.component.ts  # ✅ Catálogo público (placeholder)
+│   ├── home/                  # ✅ FASE 8a: Landing page pública
+│   │   └── home.component.ts          # Hero, categorías, destacados
+│   └── products/              # Catálogo público
+│       ├── product-list.component.ts  # ✅ FASE 8b: Catálogo con filtros avanzados
+│       └── product-detail/            # ✅ FASE 8c: Detalle de producto
+│           ├── product-detail.component.ts
+│           ├── product-detail.component.html
+│           └── product-detail.component.css
 │
 ├── shared/                    # Utilidades reutilizables
 │   ├── constants/
 │   │   └── validation-messages.ts     # ✅ Mensajes de validación centralizados
 │   ├── utils/
-│   │   └── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
+│   │   ├── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
+│   │   └── seo.util.ts                # ✅ FASE 8c: Helpers SEO (truncate, buildUrl, sanitize)
 │   ├── components/            # Componentes reutilizables
 │   │   ├── image-upload/              # ✅ FASE 5 bis: Upload de imágenes
 │   │   │   ├── image-upload.component.ts
@@ -510,35 +517,46 @@ Dividida en 3 subfases para desarrollo incremental:
   - ✅ ProductService actualizado con soporte para múltiples filtros
   - ✅ Query params: `?minPrice=1000&maxPrice=5000&sizes=P,M&colors=black,white&styles=regular,oversize&sortBy=price_asc&destacado=true`
 
-#### FASE 8c: Product Detail (Detalle de Producto)
-- [ ] **ProductDetailComponent** (`/products/:id`):
-  - Galería de imágenes (PrimeNG Galleria con thumbnails)
-  - Información del producto:
-    - Nombre, código, descripción
-    - Precio base (o rango si las variantes varían)
-    - Categoría, estilo, tags
-  - **Selector de Variantes**:
-    - Selector de talla (P, M, G, GG) con badges
-    - Selector de color (chips con hex real)
-    - Precio y stock de la variante seleccionada
-    - Validación: Deshabilitar combinaciones sin stock
-  - **Agregar al Carrito**:
-    - Input de cantidad (PrimeNG InputNumber)
-    - Botón "Agregar al Carrito" (deshabilitado si sin stock)
-    - Toast de confirmación al agregar
-  - **Productos Relacionados**:
-    - Carousel de productos de la misma categoría
-    - Usando `ProductCardComponent`
-- [ ] **Breadcrumbs**:
-  - Home > [Categoría] > [Nombre Producto]
-  - Usando PrimeNG Breadcrumb
-- [ ] **Responsive Design**:
-  - Desktop: Galería izquierda (60%), info derecha (40%)
-  - Mobile: Stack vertical (galería arriba, info abajo)
-- [ ] **SEO y Meta Tags**:
-  - Title dinámico: `[Nombre Producto] - Tu Tienda`
-  - Meta description con descripción del producto
-  - Open Graph tags para redes sociales
+#### ✅ FASE 8c: Product Detail (Detalle de Producto)
+**ProductDetailComponent** (`/products/:id`):
+  - ✅ Galería de imágenes con thumbnails verticales (responsive: horizontal en mobile)
+  - ✅ Imagen principal con PrimeNG Image (preview mode)
+  - ✅ Información del producto: Nombre, código, descripción, categoría, estilo, tags
+  - ✅ Rating y reviews (placeholder para futura implementación)
+  - ✅ **Selector de Variantes Inteligente**:
+    - ✅ Selector de color con chips visuales (hex colors reales)
+    - ✅ Selector de talla (P, M, G, GG) con estado disabled dinámico
+    - ✅ Lógica dependiente: Colores filtrados por tallas disponibles y viceversa
+    - ✅ Precio y stock de la variante seleccionada
+    - ✅ Validación: Deshabilitar combinaciones sin stock
+  - ✅ **Agregar al Carrito** (placeholder para FASE 9):
+    - ✅ Input de cantidad con min/max basado en stock (PrimeNG InputNumber)
+    - ✅ Botón deshabilitado si no hay variante seleccionada o sin stock
+    - ✅ Toast de confirmación (placeholder)
+  - ✅ **Breadcrumbs**: Home > Categoría > Nombre Producto (PrimeNG Breadcrumb)
+  - ✅ **Tabs Informativos** (PrimeNG v20 Tabs):
+    - ✅ Product Description (descripción, especificaciones, tags)
+    - ✅ Customer Reviews (placeholder con rating summary)
+    - ✅ Shipping Information (texto estático)
+    - ✅ Return Policy (texto estático)
+  - ✅ **Productos Relacionados**:
+    - ✅ Carousel con hasta 6 productos de la misma categoría (PrimeNG Carousel)
+    - ✅ Usa ProductCardComponent reutilizable en modo grid
+    - ✅ Responsive: 3 en desktop, 2 en tablet, 1 en mobile
+    - ✅ Método `getRelatedProducts()` en ProductService
+  - ✅ **SEO y Meta Tags Dinámicos**:
+    - ✅ Title: `[Nombre Producto] - Tu Tienda`
+    - ✅ Meta description truncada a 160 chars (respetando palabras)
+    - ✅ Open Graph tags (og:title, og:description, og:image, og:url, og:type)
+    - ✅ Twitter Card tags (twitter:card, twitter:title, twitter:description, twitter:image)
+    - ✅ Keywords dinámicos desde tags del producto
+    - ✅ `seo.util.ts` con helpers reutilizables (`truncateDescription`, `buildPageUrl`, `sanitizeMetaText`)
+    - ✅ Cleanup automático en `ngOnDestroy()`
+  - ✅ **Responsive Design Completo**:
+    - ✅ Desktop: Grid 3 columnas (thumbnails | imagen | info panel)
+    - ✅ Tablet: Grid ajustado con thumbnails más pequeños
+    - ✅ Mobile: Stack vertical con thumbnails horizontales scroll
+    - ✅ Loading, error y empty states para todos los componentes
 
 ---
 
@@ -656,4 +674,4 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-15 (FASE 8a completada: Home Landing Page con hero section, grid de categorías con imágenes locales, carousel de productos destacados, catálogo público con filtros por query params, y headless ConfirmDialogs en todo el panel admin)
+**Última actualización**: 2025-11-16 (FASE 8c completada: Página de detalle de producto completa con galería de imágenes, selector inteligente de variantes, breadcrumbs, tabs informativos con PrimeNG v20, carousel de productos relacionados de la misma categoría, y sistema completo de meta tags SEO dinámicos con Open Graph y Twitter Cards. Implementado `seo.util.ts` reutilizable con helpers de truncado, sanitización y construcción de URLs. Product Detail ahora tiene full SEO para social sharing y Google indexing.)

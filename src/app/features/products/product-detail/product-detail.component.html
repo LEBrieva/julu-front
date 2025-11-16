@@ -1,0 +1,305 @@
+<div class="product-detail-container">
+  <!-- LOADING STATE -->
+  @if (loading()) {
+    <div class="state-container loading-state">
+      <p-progressSpinner
+        styleClass="w-16 h-16"
+        strokeWidth="4"
+      />
+      <p class="text-gray-600 mt-4 text-lg">Cargando producto...</p>
+    </div>
+  }
+
+  <!-- ERROR STATE -->
+  @else if (error()) {
+    <div class="state-container error-state">
+      <i class="pi pi-exclamation-triangle text-6xl text-red-500"></i>
+      <p class="text-red-600 mt-4 text-xl">{{ error() }}</p>
+      <div class="flex gap-3 mt-6">
+        <p-button
+          label="Volver al catálogo"
+          icon="pi pi-arrow-left"
+          (onClick)="goBack()"
+          severity="secondary"
+          [outlined]="true"
+        />
+        <p-button
+          label="Reintentar"
+          icon="pi pi-refresh"
+          (onClick)="retry()"
+          severity="danger"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- PRODUCT DETAIL -->
+  @else if (product()) {
+    <div class="product-detail-content">
+      <!-- Breadcrumbs -->
+      <div class="breadcrumbs-section">
+        <p-breadcrumb
+          [model]="breadcrumbItems()"
+          [home]="{icon: 'pi pi-home', routerLink: '/'}"
+        />
+      </div>
+
+      <!-- Main Product Grid (3 columns: thumbnails | main-image | info) -->
+      <div class="product-detail-grid">
+        <!-- Column 1: Thumbnails Verticales -->
+        <div class="thumbnails-column">
+          @for (image of galleryImages(); track $index) {
+            <div
+              class="thumbnail-item"
+              [class.active]="currentImageIndex() === $index"
+              (click)="selectImage($index)"
+            >
+              <img [src]="image" [alt]="product()!.name" />
+            </div>
+          }
+        </div>
+
+        <!-- Column 2: Main Image -->
+        <div class="main-image-column">
+          <p-image
+            [src]="currentImage()"
+            [alt]="product()!.name"
+            [preview]="true"
+            imageClass="product-main-image-large"
+          />
+        </div>
+
+        <!-- Column 3: Product Info Panel -->
+        <div class="product-info-panel">
+          <!-- 1. Product Title -->
+          <h1 class="product-title">{{ product()!.name }}</h1>
+
+          <!-- 2. Price -->
+          <div class="product-price-large">
+            {{ selectedVariant()?.price || product()!.basePrice | currency:'ARS':'symbol-narrow':'1.0-0' }}
+          </div>
+
+          <!-- 3. Rating + Reviews -->
+          <div class="rating-section">
+            <p-rating
+              [ngModel]="rating()"
+              [readonly]="true"
+              [stars]="5"
+            />
+            <span class="reviews-text">{{ reviewsCount() }} reviews</span>
+          </div>
+
+          <!-- 4. Color Selector -->
+          <div class="option-group">
+            <label class="option-label">Color</label>
+            <div class="color-chips">
+              @for (color of availableColors(); track color) {
+                <button
+                  class="color-chip"
+                  [class.selected]="selectedColor() === color"
+                  [style.background-color]="getColorHex(color)"
+                  (click)="selectedColor.set(color)"
+                  [title]="formatColor(color)"
+                >
+                  @if (selectedColor() === color) {
+                    <i class="pi pi-check"></i>
+                  }
+                </button>
+              }
+            </div>
+            @if (selectedColor()) {
+              <span class="selected-option-text">{{ formatColor(selectedColor()!) }}</span>
+            }
+          </div>
+
+          <!-- 5. Size Selector -->
+          <div class="option-group">
+            <div class="option-header">
+              <label class="option-label">Size</label>
+              <button class="size-guide-link">
+                Size Guide <i class="pi pi-angle-right"></i>
+              </button>
+            </div>
+            <div class="size-buttons">
+              @for (size of allSizes; track size) {
+                <button
+                  class="size-btn"
+                  [class.selected]="selectedSize() === size"
+                  [disabled]="!availableSizes().includes(size)"
+                  (click)="selectedSize.set(size)"
+                >
+                  {{ size }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- 6. Quantity -->
+          <div class="option-group">
+            <label class="option-label">Quantity</label>
+            <p-inputNumber
+              [(ngModel)]="quantity"
+              [showButtons]="true"
+              buttonLayout="horizontal"
+              incrementButtonIcon="pi pi-plus"
+              decrementButtonIcon="pi pi-minus"
+              [min]="1"
+              [max]="maxQuantity()"
+              [disabled]="!selectedVariant()"
+            />
+            @if (selectedVariant()) {
+              <span class="stock-info-text">{{ selectedVariant()!.stock }} in stock</span>
+            }
+          </div>
+
+          <!-- 7. Action Buttons (Add to Cart + Favorite) -->
+          <div class="action-buttons">
+            <p-button
+              label="Add to Cart"
+              [disabled]="!selectedVariant() || selectedVariant()!.stock === 0"
+              (onClick)="addToCart()"
+              size="large"
+              styleClass="add-to-cart-btn"
+            />
+            <p-button
+              icon="pi pi-heart"
+              [outlined]="true"
+              severity="secondary"
+              size="large"
+              pTooltip="Add to favorites"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Section (Product Description, Reviews, Shipping, Returns) -->
+      <div class="product-tabs-section">
+        <p-tabs value="0">
+          <p-tablist>
+            <p-tab value="0">Product Description</p-tab>
+            <p-tab value="1">Customer Reviews</p-tab>
+            <p-tab value="2">Shipping Information</p-tab>
+            <p-tab value="3">Return Policy</p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <!-- Tab 1: Product Description -->
+            <p-tabpanel value="0">
+              <div class="tab-content">
+                <p class="tab-content-text">
+                  {{ product()?.description || 'No description available for this product.' }}
+                </p>
+
+                <h4 class="tab-content-subtitle">Specifications</h4>
+                <div class="specs-grid">
+                  <div class="spec-item">
+                    <strong>Category:</strong> {{ formatEnumValue(product()!.category) }}
+                  </div>
+                  <div class="spec-item">
+                    <strong>Style:</strong> {{ formatStyle(product()!.style) }}
+                  </div>
+                  <div class="spec-item">
+                    <strong>Code:</strong> {{ product()!.code }}
+                  </div>
+                </div>
+
+                @if (product()?.tags && product()!.tags!.length > 0) {
+                  <h4 class="tab-content-subtitle">Tags</h4>
+                  <div class="tags-list">
+                    @for (tag of product()!.tags; track tag) {
+                      <p-tag [value]="tag" severity="secondary" />
+                    }
+                  </div>
+                }
+              </div>
+            </p-tabpanel>
+
+            <!-- Tab 2: Customer Reviews -->
+            <p-tabpanel value="1">
+              <div class="tab-content">
+                <div class="reviews-placeholder">
+                  <p class="text-gray-500 italic mb-4">
+                    Review system will be available in future phases.
+                  </p>
+                  <div class="review-summary">
+                    <p><strong>Average Rating:</strong> {{ rating() }}/5.0 ★★★★☆</p>
+                    <p><strong>Total Reviews:</strong> {{ reviewsCount() }}</p>
+                  </div>
+                </div>
+              </div>
+            </p-tabpanel>
+
+            <!-- Tab 3: Shipping Information -->
+            <p-tabpanel value="2">
+              <div class="tab-content">
+                <p class="tab-content-text">
+                  Free shipping on orders over $50.
+                </p>
+                <p class="tab-content-text">
+                  Estimated delivery: 3-5 business days.
+                </p>
+              </div>
+            </p-tabpanel>
+
+            <!-- Tab 4: Return Policy -->
+            <p-tabpanel value="3">
+              <div class="tab-content">
+                <p class="tab-content-text">
+                  30-day return policy. Items must be in original condition with tags attached.
+                </p>
+                <p class="tab-content-text">
+                  Refunds will be processed within 5-7 business days after we receive your return.
+                </p>
+              </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      </div>
+
+      <!-- RELATED PRODUCTS SECTION (FASE 8c) -->
+      <div class="related-products-section">
+        <h2 class="related-products-title">Productos Relacionados</h2>
+
+        @if (relatedLoading()) {
+          <div class="related-loading">
+            <p-progressSpinner
+              styleClass="w-12 h-12"
+              strokeWidth="4"
+            />
+            <p class="text-gray-600 mt-3">Cargando productos relacionados...</p>
+          </div>
+        } @else if (relatedError()) {
+          <div class="related-error">
+            <i class="pi pi-exclamation-circle text-yellow-600 text-2xl"></i>
+            <p class="text-gray-600 mt-2">{{ relatedError() }}</p>
+          </div>
+        } @else if (relatedProducts().length > 0) {
+          <p-carousel
+            [value]="relatedProducts()"
+            [numVisible]="3"
+            [numScroll]="1"
+            [responsiveOptions]="relatedProductsCarouselConfig"
+            [circular]="false"
+            [showIndicators]="false"
+            [showNavigators]="true"
+            styleClass="related-carousel"
+          >
+            <ng-template pTemplate="item" let-product>
+              <div class="carousel-item-wrapper">
+                <app-product-card
+                  [product]="product"
+                  viewMode="grid"
+                />
+              </div>
+            </ng-template>
+          </p-carousel>
+        } @else {
+          <div class="related-empty">
+            <i class="pi pi-inbox text-gray-400 text-4xl"></i>
+            <p class="text-gray-500 mt-3">No hay productos relacionados disponibles</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

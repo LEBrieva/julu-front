@@ -1,0 +1,418 @@
+/* ===== CONTAINER ===== */
+.product-detail-container {
+  @apply min-h-screen bg-gray-50 p-4 lg:p-6;
+}
+
+/* ===== LOADING & ERROR STATES ===== */
+.state-container {
+  @apply flex flex-col items-center justify-center min-h-[60vh] text-center;
+}
+
+.loading-state {
+  @apply text-blue-600;
+}
+
+.error-state {
+  @apply text-red-600;
+}
+
+/* ===== PRODUCT DETAIL CONTENT ===== */
+.product-detail-content {
+  @apply max-w-screen-2xl mx-auto bg-white rounded-lg shadow-sm p-6;
+}
+
+/* ===== BREADCRUMBS ===== */
+.breadcrumbs-section {
+  @apply mb-6 pb-4 border-b border-gray-200;
+}
+
+:host ::ng-deep .p-breadcrumb {
+  @apply bg-transparent border-none p-0;
+}
+
+:host ::ng-deep .p-breadcrumb .p-menuitem-link {
+  @apply text-sm;
+}
+
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-chevron {
+  @apply mx-2 text-gray-400;
+}
+
+/* ===== MAIN PRODUCT GRID (3 columns) ===== */
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr 400px; /* thumbnails | main-image | info */
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* ===== COLUMN 1: THUMBNAILS VERTICALES ===== */
+.thumbnails-column {
+  @apply flex flex-col gap-3;
+}
+
+.thumbnail-item {
+  width: 100px;
+  height: 100px;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f3f4f6;
+}
+
+.thumbnail-item.active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.thumbnail-item:hover {
+  border-color: #93c5fd;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== COLUMN 2: MAIN IMAGE ===== */
+.main-image-column {
+  @apply flex items-center justify-center bg-gray-100 rounded-lg p-4;
+  min-height: 500px;
+}
+
+:host ::ng-deep .product-main-image-large {
+  @apply w-full h-auto object-contain;
+  max-height: 600px;
+}
+
+:host ::ng-deep .main-image-column .p-image {
+  @apply w-full flex justify-center;
+}
+
+/* ===== COLUMN 3: PRODUCT INFO PANEL ===== */
+.product-info-panel {
+  @apply flex flex-col gap-6;
+}
+
+/* Product Title */
+.product-title {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+/* Price Large */
+.product-price-large {
+  @apply text-4xl font-bold text-green-600;
+}
+
+/* Rating Section */
+.rating-section {
+  @apply flex items-center gap-3;
+}
+
+:host ::ng-deep .rating-section .p-rating {
+  @apply flex gap-1;
+}
+
+.reviews-text {
+  @apply text-sm text-gray-600;
+}
+
+/* Option Groups (Color, Size, Quantity) */
+.option-group {
+  @apply flex flex-col gap-2;
+}
+
+.option-label {
+  @apply text-sm font-semibold text-gray-700 uppercase tracking-wide;
+}
+
+.option-header {
+  @apply flex items-center justify-between;
+}
+
+.size-guide-link {
+  @apply text-sm text-blue-600 hover:text-blue-700 underline bg-transparent border-none cursor-pointer flex items-center gap-1;
+}
+
+/* Color Chips */
+.color-chips {
+  @apply flex gap-2 flex-wrap;
+}
+
+.color-chip {
+  width: 40px;
+  height: 40px;
+  @apply rounded-full border-2 border-gray-300 cursor-pointer transition-all;
+  @apply flex items-center justify-center;
+}
+
+.color-chip.selected {
+  @apply border-blue-500 ring-2 ring-blue-200;
+}
+
+.color-chip:hover:not(:disabled) {
+  @apply transform scale-110;
+}
+
+.color-chip i {
+  @apply text-white text-sm;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.selected-option-text {
+  @apply text-sm text-gray-700 font-medium;
+}
+
+/* Size Buttons */
+.size-buttons {
+  @apply flex gap-2 flex-wrap;
+}
+
+.size-btn {
+  @apply px-4 py-2 border-2 border-gray-300 rounded-md font-semibold text-gray-700;
+  @apply transition-all cursor-pointer bg-white;
+  min-width: 60px;
+}
+
+.size-btn.selected {
+  @apply border-blue-500 bg-blue-50 text-blue-700;
+}
+
+.size-btn:hover:not(:disabled) {
+  @apply border-gray-400;
+}
+
+.size-btn:disabled {
+  @apply opacity-40 cursor-not-allowed bg-gray-100;
+}
+
+/* Quantity Input */
+.option-group :host ::ng-deep .p-inputnumber {
+  @apply w-full max-w-xs;
+}
+
+.stock-info-text {
+  @apply text-sm text-gray-600;
+}
+
+/* Action Buttons */
+.action-buttons {
+  @apply flex gap-3 mt-4;
+}
+
+:host ::ng-deep .add-to-cart-btn {
+  @apply flex-1;
+}
+
+/* ===== TABS SECTION ===== */
+.product-tabs-section {
+  @apply mt-8 pt-8 border-t border-gray-200;
+}
+
+:host ::ng-deep .p-tabs .p-tablist {
+  @apply bg-transparent border-b-2 border-gray-200;
+}
+
+:host ::ng-deep .p-tabs .p-tablist .p-tab {
+  @apply text-gray-600 font-semibold;
+}
+
+:host ::ng-deep .p-tabs .p-tablist .p-tab.p-tab-active {
+  @apply text-blue-600;
+}
+
+:host ::ng-deep .p-tabs .p-tablist .p-tab:hover {
+  @apply text-gray-800;
+}
+
+/* Tab Content */
+.tab-content {
+  @apply py-6;
+}
+
+.tab-content-title {
+  @apply text-xl font-bold text-gray-900 mb-4;
+}
+
+.tab-content-subtitle {
+  @apply text-lg font-semibold text-gray-800 mt-6 mb-3;
+}
+
+.tab-content-text {
+  @apply text-gray-700 leading-relaxed mb-2;
+}
+
+.specs-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-3;
+}
+
+.spec-item {
+  @apply text-gray-700;
+}
+
+.tags-list {
+  @apply flex flex-wrap gap-2;
+}
+
+.reviews-placeholder {
+  @apply bg-gray-50 rounded-lg p-6;
+}
+
+.review-summary p {
+  @apply mb-2;
+}
+
+/* ===== RELATED PRODUCTS SECTION (FASE 8c) ===== */
+.related-products-section {
+  @apply mt-12 pt-12 border-t border-gray-200;
+}
+
+.related-products-title {
+  @apply text-2xl font-bold text-gray-900 mb-8;
+}
+
+/* Carousel Styling */
+:host ::ng-deep .related-carousel {
+  @apply w-full;
+}
+
+:host ::ng-deep .related-carousel .p-carousel-content {
+  @apply gap-4;
+}
+
+:host ::ng-deep .related-carousel .p-carousel-item {
+  @apply p-2 sm:p-3;
+}
+
+.carousel-item-wrapper {
+  @apply h-full;
+}
+
+/* Navigation buttons */
+:host ::ng-deep .related-carousel .p-carousel-prev,
+:host ::ng-deep .related-carousel .p-carousel-next {
+  @apply bg-blue-500 hover:bg-blue-600 text-white transition-colors;
+  width: 40px;
+  height: 40px;
+  @apply rounded-full flex items-center justify-center;
+}
+
+:host ::ng-deep .related-carousel .p-carousel-prev:hover,
+:host ::ng-deep .related-carousel .p-carousel-next:hover {
+  @apply bg-blue-700;
+}
+
+/* Loading State */
+.related-loading {
+  @apply flex flex-col items-center justify-center py-12;
+  @apply text-center;
+}
+
+/* Error State */
+.related-error {
+  @apply flex flex-col items-center justify-center py-8;
+  @apply bg-yellow-50 rounded-lg p-6;
+  @apply border border-yellow-200;
+}
+
+/* Empty State */
+.related-empty {
+  @apply flex flex-col items-center justify-center py-12;
+  @apply text-center;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .product-detail-grid {
+    grid-template-columns: 80px 1fr 350px;
+    gap: 1.5rem;
+  }
+
+  .thumbnail-item {
+    width: 80px;
+    height: 80px;
+  }
+
+  .product-info-panel {
+    gap: 4;
+  }
+
+  .product-title {
+    @apply text-2xl;
+  }
+
+  .product-price-large {
+    @apply text-3xl;
+  }
+
+  .related-products-section {
+    @apply mt-8 pt-8;
+  }
+
+  .related-products-title {
+    @apply text-xl mb-6;
+  }
+}
+
+/* Mobile (<768px) */
+@media (max-width: 767px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .thumbnails-column {
+    @apply flex-row overflow-x-auto;
+    order: 2; /* Después de main image */
+  }
+
+  .thumbnail-item {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+  }
+
+  .main-image-column {
+    order: 1; /* Primero */
+    min-height: 300px;
+  }
+
+  .product-info-panel {
+    order: 3; /* Último */
+  }
+
+  .product-title {
+    @apply text-xl;
+  }
+
+  .product-price-large {
+    @apply text-2xl;
+  }
+
+  .action-buttons {
+    @apply flex-col;
+  }
+
+  .specs-grid {
+    @apply grid-cols-1;
+  }
+
+  .related-products-section {
+    @apply mt-6 pt-6;
+  }
+
+  .related-products-title {
+    @apply text-lg mb-4;
+  }
+
+  :host ::ng-deep .related-carousel .p-carousel-prev,
+  :host ::ng-deep .related-carousel .p-carousel-next {
+    width: 36px;
+    height: 36px;
+  }
+}

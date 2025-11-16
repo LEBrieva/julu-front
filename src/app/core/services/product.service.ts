@@ -1,12 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { PaginatedResponse } from '../models/api-response.model';
 import {
   Product,
   ProductListItem,
+  ProductCategory,
   CreateProductDto,
   UpdateProductDto,
   FilterProductDto,
@@ -203,6 +205,38 @@ export class ProductService {
    */
   getPublicProductById(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/catalog/${id}`);
+  }
+
+  /**
+   * Obtiene productos relacionados por categoría (PÚBLICO)
+   * Utiliza el endpoint de catálogo público filtrando por categoría
+   * y excluyendo el producto actual del resultado.
+   *
+   * Útil para mostrar en la sección "Productos Relacionados" del detalle.
+   *
+   * @param category Categoría del producto actual
+   * @param excludeId ID del producto actual (para excluirlo)
+   * @param limit Cantidad máxima de productos a retornar (default: 6)
+   * @returns Array de productos de la misma categoría
+   */
+  getRelatedProducts(
+    category: ProductCategory,
+    excludeId: string,
+    limit: number = 6
+  ): Observable<ProductListItem[]> {
+    const filters: FilterProductDto = {
+      category,
+      limit: limit * 2, // Fetch más para compensar filtrado
+      page: 1
+    };
+
+    return this.getPublicCatalog(filters).pipe(
+      map(response =>
+        response.data
+          .filter(item => item.id !== excludeId)
+          .slice(0, limit)
+      )
+    );
   }
 
   // ===========================

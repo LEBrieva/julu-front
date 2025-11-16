@@ -40,14 +40,13 @@ export const routes: Routes = [
           )
       },
 
-      // Detalle de producto (público) - TODO FASE 8c
+      // Detalle de producto (público) - FASE 8c
       {
         path: 'products/:id',
         loadComponent: () =>
-          import('./features/products/product-list.component').then(
-            (m) => m.ProductListComponent
+          import('./features/products/product-detail/product-detail.component').then(
+            (m) => m.ProductDetailComponent
           )
-        // ⭐ Placeholder - reemplazar con ProductDetailComponent en FASE 8c
       }
     ]
   },
