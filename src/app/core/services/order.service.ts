@@ -37,11 +37,11 @@ export interface CreateOrderDto {
 })
 export class OrderService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/order`; // Nota: endpoint es /order (singular) en el backend
+  private apiUrl = `${environment.apiUrl}/orders`; // Endpoint plural para seguir estándar RESTful
 
   /**
    * Crea una orden desde el carrito (USER autenticado)
-   * Endpoint: POST /order
+   * Endpoint: POST /orders
    *
    * El backend:
    * 1. Valida que el carrito tenga items
@@ -57,7 +57,7 @@ export class OrderService {
 
   /**
    * Crea una orden como invitado (GUEST - sin autenticación)
-   * Endpoint: POST /order/guest
+   * Endpoint: POST /orders/guest
    *
    * El backend:
    * 1. Valida stock de todos los items del carrito
@@ -75,7 +75,7 @@ export class OrderService {
 
   /**
    * Obtiene lista paginada de órdenes (ADMIN)
-   * Endpoint: GET /order?page=1&limit=10&search=ORD-2025-00001&status=pending&dateFrom=...&dateTo=...
+   * Endpoint: GET /orders?page=1&limit=10&search=ORD-2025-00001&status=pending&dateFrom=...&dateTo=...
    *
    * El backend retorna todas las órdenes para admin (isAdmin=true se detecta en el backend vía JWT)
    */
@@ -121,7 +121,7 @@ export class OrderService {
 
   /**
    * Obtiene una orden por ID (ADMIN o propietario)
-   * Endpoint: GET /order/:id
+   * Endpoint: GET /orders/:id
    *
    * El backend valida que el usuario sea admin o el propietario de la orden
    */
@@ -131,7 +131,7 @@ export class OrderService {
 
   /**
    * Actualiza el estado de una orden (ADMIN)
-   * Endpoint: PATCH /order/:id/status
+   * Endpoint: PATCH /orders/:id/status
    *
    * Solo admin puede cambiar el estado.
    * El backend valida que la transición de estado sea válida.
@@ -142,7 +142,7 @@ export class OrderService {
 
   /**
    * Cancela una orden (USER o ADMIN)
-   * Endpoint: DELETE /order/:id
+   * Endpoint: DELETE /orders/:id
    *
    * Solo se pueden cancelar órdenes en estado PENDING.
    * El backend restaura el stock automáticamente.
