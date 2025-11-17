@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
+import { CartDrawerComponent } from '../../components/cart-drawer/cart-drawer.component';
 
 /**
  * Layout público de la tienda
@@ -21,7 +22,7 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, PublicHeaderComponent],
+  imports: [CommonModule, RouterModule, PublicHeaderComponent, CartDrawerComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css'
 })

@@ -1,0 +1,106 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [closeOnEscape]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [showHeader]="true"
+  [style]="{ width: '28rem', height: '100vh', margin: '0' }"
+  styleClass="cart-drawer-dialog"
+  position="right"
+  [blockScroll]="true"
+>
+  <!-- Header -->
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <i class="pi pi-shopping-cart text-2xl"></i>
+      <div>
+        <h2 class="text-xl font-bold m-0">Carrito</h2>
+        <span class="text-sm text-gray-600">{{ totalItems() }} productos</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Content -->
+  <div class="cart-drawer-content">
+    @if (cartItems().length > 0) {
+      <!-- Lista de productos -->
+      <div class="space-y-4 mb-6">
+        @for (item of cartItems(); track $index) {
+          <div class="cart-drawer-item">
+            <img
+              [src]="item.productImage || 'assets/placeholder.png'"
+              [alt]="item.productName"
+              class="cart-drawer-item-image"
+            />
+            <div class="cart-drawer-item-info">
+              <h3 class="cart-drawer-item-name">{{ item.productName }}</h3>
+              <p class="cart-drawer-item-variant">
+                {{ formatSize(item.variantSize) }} / {{ formatColor(item.variantColor) }}
+              </p>
+              <p class="cart-drawer-item-price">
+                ${{ item.priceAtAdd | number:'1.2-2' }} x {{ item.quantity }}
+              </p>
+            </div>
+            <div class="cart-drawer-item-total">
+              <span class="font-semibold">
+                ${{ (item.priceAtAdd * item.quantity) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <p-divider />
+
+      <!-- Resumen de precios -->
+      <div class="cart-drawer-summary">
+        <div class="cart-drawer-summary-row">
+          <span>Subtotal</span>
+          <span class="font-semibold">${{ subtotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="cart-drawer-summary-row">
+          <span>Envío</span>
+          <span class="font-semibold">${{ SHIPPING_COST | number:'1.2-2' }}</span>
+        </div>
+        <p-divider />
+        <div class="cart-drawer-summary-row cart-drawer-summary-total">
+          <span class="font-bold text-lg">Total</span>
+          <span class="font-bold text-lg">${{ total | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="cart-drawer-actions">
+        <p-button
+          label="Ver Carrito Completo"
+          icon="pi pi-shopping-cart"
+          styleClass="w-full mb-3"
+          (onClick)="goToCart()"
+        />
+        <p-button
+          label="Continuar Comprando"
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [outlined]="true"
+          styleClass="w-full"
+          (onClick)="continueShopping()"
+        />
+      </div>
+    } @else {
+      <!-- Empty state -->
+      <div class="cart-drawer-empty">
+        <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-lg font-semibold mb-2">Tu carrito está vacío</h3>
+        <p class="text-gray-600 mb-6">Agrega productos para comenzar a comprar</p>
+        <p-button
+          label="Explorar Productos"
+          icon="pi pi-shopping-bag"
+          (onClick)="continueShopping()"
+        />
+      </div>
+    }
+  </div>
+</p-dialog>
+

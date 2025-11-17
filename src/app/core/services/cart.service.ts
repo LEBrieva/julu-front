@@ -1,7 +1,9 @@
 import { Injectable, computed, signal, inject, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { CartDrawerService } from './cart-drawer.service';
 import {
   CartItem,
   GuestCartItem,
@@ -16,8 +18,10 @@ const GUEST_CART_KEY = 'guest_cart';
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private http = inject(HttpClient);
+  private router = inject(Router);
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
+  private cartDrawerService = inject(CartDrawerService);
 
   private apiUrl = `${environment.apiUrl}/cart`;
 
@@ -78,6 +82,17 @@ export class CartService {
 
   // ========== MÉTODOS PRIVADOS ==========
 
+  /**
+   * Abre el drawer solo si NO estamos en la página del carrito
+   */
+  private openDrawerIfNotInCartPage(): void {
+    const currentUrl = this.router.url;
+    // No abrir el drawer si estamos en /cart o /checkout
+    if (!currentUrl.startsWith('/cart') && !currentUrl.startsWith('/checkout')) {
+      this.cartDrawerService.open();
+    }
+  }
+
   private loadGuestCart(): GuestCartItem[] {
     const stored = localStorage.getItem(GUEST_CART_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -126,6 +141,8 @@ export class CartService {
               detail: 'Producto agregado al carrito',
               life: 3000,
             });
+            // Abrir el drawer automáticamente (solo si NO estamos en /cart)
+            this.openDrawerIfNotInCartPage();
           }),
           catchError((error) => {
             this.messageService.add({
@@ -138,7 +155,8 @@ export class CartService {
         );
     } else {
       // Usuario anónimo: localStorage
-      const items = this.guestCartSignal();
+      // ⚠️ IMPORTANTE: Crear una COPIA del array para que Angular detecte el cambio
+      const items = [...this.guestCartSignal()];
       const existingIndex = items.findIndex(
         (i) =>
           i.productId === request.productId &&
@@ -146,7 +164,10 @@ export class CartService {
       );
 
       if (existingIndex >= 0) {
-        items[existingIndex].quantity += request.quantity;
+        items[existingIndex] = {
+          ...items[existingIndex],
+          quantity: items[existingIndex].quantity + request.quantity
+        };
       } else {
         items.push({
           productId: request.productId,
@@ -167,6 +188,8 @@ export class CartService {
         detail: 'Producto agregado al carrito',
         life: 3000,
       });
+      // Abrir el drawer automáticamente (solo si NO estamos en /cart)
+      this.openDrawerIfNotInCartPage();
       return of(void 0);
     }
   }
@@ -202,9 +225,10 @@ export class CartService {
           })
         );
     } else {
-      const items = this.guestCartSignal();
+      // ⚠️ IMPORTANTE: Crear una COPIA del array para que Angular detecte el cambio
+      const items = [...this.guestCartSignal()];
       if (items[itemIndex]) {
-        items[itemIndex].quantity = quantity;
+        items[itemIndex] = { ...items[itemIndex], quantity };
         this.saveGuestCart(items);
         this.messageService.add({
           severity: 'info',
@@ -235,7 +259,8 @@ export class CartService {
           })
         );
     } else {
-      const items = this.guestCartSignal();
+      // ⚠️ IMPORTANTE: Crear una COPIA del array para que Angular detecte el cambio
+      const items = [...this.guestCartSignal()];
       items.splice(itemIndex, 1);
       this.saveGuestCart(items);
       this.messageService.add({

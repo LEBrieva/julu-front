@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
+import { CartDrawerService } from '../../../core/services/cart-drawer.service';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -39,6 +40,7 @@ import { MenuItem } from 'primeng/api';
 export class PublicHeaderComponent {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
+  private cartDrawerService = inject(CartDrawerService);
   private router = inject(Router);
 
   // Signals
@@ -114,10 +116,24 @@ export class PublicHeaderComponent {
   }
 
   /**
-   * Ir al carrito
+   * Abrir el drawer del carrito o navegar a /cart si ya estamos ahí
    */
   goToCart(): void {
-    this.router.navigate(['/cart']);
+    const currentUrl = this.router.url;
+    
+    // Si ya estamos en /cart, no hacer nada (ya estamos viendo el carrito)
+    if (currentUrl.startsWith('/cart')) {
+      return;
+    }
+    
+    // Si estamos en checkout, navegar a /cart (no abrir drawer)
+    if (currentUrl.startsWith('/checkout')) {
+      this.router.navigate(['/cart']);
+      return;
+    }
+    
+    // En cualquier otra página, abrir el drawer
+    this.cartDrawerService.open();
   }
 
   /**
