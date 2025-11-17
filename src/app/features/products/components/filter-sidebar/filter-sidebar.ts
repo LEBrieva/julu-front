@@ -1,4 +1,4 @@
-import { Component, output, signal, effect, input } from '@angular/core';
+import { Component, output, signal, effect, input, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
@@ -26,6 +26,9 @@ import {
   formatSize,
   getColorHex
 } from '../../../../core/models/product.model';
+
+// Services
+import { ProductService } from '../../../../core/services/product.service';
 
 interface FilterForm {
   search: FormControl<string | null>;
@@ -61,7 +64,10 @@ interface FilterForm {
   templateUrl: './filter-sidebar.html',
   styleUrl: './filter-sidebar.css'
 })
-export class FilterSidebarComponent {
+export class FilterSidebarComponent implements OnInit {
+  // Services
+  private productService = inject(ProductService);
+
   // Inputs
   initialFilters = input<FilterProductDto>();
 
@@ -106,9 +112,10 @@ export class FilterSidebarComponent {
 
   // Rango de precios
   priceRange = signal<[number, number]>([0, 50000]);
-  readonly MIN_PRICE = 0;
-  readonly MAX_PRICE = 50000;
-  readonly PRICE_STEP = 500;
+  priceRangeValue: [number, number] = [0, 50000]; // Propiedad para ngModel
+  priceStep = signal<number>(1); // Step dinámico basado en el rango
+  minPrice = signal<number>(0);
+  maxPrice = signal<number>(50000);
 
   // Contador de filtros activos
   activeFiltersCount = signal<number>(0);
@@ -136,21 +143,73 @@ export class FilterSidebarComponent {
 
     // Sincronizar slider con form controls
     this.filterForm.controls.minPrice.valueChanges.subscribe(min => {
-      const max = this.filterForm.controls.maxPrice.value ?? this.MAX_PRICE;
-      this.priceRange.set([min ?? 0, max]);
+      const max = this.filterForm.controls.maxPrice.value ?? this.maxPrice();
+      this.priceRange.set([min ?? this.minPrice(), max]);
     });
 
     this.filterForm.controls.maxPrice.valueChanges.subscribe(max => {
-      const min = this.filterForm.controls.minPrice.value ?? 0;
-      this.priceRange.set([min, max ?? this.MAX_PRICE]);
+      const min = this.filterForm.controls.minPrice.value ?? this.minPrice();
+      this.priceRange.set([min, max ?? this.maxPrice()]);
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadPriceRange();
+  }
+
+  /**
+   * Carga el rango de precios dinámico desde el backend
+   */
+  private loadPriceRange(): void {
+    this.productService.getPriceRange().subscribe({
+      next: (range) => {
+        this.minPrice.set(range.min);
+        this.maxPrice.set(range.max);
+
+        // Calcular step dinámico basado en el rango
+        const priceRange = range.max - range.min;
+        let step = 1;
+
+        if (priceRange > 10000) {
+          step = 500;
+        } else if (priceRange > 1000) {
+          step = 100;
+        } else if (priceRange > 100) {
+          step = 10;
+        } else {
+          step = 1;
+        }
+
+        this.priceStep.set(step);
+
+        // Actualizar el slider solo si no hay filtros preexistentes
+        const currentMin = this.filterForm.controls.minPrice.value;
+        const currentMax = this.filterForm.controls.maxPrice.value;
+
+        if (currentMin === null && currentMax === null) {
+          const newRange: [number, number] = [range.min, range.max];
+          this.priceRange.set(newRange);
+          this.priceRangeValue = newRange;
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando rango de precios, usando valores por defecto:', err);
+        // Mantener valores por defecto (0, 50000) ya inicializados
+      }
     });
   }
 
   /**
    * Maneja cambio del slider de precios
    */
-  onPriceRangeChange(event: any): void {
-    const [min, max] = event.value;
+  onPriceRangeChange(value: [number, number]): void {
+    const [min, max] = value;
+
+    // Sincronizar signal y propiedad
+    this.priceRange.set(value);
+    this.priceRangeValue = value;
+
+    // Actualizar el form
     this.filterForm.patchValue({
       minPrice: min,
       maxPrice: max
@@ -199,7 +258,9 @@ export class FilterSidebarComponent {
       tags: ''
     });
 
-    this.priceRange.set([0, this.MAX_PRICE]);
+    const resetRange: [number, number] = [this.minPrice(), this.maxPrice()];
+    this.priceRange.set(resetRange);
+    this.priceRangeValue = resetRange;
     this.filtersCleared.emit();
   }
 
@@ -236,9 +297,11 @@ export class FilterSidebarComponent {
     });
 
     // Actualizar slider
-    const min = filters.minPrice ?? 0;
-    const max = filters.maxPrice ?? this.MAX_PRICE;
-    this.priceRange.set([min, max]);
+    const min = filters.minPrice ?? this.minPrice();
+    const max = filters.maxPrice ?? this.maxPrice();
+    const newRange: [number, number] = [min, max];
+    this.priceRange.set(newRange);
+    this.priceRangeValue = newRange;
   }
 
   /**

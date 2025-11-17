@@ -132,13 +132,13 @@
           <div class="filter-section">
             <div class="price-range-container">
               <p-slider
-                [(ngModel)]="priceRange"
+                [(ngModel)]="priceRangeValue"
                 [ngModelOptions]="{standalone: true}"
                 [range]="true"
-                [min]="MIN_PRICE"
-                [max]="MAX_PRICE"
-                [step]="PRICE_STEP"
-                (onChange)="onPriceRangeChange($event)"
+                [min]="minPrice()"
+                [max]="maxPrice()"
+                [step]="priceStep()"
+                (ngModelChange)="onPriceRangeChange($event)"
                 styleClass="w-full"
               />
               <div class="price-labels">

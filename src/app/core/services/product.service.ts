@@ -367,6 +367,18 @@ export class ProductService {
   }
 
   /**
+   * Obtiene el rango de precios (mínimo y máximo) de productos activos (PÚBLICO)
+   * Endpoint: GET /products/price-range
+   *
+   * Útil para inicializar dinámicamente el slider de filtros de precios.
+   *
+   * @returns Observable con { min: number, max: number }
+   */
+  getPriceRange(): Observable<{ min: number; max: number }> {
+    return this.http.get<{ min: number; max: number }>(`${this.apiUrl}/price-range`);
+  }
+
+  /**
    * Alterna el estado de destacado de un producto (ADMIN)
    * Endpoint: PATCH /products/:id/toggle-destacado
    *
