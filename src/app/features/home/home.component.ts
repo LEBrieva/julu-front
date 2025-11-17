@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 // PrimeNG
 import { CarouselModule } from 'primeng/carousel';
@@ -7,12 +8,14 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Components
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
-import { CategoryCardComponent } from './components/category-card/category-card.component';
+import { HeroCategoryCardComponent, type HeroCategoryConfig } from '../../shared/components/hero-category-card/hero-category-card.component';
+import { CompactCategoryCardComponent, type CompactCategoryConfig } from '../../shared/components/compact-category-card/compact-category-card.component';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 // Services & Models
 import { ProductService } from '../../core/services/product.service';
-import { Product, ProductStyle } from '../../core/models/product.model';
+import { Product } from '../../core/models/product.model';
+import { HERO_CATEGORY, COMPACT_CATEGORIES } from './constants/split-categories.const';
 
 /**
  * HomeComponent - Landing page principal
@@ -30,7 +33,8 @@ import { Product, ProductStyle } from '../../core/models/product.model';
     CarouselModule,
     ProgressSpinnerModule,
     HeroSectionComponent,
-    CategoryCardComponent,
+    HeroCategoryCardComponent,
+    CompactCategoryCardComponent,
     ProductCardComponent
   ],
   templateUrl: './home.component.html',
@@ -38,40 +42,16 @@ import { Product, ProductStyle } from '../../core/models/product.model';
 })
 export class HomeComponent implements OnInit {
   private productService = inject(ProductService);
+  private router = inject(Router);
 
   // Signals
   productosDestacados = signal<Product[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
 
-  // Secciones del catálogo (hardcodeadas)
-  catalogSections = [
-    {
-      title: 'Nueva Colección',
-      imageUrl: 'assets/images/categories/straight.jpg',
-      queryParams: {} // TODO: Agregar filtro cuando exista campo 'nueva'
-    },
-    {
-      title: 'Más Vendidas',
-      imageUrl: 'assets/images/categories/slim.jpg',
-      queryParams: {} // TODO: Agregar filtro cuando existan métricas
-    },
-    {
-      title: 'Ofertas',
-      imageUrl: 'assets/images/categories/skinny.jpg',
-      queryParams: {} // TODO: Agregar filtro cuando exista campo 'enOferta'
-    },
-    {
-      title: 'Regular',
-      imageUrl: 'assets/images/categories/regular.jpg',
-      queryParams: { style: ProductStyle.REGULAR }
-    },
-    {
-      title: 'Oversize',
-      imageUrl: 'assets/images/categories/oversize.jpg',
-      queryParams: { style: ProductStyle.OVERSIZE }
-    }
-  ];
+  // Categorías para layout split
+  heroCategory = HERO_CATEGORY;
+  compactCategories = COMPACT_CATEGORIES;
 
   // Configuración del carousel (responsive)
   carouselResponsiveOptions = [
@@ -94,6 +74,24 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProductosDestacados();
+  }
+
+  /**
+   * Navega al catálogo con los filtros de la categoría hero seleccionada
+   */
+  navigateToHeroCategory(category: HeroCategoryConfig): void {
+    this.router.navigate(['/products'], {
+      queryParams: category.queryParams
+    });
+  }
+
+  /**
+   * Navega al catálogo con los filtros de la categoría compacta seleccionada
+   */
+  navigateToCompactCategory(category: CompactCategoryConfig): void {
+    this.router.navigate(['/products'], {
+      queryParams: category.queryParams
+    });
   }
 
   /**

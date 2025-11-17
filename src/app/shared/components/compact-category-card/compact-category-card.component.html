@@ -1,0 +1,30 @@
+<article
+  class="compact-card"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="'Explorar colección de ' + category().name"
+  (click)="onClick()"
+  (keydown)="onKeyPress($event)"
+>
+  <!-- Imagen de fondo -->
+  <div class="compact-image-container">
+    <img
+      [src]="category().image"
+      [alt]="'Colección ' + category().name"
+      loading="lazy"
+      class="compact-image"
+    />
+  </div>
+
+  <!-- Overlay simple -->
+  <div class="compact-overlay"></div>
+
+  <!-- Título centrado -->
+  <div class="compact-content">
+    <h3 class="compact-title">{{ category().name }}</h3>
+    <div class="compact-arrow">
+      <i class="pi pi-arrow-right"></i>
+    </div>
+  </div>
+</article>
+

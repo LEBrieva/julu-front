@@ -1,0 +1,56 @@
+<article
+  class="hero-card"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="'Explorar colección destacada de ' + category().name"
+  (click)="onClick()"
+  (keydown)="onKeyPress($event)"
+>
+  <!-- Imagen de fondo -->
+  <div class="hero-image-container">
+    <img
+      [src]="category().image"
+      [alt]="'Colección ' + category().name"
+      loading="eager"
+      class="hero-image"
+    />
+  </div>
+
+  <!-- Overlay gradiente más intenso -->
+  <div class="hero-overlay"></div>
+
+  <!-- Badge "DESTACADO" -->
+  <div class="hero-badge">
+    <i class="pi pi-star-fill"></i>
+    <span>DESTACADO</span>
+  </div>
+
+  <!-- Contenido -->
+  <div class="hero-content">
+    <!-- Tagline pequeño -->
+    <p class="hero-tagline">{{ category().tagline }}</p>
+    
+    <!-- Título grande -->
+    <h2 class="hero-title">{{ category().name }}</h2>
+    
+    <!-- Descripción -->
+    <p class="hero-description">{{ category().description }}</p>
+
+    <!-- Lista de beneficios (3 items con checkmarks) -->
+    <ul class="hero-benefits">
+      @for (benefit of category().benefits; track benefit) {
+        <li class="benefit-item">
+          <i class="pi pi-check-circle"></i>
+          <span>{{ benefit }}</span>
+        </li>
+      }
+    </ul>
+
+    <!-- CTA grande -->
+    <button class="hero-cta">
+      <span>Explorar Colección</span>
+      <i class="pi pi-arrow-right"></i>
+    </button>
+  </div>
+</article>
+

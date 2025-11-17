@@ -2,21 +2,34 @@
   <!-- Hero Section -->
   <app-hero-section></app-hero-section>
 
-  <!-- Secciones del Catálogo -->
-  <section class="catalog-sections py-12 px-4 md:px-8 max-w-7xl mx-auto">
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800">
-      Explorá por Estilo
-    </h2>
+  <!-- Sección de Estilos - Split Layout -->
+  <section class="styles-section py-16 px-4">
+    <div class="container mx-auto max-w-7xl">
+      <!-- Título de sección -->
+      <h2 class="section-title text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+        Explorá por Estilo
+      </h2>
 
-    <!-- Grid responsive de secciones -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (section of catalogSections; track section.title) {
-        <app-category-card
-          [title]="section.title"
-          [imageUrl]="section.imageUrl"
-          [queryParams]="section.queryParams"
-        ></app-category-card>
-      }
+      <!-- Layout Split: Hero + Grid -->
+      <div class="split-layout">
+        <!-- Hero Card (Izquierda - 60%) -->
+        <div class="hero-column">
+          <app-hero-category-card
+            [category]="heroCategory"
+            (categoryClick)="navigateToHeroCategory($event)"
+          />
+        </div>
+
+        <!-- Grid Compacto (Derecha - 40%) -->
+        <div class="compact-grid">
+          @for (category of compactCategories; track category.id) {
+            <app-compact-category-card
+              [category]="category"
+              (categoryClick)="navigateToCompactCategory($event)"
+            />
+          }
+        </div>
+      </div>
     </div>
   </section>
 
