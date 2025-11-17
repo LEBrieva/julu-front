@@ -93,6 +93,16 @@ export const routes: Routes = [
       import('./features/checkout/checkout').then((m) => m.CheckoutComponent)
   },
 
+  // Guest Checkout (FASE 10) - Sin autenticación, solo carrito con items
+  {
+    path: 'checkout/guest',
+    canActivate: [cartNotEmptyGuard], // Solo verifica que haya items en el carrito
+    loadComponent: () =>
+      import('./features/checkout/guest-checkout').then(
+        (m) => m.GuestCheckoutComponent
+      )
+  },
+
   // Order Success (FASE 9) - Requiere autenticación
   {
     path: 'order-success/:id',
@@ -100,6 +110,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/order-success/order-success').then(
         (m) => m.OrderSuccessComponent
+      )
+  },
+
+  // Order Success Guest (FASE 10) - Sin autenticación (público)
+  {
+    path: 'order-success-guest/:id',
+    loadComponent: () =>
+      import('./features/order-success/order-success-guest').then(
+        (m) => m.OrderSuccessGuestComponent
       )
   },
 

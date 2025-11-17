@@ -82,6 +82,7 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   notes?: string;
+  isGuest: boolean;  // true = orden de invitado, false = usuario registrado
   createdAt: Date;
   updatedAt: Date;
 }
@@ -98,6 +99,7 @@ export interface OrderListItem {
   total: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  isGuest: boolean;        // true = orden de invitado, false = usuario registrado
   createdAt: Date;
 }
 
@@ -116,6 +118,7 @@ export interface FilterOrderDto {
   paymentStatus?: PaymentStatus; // Filtro por estado de pago
   dateFrom?: string;         // Fecha desde (ISO string: YYYY-MM-DD)
   dateTo?: string;           // Fecha hasta (ISO string: YYYY-MM-DD)
+  isGuest?: boolean;         // Filtro por tipo: true = solo invitados, false = solo registrados, undefined = todas
 }
 
 /**
@@ -252,4 +255,27 @@ export const CHANGE_STATUS_OPTIONS = [
   { label: formatOrderStatus(OrderStatus.SHIPPED), value: OrderStatus.SHIPPED },
   { label: formatOrderStatus(OrderStatus.DELIVERED), value: OrderStatus.DELIVERED },
   { label: formatOrderStatus(OrderStatus.CANCELLED), value: OrderStatus.CANCELLED }
+];
+
+/**
+ * Formatea el tipo de orden (guest vs registered)
+ */
+export function formatOrderType(isGuest: boolean): string {
+  return isGuest ? 'Invitado' : 'Registrado';
+}
+
+/**
+ * Devuelve la severidad de PrimeNG para badges de tipo de orden
+ */
+export function getOrderTypeSeverity(isGuest: boolean): 'secondary' | 'info' {
+  return isGuest ? 'secondary' : 'info';
+}
+
+/**
+ * Opciones de tipo de orden para filtros
+ */
+export const ORDER_TYPE_OPTIONS = [
+  { label: 'Todos', value: null },
+  { label: 'Invitado', value: true },
+  { label: 'Registrado', value: false }
 ];

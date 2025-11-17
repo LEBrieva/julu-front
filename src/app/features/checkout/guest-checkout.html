@@ -1,0 +1,353 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <h1 class="text-3xl font-bold mb-6">Finalizar Compra como Invitado</h1>
+
+  <!-- Steps indicator -->
+  <div class="mb-8">
+    <p-steps
+      [model]="steps"
+      [activeIndex]="currentStep()"
+      [readonly]="true"
+      styleClass="mb-8"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main content area -->
+    <div class="lg:col-span-2">
+      <p-card>
+        <!-- STEP 0: Email -->
+        @if (currentStep() === 0) {
+          <div>
+            <h2 class="text-xl font-bold mb-4">Ingresa tu Email</h2>
+            <p class="text-gray-600 mb-6">
+              Te enviaremos la confirmación de tu pedido a este email
+            </p>
+
+            <form [formGroup]="emailForm" class="space-y-4">
+              <div>
+                <label for="email" class="block text-sm font-medium mb-2">
+                  Email *
+                </label>
+                <input
+                  pInputText
+                  id="email"
+                  formControlName="email"
+                  type="email"
+                  class="w-full"
+                  placeholder="tu@email.com"
+                />
+                @if (getEmailError()) {
+                  <small class="text-red-500">{{ getEmailError() }}</small>
+                }
+              </div>
+            </form>
+
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-gray-700">
+                <i class="pi pi-info-circle text-blue-600 mr-2"></i>
+                ¿Ya tienes cuenta?
+                <a
+                  routerLink="/login"
+                  [queryParams]="{ returnUrl: '/checkout' }"
+                  class="text-blue-600 hover:underline font-semibold ml-1"
+                >
+                  Inicia sesión aquí
+                </a>
+              </p>
+            </div>
+
+            <div class="flex justify-end mt-6">
+              <p-button
+                label="Continuar"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                (onClick)="nextStep()"
+              />
+            </div>
+          </div>
+        }
+
+        <!-- STEP 1: Dirección de envío -->
+        @if (currentStep() === 1) {
+          <div>
+            <h2 class="text-xl font-bold mb-4">Dirección de Envío</h2>
+
+            <form [formGroup]="addressForm" class="space-y-4">
+              <div>
+                <label for="fullName" class="block text-sm font-medium mb-2">
+                  Nombre Completo *
+                </label>
+                <input
+                  pInputText
+                  id="fullName"
+                  formControlName="fullName"
+                  class="w-full"
+                  placeholder="Juan Pérez"
+                />
+                @if (getFieldError('fullName')) {
+                  <small class="text-red-500">{{ getFieldError('fullName') }}</small>
+                }
+              </div>
+
+              <div>
+                <label for="street" class="block text-sm font-medium mb-2">
+                  Calle y Número *
+                </label>
+                <input
+                  pInputText
+                  id="street"
+                  formControlName="street"
+                  class="w-full"
+                  placeholder="Av. Corrientes 1234"
+                />
+                @if (getFieldError('street')) {
+                  <small class="text-red-500">{{ getFieldError('street') }}</small>
+                }
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="city" class="block text-sm font-medium mb-2">
+                    Ciudad *
+                  </label>
+                  <input
+                    pInputText
+                    id="city"
+                    formControlName="city"
+                    class="w-full"
+                    placeholder="Buenos Aires"
+                  />
+                  @if (getFieldError('city')) {
+                    <small class="text-red-500">{{ getFieldError('city') }}</small>
+                  }
+                </div>
+
+                <div>
+                  <label for="state" class="block text-sm font-medium mb-2">
+                    Provincia *
+                  </label>
+                  <input
+                    pInputText
+                    id="state"
+                    formControlName="state"
+                    class="w-full"
+                    placeholder="CABA"
+                  />
+                  @if (getFieldError('state')) {
+                    <small class="text-red-500">{{ getFieldError('state') }}</small>
+                  }
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="zipCode" class="block text-sm font-medium mb-2">
+                    Código Postal *
+                  </label>
+                  <p-inputMask
+                    id="zipCode"
+                    formControlName="zipCode"
+                    mask="9999"
+                    placeholder="1234"
+                    styleClass="w-full"
+                  />
+                  @if (getFieldError('zipCode')) {
+                    <small class="text-red-500">{{ getFieldError('zipCode') }}</small>
+                  }
+                </div>
+
+                <div>
+                  <label for="phone" class="block text-sm font-medium mb-2">
+                    Teléfono *
+                  </label>
+                  <p-inputMask
+                    id="phone"
+                    formControlName="phone"
+                    mask="9999999999"
+                    placeholder="1134567890"
+                    styleClass="w-full"
+                  />
+                  @if (getFieldError('phone')) {
+                    <small class="text-red-500">{{ getFieldError('phone') }}</small>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label for="country" class="block text-sm font-medium mb-2">
+                  País *
+                </label>
+                <input
+                  pInputText
+                  id="country"
+                  formControlName="country"
+                  class="w-full"
+                  [readonly]="true"
+                />
+              </div>
+            </form>
+
+            <div class="flex justify-between mt-6">
+              <p-button
+                label="Volver"
+                icon="pi pi-arrow-left"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="prevStep()"
+              />
+              <p-button
+                label="Continuar"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                (onClick)="nextStep()"
+              />
+            </div>
+          </div>
+        }
+
+        <!-- STEP 2: Confirmación -->
+        @if (currentStep() === 2) {
+          <div>
+            <h2 class="text-xl font-bold mb-6">Revisa y Confirma tu Pedido</h2>
+
+            <div class="space-y-4">
+              <!-- Resumen de email -->
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Email de Confirmación</h3>
+                <p class="text-sm text-gray-700">
+                  {{ emailForm.get('email')?.value }}
+                </p>
+              </div>
+
+              <!-- Resumen de productos -->
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-3">Productos ({{ cartItems().length }})</h3>
+                <div class="space-y-3">
+                  @for (item of cartItems(); track $index) {
+                    <div class="flex gap-3 items-center">
+                      <img
+                        [src]="item.productImage || '/assets/images/placeholder.jpg'"
+                        [alt]="item.productName"
+                        class="w-16 h-16 object-cover rounded"
+                      />
+                      <div class="flex-1">
+                        <p class="text-sm font-semibold">{{ item.productName }}</p>
+                        <p class="text-xs text-gray-600">
+                          {{ formatSize(item.variantSize) }} •
+                          {{ formatColor(item.variantColor) }} • Cant: {{ item.quantity }}
+                        </p>
+                      </div>
+                      <p class="text-sm font-bold">
+                        ${{ (item.priceAtAdd * item.quantity) | number: '1.2-2' }}
+                      </p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Resumen de dirección -->
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Dirección de Envío</h3>
+                <p class="text-sm text-gray-700">
+                  {{ addressForm.get('fullName')?.value }}
+                </p>
+                <p class="text-sm text-gray-700">
+                  {{ addressForm.get('street')?.value }}
+                </p>
+                <p class="text-sm text-gray-700">
+                  {{ addressForm.get('city')?.value }},
+                  {{ addressForm.get('state')?.value }}
+                  ({{ addressForm.get('zipCode')?.value }})
+                </p>
+                <p class="text-sm text-gray-700">
+                  Tel: {{ addressForm.get('phone')?.value }}
+                </p>
+              </div>
+
+              <!-- Resumen de método de pago -->
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Método de Pago</h3>
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-money-bill text-green-600"></i>
+                  <p class="text-sm text-gray-700">Pago en Efectivo al recibir</p>
+                </div>
+              </div>
+
+              <!-- Términos y condiciones -->
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm text-gray-700">
+                  <i class="pi pi-info-circle text-blue-600 mr-2"></i>
+                  Al confirmar tu pedido, aceptas nuestros términos y condiciones
+                  de venta.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex justify-between mt-6">
+              <p-button
+                label="Volver"
+                icon="pi pi-arrow-left"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="prevStep()"
+                [disabled]="loading()"
+              />
+              <p-button
+                label="Confirmar Pedido"
+                icon="pi pi-check"
+                iconPos="right"
+                [loading]="loading()"
+                (onClick)="completeOrder()"
+              />
+            </div>
+          </div>
+        }
+      </p-card>
+    </div>
+
+    <!-- Sidebar con resumen -->
+    <div class="lg:col-span-1">
+      <p-card>
+        <h2 class="text-lg font-bold mb-4">Resumen del Pedido</h2>
+
+        <div class="space-y-3 mb-6">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="font-semibold"
+              >${{ subtotal() | number: '1.2-2' }}</span
+            >
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Envío</span>
+            <span class="font-semibold"
+              >${{ SHIPPING_COST | number: '1.2-2' }}</span
+            >
+          </div>
+          <p-divider />
+          <div class="flex justify-between">
+            <span class="font-bold">Total</span>
+            <span class="font-bold text-xl text-blue-600"
+              >${{ total() | number: '1.2-2' }}</span
+            >
+          </div>
+        </div>
+
+        <div class="space-y-2 text-sm text-gray-600">
+          <p>
+            <i class="pi pi-shield text-green-600 mr-2"></i>
+            Compra segura y protegida
+          </p>
+          <p>
+            <i class="pi pi-truck text-blue-600 mr-2"></i>
+            Envío a todo el país
+          </p>
+          <p>
+            <i class="pi pi-replay text-purple-600 mr-2"></i>
+            Devolución gratuita
+          </p>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</div>
+

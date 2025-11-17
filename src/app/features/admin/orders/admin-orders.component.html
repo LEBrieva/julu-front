@@ -48,7 +48,7 @@
 
   <!-- Filtros -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <!-- Búsqueda por número de orden -->
       <div class="flex flex-col">
         <label for="search" class="text-sm font-medium text-gray-700 mb-2">
@@ -95,6 +95,24 @@
           id="paymentStatus"
           [options]="paymentStatusOptions"
           [(ngModel)]="selectedPaymentStatus"
+          (onChange)="onFilterChange()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Todos"
+          [showClear]="true"
+          styleClass="w-full"
+        />
+      </div>
+
+      <!-- Filtro por tipo de orden (guest/registered) -->
+      <div class="flex flex-col">
+        <label for="orderType" class="text-sm font-medium text-gray-700 mb-2">
+          Tipo de Orden
+        </label>
+        <p-select
+          id="orderType"
+          [options]="orderTypeOptions"
+          [(ngModel)]="selectedOrderType"
           (onChange)="onFilterChange()"
           optionLabel="label"
           optionValue="value"
@@ -165,6 +183,7 @@
         <tr>
           <th class="font-semibold" style="min-width: 10rem">Número</th>
           <th class="font-semibold" style="min-width: 12rem">Cliente</th>
+          <th class="font-semibold text-center" style="min-width: 8rem">Tipo</th>
           <th class="font-semibold text-right" style="min-width: 10rem">Total</th>
           <th class="font-semibold text-center" style="min-width: 10rem">Estado Orden</th>
           <th class="font-semibold text-center" style="min-width: 10rem">Estado Pago</th>
@@ -188,6 +207,14 @@
           <!-- Cliente -->
           <td>
             <span class="font-medium">{{ order.customerName }}</span>
+          </td>
+
+          <!-- Tipo (guest/registered) -->
+          <td class="text-center">
+            <p-tag
+              [value]="formatOrderType(order.isGuest)"
+              [severity]="getOrderTypeSeverity(order.isGuest)"
+            />
           </td>
 
           <!-- Total -->

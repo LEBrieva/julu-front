@@ -28,9 +28,12 @@ import {
   formatPaymentStatus,
   getOrderStatusSeverity,
   getPaymentStatusSeverity,
+  formatOrderType,
+  getOrderTypeSeverity,
   ORDER_STATUS_OPTIONS,
   PAYMENT_STATUS_OPTIONS,
-  CHANGE_STATUS_OPTIONS
+  CHANGE_STATUS_OPTIONS,
+  ORDER_TYPE_OPTIONS
 } from '../../../core/models/order.model';
 import { PaginationInfo } from '../../../core/models/api-response.model';
 
@@ -87,6 +90,7 @@ export class AdminOrdersComponent implements OnInit {
   searchTerm = '';
   selectedStatus: OrderStatus | null = null;
   selectedPaymentStatus: PaymentStatus | null = null;
+  selectedOrderType: boolean | null = null; // null = todas, true = guest, false = registered
   dateRange: Date[] | null = null; // [fechaDesde, fechaHasta]
 
   // Pagination
@@ -100,18 +104,22 @@ export class AdminOrdersComponent implements OnInit {
   statusOptions = ORDER_STATUS_OPTIONS;
   paymentStatusOptions = PAYMENT_STATUS_OPTIONS;
   changeStatusOptions = CHANGE_STATUS_OPTIONS;
+  orderTypeOptions = ORDER_TYPE_OPTIONS;
 
   // Helper functions (para usar en template)
   formatOrderStatus = formatOrderStatus;
   formatPaymentStatus = formatPaymentStatus;
   getOrderStatusSeverity = getOrderStatusSeverity;
   getPaymentStatusSeverity = getPaymentStatusSeverity;
+  formatOrderType = formatOrderType;
+  getOrderTypeSeverity = getOrderTypeSeverity;
 
   ngOnInit(): void {
     // Resetear estado al inicializar
     this.searchTerm = '';
     this.selectedStatus = null;
     this.selectedPaymentStatus = null;
+    this.selectedOrderType = null;
     this.dateRange = null;
     this.currentPage = 1;
     this.first = 0;
@@ -150,6 +158,11 @@ export class AdminOrdersComponent implements OnInit {
       // Convertir fechas a ISO strings (YYYY-MM-DD)
       filters.dateFrom = this.dateRange[0].toISOString().split('T')[0];
       filters.dateTo = this.dateRange[1].toISOString().split('T')[0];
+    }
+
+    // Agregar filtro de tipo de orden (guest vs registered)
+    if (this.selectedOrderType !== null) {
+      filters.isGuest = this.selectedOrderType;
     }
 
     this.orderService.getOrders(filters).subscribe({
@@ -210,6 +223,7 @@ export class AdminOrdersComponent implements OnInit {
     this.searchTerm = '';
     this.selectedStatus = null;
     this.selectedPaymentStatus = null;
+    this.selectedOrderType = null;
     this.dateRange = null;
     this.first = 0;
     this.currentPage = 1;

@@ -99,6 +99,10 @@ export class CartComponent {
     this.router.navigate(['/checkout']);
   }
 
+  goToGuestCheckout() {
+    this.router.navigate(['/checkout/guest']);
+  }
+
   continueShopping() {
     this.router.navigate(['/products']);
   }

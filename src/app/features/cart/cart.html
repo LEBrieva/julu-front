@@ -106,18 +106,30 @@
               (onClick)="goToCheckout()"
             />
           } @else {
-            <div class="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p class="text-sm text-blue-800 mb-2">
-                <i class="pi pi-info-circle mr-1"></i>
-                Inicia sesión para finalizar tu compra
+            <!-- NUEVO: Dos opciones para usuarios anónimos -->
+            <div class="space-y-3 mb-3">
+              <p class="text-sm text-gray-600 text-center mb-2">
+                ¿Cómo deseas continuar?
               </p>
+              
+              <p-button
+                label="Continuar como Invitado"
+                icon="pi pi-user"
+                styleClass="w-full"
+                (onClick)="goToGuestCheckout()"
+              />
+              
+              <div class="text-center text-sm text-gray-500">o</div>
+              
+              <p-button
+                label="Iniciar Sesión"
+                icon="pi pi-sign-in"
+                severity="secondary"
+                [outlined]="true"
+                styleClass="w-full"
+                (onClick)="goToCheckout()"
+              />
             </div>
-            <p-button
-              label="Iniciar Sesión"
-              icon="pi pi-sign-in"
-              styleClass="w-full mb-3"
-              (onClick)="goToCheckout()"
-            />
           }
 
           <p-button

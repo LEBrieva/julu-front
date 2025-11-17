@@ -10,6 +10,7 @@ import {
   FilterOrderDto,
   UpdateOrderStatusDto
 } from '../models/order.model';
+import { CreateGuestOrderDto } from '../models/guest-order.model';
 
 /**
  * DTO para crear una orden desde el carrito
@@ -39,7 +40,7 @@ export class OrderService {
   private apiUrl = `${environment.apiUrl}/order`; // Nota: endpoint es /order (singular) en el backend
 
   /**
-   * Crea una orden desde el carrito (USER)
+   * Crea una orden desde el carrito (USER autenticado)
    * Endpoint: POST /order
    *
    * El backend:
@@ -52,6 +53,24 @@ export class OrderService {
    */
   createOrder(dto: CreateOrderDto): Observable<Order> {
     return this.http.post<Order>(this.apiUrl, dto, { withCredentials: true });
+  }
+
+  /**
+   * Crea una orden como invitado (GUEST - sin autenticación)
+   * Endpoint: POST /order/guest
+   *
+   * El backend:
+   * 1. Valida stock de todos los items del carrito
+   * 2. Crea la orden con userId = null (marca como guest)
+   * 3. Usa el email del DTO en shippingAddress
+   * 4. Decrementa stock de variantes
+   * 5. Genera orderNumber único
+   * 6. Retorna la orden creada
+   *
+   * NOTA: NO usa withCredentials porque no hay JWT (usuario no autenticado)
+   */
+  createGuestOrder(dto: CreateGuestOrderDto): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/guest`, dto);
   }
 
   /**
@@ -90,6 +109,11 @@ export class OrderService {
     }
     if (filters?.dateTo) {
       params = params.set('dateTo', filters.dateTo);
+    }
+
+    // Agregar filtro de tipo de orden (guest vs registered)
+    if (filters?.isGuest !== undefined) {
+      params = params.set('isGuest', filters.isGuest.toString());
     }
 
     return this.http.get<PaginatedResponse<OrderListItem>>(this.apiUrl, { params });
