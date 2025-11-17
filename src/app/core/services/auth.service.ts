@@ -70,6 +70,7 @@ export class AuthService {
    * 4. Guardamos accessToken en localStorage
    * 5. Guardamos user en el signal (reactivo)
    * 6. Los componentes que usan currentUser() se actualizan automáticamente
+   * 7. CartService detecta el cambio de autenticación y mergea el carrito automáticamente
    *
    * IMPORTANTE: withCredentials: true
    * - Esto le dice al navegador que INCLUYA las cookies en la petición
@@ -94,6 +95,8 @@ export class AuthService {
         // ⏰ Iniciar silent refresh después del login
         this.startSilentRefresh();
       }),
+      // Nota: El merge del carrito se maneja automáticamente en CartService
+      // mediante un effect() que detecta cuando el usuario se autentica
       catchError(error => {
         console.error('❌ Error en login:', error);
         return throwError(() => error);  // Re-lanzar el error para que el componente lo maneje

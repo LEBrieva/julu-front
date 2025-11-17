@@ -1,0 +1,158 @@
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+  <h1 class="text-3xl font-bold mb-8">Carrito de Compras</h1>
+
+  @if (cartItems().length > 0) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Lista de items -->
+      <div class="lg:col-span-2 space-y-4">
+        @for (item of cartItems(); track $index) {
+          <div class="bg-white rounded-lg shadow-md p-4 flex gap-4 relative">
+            <!-- Imagen -->
+            <div class="flex-shrink-0">
+              <p-image
+                [src]="item.productImage || '/assets/images/placeholder.jpg'"
+                [alt]="item.productName"
+                width="120"
+                [preview]="true"
+                imageClass="rounded-lg object-cover"
+              />
+            </div>
+
+            <!-- Info del producto -->
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-lg font-semibold mb-1">
+                  {{ item.productName }}
+                </h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  Talla: {{ formatSize(item.variantSize) }} •
+                  Color: {{ formatColor(item.variantColor) }}
+                </p>
+                <p class="text-lg font-bold text-blue-600">
+                  ${{ item.priceAtAdd | number: '1.2-2' }}
+                </p>
+              </div>
+
+              <!-- Controles -->
+              <div class="flex items-center gap-4 mt-4 flex-wrap">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-gray-600">Cantidad:</span>
+                  <p-inputNumber
+                    [(ngModel)]="item.quantity"
+                    [min]="1"
+                    [max]="99"
+                    [showButtons]="true"
+                    [disabled]="loading()[$index]"
+                    (ngModelChange)="updateQuantity($index, $event)"
+                    buttonLayout="horizontal"
+                    inputStyleClass="w-16 text-center"
+                    decrementButtonClass="p-button-text"
+                    incrementButtonClass="p-button-text"
+                  />
+                </div>
+
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  [loading]="loading()[$index]"
+                  (onClick)="removeItem($index, item.productName)"
+                  styleClass="ml-auto"
+                />
+
+                <div class="w-full lg:w-auto text-right">
+                  <span class="text-sm text-gray-600">Subtotal:</span>
+                  <span class="text-xl font-bold ml-2">
+                    ${{ (item.priceAtAdd * item.quantity) | number: '1.2-2' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Resumen -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+          <h2 class="text-xl font-bold mb-4">Resumen de Compra</h2>
+
+          <div class="space-y-3 mb-6">
+            <div class="flex justify-between text-gray-700">
+              <span>Subtotal ({{ totalItems() }} items)</span>
+              <span class="font-semibold"
+                >${{ subtotal() | number: '1.2-2' }}</span
+              >
+            </div>
+            <div class="flex justify-between text-gray-700">
+              <span>Envío</span>
+              <span class="font-semibold"
+                >${{ SHIPPING_COST | number: '1.2-2' }}</span
+              >
+            </div>
+            <div class="border-t pt-3 flex justify-between text-lg">
+              <span class="font-bold">Total</span>
+              <span class="font-bold text-blue-600"
+                >${{ total() | number: '1.2-2' }}</span
+              >
+            </div>
+          </div>
+
+          @if (isAuthenticated()) {
+            <p-button
+              label="Proceder al Pago"
+              icon="pi pi-shopping-cart"
+              styleClass="w-full mb-3"
+              (onClick)="goToCheckout()"
+            />
+          } @else {
+            <div class="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-blue-800 mb-2">
+                <i class="pi pi-info-circle mr-1"></i>
+                Inicia sesión para finalizar tu compra
+              </p>
+            </div>
+            <p-button
+              label="Iniciar Sesión"
+              icon="pi pi-sign-in"
+              styleClass="w-full mb-3"
+              (onClick)="goToCheckout()"
+            />
+          }
+
+          <p-button
+            label="Continuar Comprando"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            [outlined]="true"
+            styleClass="w-full"
+            (onClick)="continueShopping()"
+          />
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Empty state -->
+    <div class="text-center py-16 bg-white rounded-lg shadow-md">
+      <div
+        class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-100 mb-6"
+      >
+        <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
+      </div>
+      <h2 class="text-2xl font-semibold mb-2 text-gray-800">
+        Tu carrito está vacío
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Agrega productos a tu carrito para comenzar a comprar
+      </p>
+      <p-button
+        label="Explorar Productos"
+        icon="pi pi-shopping-bag"
+        size="large"
+        (onClick)="continueShopping()"
+      />
+    </div>
+  }
+
+  <p-confirmDialog />
+</div>

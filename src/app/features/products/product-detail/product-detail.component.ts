@@ -18,6 +18,7 @@ import { MenuItem, MessageService } from 'primeng/api';
 
 // Services and models
 import { ProductService } from '../../../core/services/product.service';
+import { CartService } from '../../../core/services/cart.service';
 import { Product, ProductListItem, ProductColor, ProductSize, formatColor, formatStyle, formatEnumValue, getColorHex } from '../../../core/models/product.model';
 
 // Shared components
@@ -58,6 +59,7 @@ import { truncateDescription, buildPageUrl, getMetaTagDescription } from '../../
 export class ProductDetailComponent implements OnInit, OnDestroy {
   // Services
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private messageService = inject(MessageService);
@@ -70,6 +72,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  addingToCart = signal(false);
 
   // Gallery/Image signals
   currentImageIndex = signal(0);
@@ -257,10 +260,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Agregar al carrito (placeholder por ahora - FASE 9)
+   * Agregar al carrito (FASE 9)
    */
   addToCart(): void {
-    if (!this.selectedVariant()) {
+    const variant = this.selectedVariant();
+    const product = this.product();
+    const qty = this.quantity();
+
+    if (!variant || !product) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Selección Incompleta',
@@ -269,11 +276,42 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Placeholder toast para FASE 9
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Próximamente',
-      detail: 'Funcionalidad de carrito disponible en FASE 9'
+    if (variant.stock < qty) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Stock Insuficiente',
+        detail: `Solo quedan ${variant.stock} unidades disponibles`
+      });
+      return;
+    }
+
+    this.addingToCart.set(true);
+
+    const request = {
+      productId: product.id,
+      variantSKU: variant.sku,
+      quantity: qty
+    };
+
+    const snapshot = {
+      name: product.name,
+      image: product.images?.[product.featuredImageIndex || 0] || '',
+      size: variant.size,
+      color: variant.color,
+      price: variant.price || product.basePrice
+    };
+
+    this.cartService.addItem(request, snapshot).subscribe({
+      next: () => {
+        this.addingToCart.set(false);
+        // El toast ya se muestra desde el CartService
+        // Reiniciar cantidad a 1 después de agregar
+        this.quantity.set(1);
+      },
+      error: () => {
+        this.addingToCart.set(false);
+        // El error ya se maneja en el CartService
+      }
     });
   }
 

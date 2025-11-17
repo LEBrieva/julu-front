@@ -28,8 +28,8 @@
         (click)="goToCart()"
         aria-label="Ver carrito"
       >
-        @if (cartItemsCount > 0) {
-          <i class="pi pi-shopping-cart" pBadge [value]="cartItemsCount.toString()" severity="danger"></i>
+        @if (cartItemsCount() > 0) {
+          <i class="pi pi-shopping-cart" pBadge [value]="cartItemsCount().toString()" severity="danger"></i>
         } @else {
           <i class="pi pi-shopping-cart"></i>
         }

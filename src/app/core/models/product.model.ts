@@ -150,6 +150,8 @@ export interface ProductVariant {
   size: ProductSize;
   color: ProductColor;
   stock: number;
+  priceModifier?: number; // Modificador de precio (puede ser 0)
+  price?: number; // Precio calculado (basePrice + priceModifier) - calculado por backend
 }
 
 /**
@@ -362,15 +364,15 @@ export function getStatusSeverity(status: ProductStatus): 'success' | 'danger' |
 /**
  * Formatea el tamaño de producto para mostrar en UI
  */
-export function formatSize(size: ProductSize): string {
+export function formatSize(size: ProductSize | string): string {
   return size.toUpperCase();
 }
 
 /**
  * Formatea el color de producto para mostrar en UI
  */
-export function formatColor(color: ProductColor): string {
-  const colorMap: Record<ProductColor, string> = {
+export function formatColor(color: ProductColor | string): string {
+  const colorMap: Record<string, string> = {
     [ProductColor.BLACK]: 'Negro',
     [ProductColor.WHITE]: 'Blanco',
     [ProductColor.GRAY]: 'Gris',

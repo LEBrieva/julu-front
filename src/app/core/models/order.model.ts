@@ -26,6 +26,7 @@ export enum PaymentStatus {
 }
 
 export enum PaymentMethod {
+  CASH = 'cash',
   CREDIT_CARD = 'credit_card',
   DEBIT_CARD = 'debit_card',
   MERCADO_PAGO = 'mercado_pago',
@@ -193,6 +194,7 @@ export function getPaymentStatusSeverity(
  */
 export function formatPaymentMethod(method: PaymentMethod): string {
   const methodMap: Record<PaymentMethod, string> = {
+    [PaymentMethod.CASH]: 'Efectivo al recibir',
     [PaymentMethod.CREDIT_CARD]: 'Tarjeta de Crédito',
     [PaymentMethod.DEBIT_CARD]: 'Tarjeta de Débito',
     [PaymentMethod.MERCADO_PAGO]: 'Mercado Pago',
@@ -206,6 +208,7 @@ export function formatPaymentMethod(method: PaymentMethod): string {
  */
 export function getPaymentMethodIcon(method: PaymentMethod): string {
   const iconMap: Record<PaymentMethod, string> = {
+    [PaymentMethod.CASH]: 'pi-money-bill',
     [PaymentMethod.CREDIT_CARD]: 'pi-credit-card',
     [PaymentMethod.DEBIT_CARD]: 'pi-credit-card',
     [PaymentMethod.MERCADO_PAGO]: 'pi-wallet',

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -37,6 +38,7 @@ import { MenuItem } from 'primeng/api';
 })
 export class PublicHeaderComponent {
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
   private router = inject(Router);
 
   // Signals
@@ -44,9 +46,8 @@ export class PublicHeaderComponent {
   isAuthenticated = this.authService.isAuthenticated;
   isAdmin = this.authService.isAdmin;
 
-  // TODO FASE 9: Reemplazar con signal real del CartService
-  // cartItemsCount = cartService.totalItems();
-  cartItemsCount = 0; // Placeholder
+  // Badge del carrito (reactivo)
+  cartItemsCount = this.cartService.totalItems;
 
   // Menu items para user menu (cuando está logueado)
   userMenuItems: MenuItem[] = [
@@ -116,7 +117,6 @@ export class PublicHeaderComponent {
    * Ir al carrito
    */
   goToCart(): void {
-    // TODO FASE 9: Implementar ruta del carrito
     this.router.navigate(['/cart']);
   }
 

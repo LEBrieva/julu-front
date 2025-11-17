@@ -155,8 +155,10 @@
           <!-- 7. Action Buttons (Add to Cart + Favorite) -->
           <div class="action-buttons">
             <p-button
-              label="Add to Cart"
+              label="Agregar al Carrito"
+              icon="pi pi-shopping-cart"
               [disabled]="!selectedVariant() || selectedVariant()!.stock === 0"
+              [loading]="addingToCart()"
               (onClick)="addToCart()"
               size="large"
               styleClass="add-to-cart-btn"

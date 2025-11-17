@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { cartNotEmptyGuard } from './core/guards/cart-not-empty.guard';
 
 /**
  * Configuración de rutas de la aplicación
@@ -8,7 +9,9 @@ import { adminGuard } from './core/guards/admin.guard';
  * ESTRUCTURA:
  * - Rutas públicas con layout: /, /products (usan PublicLayoutComponent)
  * - Login: /login (sin layout, página standalone)
- * - Rutas autenticadas: /cart, /orders (requieren authGuard)
+ * - Carrito: /cart (público para anónimos)
+ * - Checkout: /checkout (requiere authGuard + cartNotEmptyGuard)
+ * - Order Success: /order-success/:id (requiere authGuard)
  * - Rutas admin: /admin/* (requieren authGuard + adminGuard)
  *
  * LAZY LOADING:
@@ -47,6 +50,13 @@ export const routes: Routes = [
           import('./features/products/product-detail/product-detail.component').then(
             (m) => m.ProductDetailComponent
           )
+      },
+
+      // Carrito (FASE 9) - Público para usuarios anónimos
+      {
+        path: 'cart',
+        loadComponent: () =>
+          import('./features/cart/cart').then((m) => m.CartComponent)
       }
     ]
   },
@@ -75,12 +85,23 @@ export const routes: Routes = [
 
   // ========== RUTAS AUTENTICADAS (solo authGuard) ==========
 
-  // TODO FASE 9: Agregar rutas para cart, checkout, orders del usuario
-  // {
-  //   path: 'cart',
-  //   canActivate: [authGuard],
-  //   loadComponent: () => import('./features/cart/cart.component').then(...)
-  // },
+  // Checkout (FASE 9) - Requiere autenticación + carrito con items
+  {
+    path: 'checkout',
+    canActivate: [authGuard, cartNotEmptyGuard],
+    loadComponent: () =>
+      import('./features/checkout/checkout').then((m) => m.CheckoutComponent)
+  },
+
+  // Order Success (FASE 9) - Requiere autenticación
+  {
+    path: 'order-success/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/order-success/order-success').then(
+        (m) => m.OrderSuccessComponent
+      )
+  },
 
   // ========== WILDCARD (404) ==========
 
