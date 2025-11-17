@@ -116,8 +116,6 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (filters.sizes?.length) count++;
     if (filters.colors?.length) count++;
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
-    if (filters.destacado) count++;
-    if (filters.tags?.length) count++;
     return count;
   });
 
@@ -257,12 +255,6 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
         delete currentFilters.minPrice;
         delete currentFilters.maxPrice;
         break;
-      case 'destacado':
-        delete currentFilters.destacado;
-        break;
-      case 'tags':
-        delete currentFilters.tags;
-        break;
     }
 
     this.updateQueryParams(currentFilters);
@@ -326,14 +318,10 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (filters.styles?.length) queryParams.styles = filters.styles.join(',');
     if (filters.sizes?.length) queryParams.sizes = filters.sizes.join(',');
     if (filters.colors?.length) queryParams.colors = filters.colors.join(',');
-    if (filters.tags?.length) queryParams.tags = filters.tags.join(',');
 
     // Rango de precios
     if (filters.minPrice !== undefined) queryParams.minPrice = filters.minPrice;
     if (filters.maxPrice !== undefined) queryParams.maxPrice = filters.maxPrice;
-
-    // Destacados
-    if (filters.destacado) queryParams.destacado = 'true';
 
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
@@ -371,17 +359,9 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
       filters.colors = params['colors'].split(',');
     }
 
-    // Tags (CSV a array)
-    if (params['tags']) {
-      filters.tags = params['tags'].split(',');
-    }
-
     // Rango de precios
     if (params['minPrice']) filters.minPrice = Number(params['minPrice']);
     if (params['maxPrice']) filters.maxPrice = Number(params['maxPrice']);
-
-    // Destacados
-    if (params['destacado'] === 'true') filters.destacado = true;
 
     return filters;
   }

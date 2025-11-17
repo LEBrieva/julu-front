@@ -292,24 +292,6 @@
                 styleClass="w-full"
               ></p-inputNumber>
             </div>
-
-            <!-- Precio -->
-            <div class="form-field">
-              <label for="variantPrice" class="form-label required">Precio</label>
-              <p-inputNumber
-                inputId="variantPrice"
-                [(ngModel)]="variantPrice"
-                [ngModelOptions]="{standalone: true}"
-                mode="currency"
-                currency="BRL"
-                locale="pt-BR"
-                [min]="0"
-                [minFractionDigits]="2"
-                [maxFractionDigits]="2"
-                placeholder="0.00"
-                styleClass="w-full"
-              ></p-inputNumber>
-            </div>
           </div>
 
           <!-- Botón Agregar Variante -->
@@ -336,7 +318,6 @@
                   <div class="variant-col-size">Tamaño</div>
                   <div class="variant-col-color">Color</div>
                   <div class="variant-col-stock">Stock</div>
-                  <div class="variant-col-price">Precio</div>
                   <div class="variant-col-actions">Acción</div>
                 </div>
 
@@ -358,9 +339,6 @@
                     </div>
                     <div class="variant-col-stock">
                       <strong>{{ variant.stock }}</strong>
-                    </div>
-                    <div class="variant-col-price">
-                      <strong>{{ variant.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
                     </div>
                     <div class="variant-col-actions">
                       <button
@@ -453,24 +431,6 @@
                 ></p-inputNumber>
               </div>
 
-              <!-- Precio -->
-              <div class="form-field">
-                <label for="variantPriceEdit" class="form-label required">Precio</label>
-                <p-inputNumber
-                  inputId="variantPriceEdit"
-                  [(ngModel)]="variantPrice"
-                  [ngModelOptions]="{standalone: true}"
-                  mode="currency"
-                  currency="BRL"
-                  locale="pt-BR"
-                  [min]="0"
-                  [minFractionDigits]="2"
-                  [maxFractionDigits]="2"
-                  placeholder="0.00"
-                  styleClass="w-full"
-                ></p-inputNumber>
-              </div>
-
               <!-- Botones del formulario inline -->
               <div class="form-field" style="grid-column: span 4;">
                 <div class="flex gap-2">
@@ -506,7 +466,6 @@
                 <th style="min-width: 9rem">Color</th>
                 <th style="min-width: 10rem">SKU</th>
                 <th style="min-width: 6rem">Stock</th>
-                <th style="min-width: 8rem">Precio</th>
                 <th style="min-width: 6rem; text-align: center">Acciones</th>
               </tr>
             </ng-template>
@@ -560,34 +519,6 @@
                   }
                 </td>
 
-                <!-- Precio (editable) -->
-                <td>
-                  @if (editingVariantSku === variant.sku) {
-                    <p-inputNumber
-                      [(ngModel)]="variant.price"
-                      [ngModelOptions]="{standalone: true}"
-                      mode="currency"
-                      currency="BRL"
-                      locale="pt-BR"
-                      [min]="0"
-                      [minFractionDigits]="2"
-                      [maxFractionDigits]="2"
-                      (onBlur)="saveVariantChanges(variant)"
-                      (keydown.enter)="saveVariantChanges(variant)"
-                      (keydown.escape)="cancelEditVariant()"
-                      styleClass="w-full"
-                    ></p-inputNumber>
-                  } @else {
-                    <span
-                      class="cursor-pointer hover:underline"
-                      (click)="startEditVariant(variant)"
-                      title="Clic para editar"
-                    >
-                      {{ variant.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}
-                    </span>
-                  }
-                </td>
-
                 <!-- Acciones -->
                 <td style="text-align: center">
                   <p-button
@@ -606,7 +537,7 @@
             <!-- Empty state -->
             <ng-template pTemplate="emptymessage">
               <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem">
+                <td colspan="5" style="text-align: center; padding: 2rem">
                   <div class="empty-state">
                     <i class="pi pi-inbox text-gray-400 text-4xl"></i>
                     <p class="text-gray-600 mt-2">No hay variantes</p>

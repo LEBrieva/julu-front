@@ -116,7 +116,6 @@ export class ProductFormComponent implements OnInit {
   variantSize: ProductSize | null = null;
   variantColor: ProductColor | null = null;
   variantStock: number = 0;
-  variantPrice: number = 0;
 
   // Gestión de variantes (modo EDITAR)
   editingVariantSku: string | null = null;
@@ -480,12 +479,12 @@ export class ProductFormComponent implements OnInit {
       return;
     }
 
-    // Validar que stock y price sean >= 0
-    if (this.variantStock < 0 || this.variantPrice < 0) {
+    // Validar que stock sea >= 0
+    if (this.variantStock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+        detail: 'El stock debe ser mayor o igual a 0.'
       });
       return;
     }
@@ -508,8 +507,7 @@ export class ProductFormComponent implements OnInit {
     const newVariant: CreateProductVariantDto = {
       size: this.variantSize,
       color: this.variantColor,
-      stock: this.variantStock,
-      price: this.variantPrice
+      stock: this.variantStock
     };
 
     this.variants.push(newVariant);
@@ -518,7 +516,6 @@ export class ProductFormComponent implements OnInit {
     this.variantSize = null;
     this.variantColor = null;
     this.variantStock = 0;
-    this.variantPrice = 0;
 
     // No mostrar toast en modo CREAR (es solo array local)
   }
@@ -568,11 +565,11 @@ export class ProductFormComponent implements OnInit {
     if (!this.productId || !this.currentProduct) return;
 
     // Validar cambios
-    if (variant.stock < 0 || variant.price < 0) {
+    if (variant.stock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+        detail: 'El stock debe ser mayor o igual a 0.'
       });
       this.cancelEditVariant();
       return;
@@ -581,8 +578,7 @@ export class ProductFormComponent implements OnInit {
     this.isLoading.set(true);
 
     const updateData: UpdateSingleVariantDto = {
-      stock: variant.stock,
-      price: variant.price
+      stock: variant.stock
     };
 
     this.productService.updateVariant(this.productId, variant.sku, updateData).subscribe({
@@ -617,7 +613,6 @@ export class ProductFormComponent implements OnInit {
       this.variantSize = null;
       this.variantColor = null;
       this.variantStock = 0;
-      this.variantPrice = 0;
     }
   }
 
@@ -637,12 +632,12 @@ export class ProductFormComponent implements OnInit {
       return;
     }
 
-    // Validar que stock y price sean >= 0
-    if (this.variantStock < 0 || this.variantPrice < 0) {
+    // Validar que stock sea >= 0
+    if (this.variantStock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'Stock y precio deben ser mayores o iguales a 0.'
+        detail: 'El stock debe ser mayor o igual a 0.'
       });
       return;
     }
@@ -666,8 +661,7 @@ export class ProductFormComponent implements OnInit {
     const newVariant: AddVariantDto = {
       size: this.variantSize,
       color: this.variantColor,
-      stock: this.variantStock,
-      price: this.variantPrice
+      stock: this.variantStock
     };
 
     this.productService.addVariant(this.productId, newVariant).subscribe({
@@ -684,7 +678,6 @@ export class ProductFormComponent implements OnInit {
         this.variantSize = null;
         this.variantColor = null;
         this.variantStock = 0;
-        this.variantPrice = 0;
         this.showAddVariantForm = false;
       },
       error: (error) => {

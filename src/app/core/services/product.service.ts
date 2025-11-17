@@ -158,9 +158,6 @@ export class ProductService {
     if (filters?.color) {
       params = params.set('color', filters.color);
     }
-    if (filters?.tags && filters.tags.length > 0) {
-      params = params.set('tags', filters.tags.join(','));
-    }
 
     // FILTROS AVANZADOS (FASE 8b)
 
@@ -186,11 +183,6 @@ export class ProductService {
     }
     if (filters?.styles && filters.styles.length > 0) {
       params = params.set('styles', filters.styles.join(','));
-    }
-
-    // Filtro de destacados
-    if (filters?.destacado !== undefined) {
-      params = params.set('destacado', filters.destacado.toString());
     }
 
     return this.http.get<PaginatedResponse<ProductListItem>>(`${this.apiUrl}/catalog`, { params });

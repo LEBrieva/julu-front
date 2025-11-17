@@ -48,16 +48,20 @@
         </p-accordion-header>
         <p-accordion-content>
           <div class="filter-section">
-            <p-multiselect
-              formControlName="styles"
-              [options]="styleOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Todos los estilos"
-              styleClass="w-full"
-              [showToggleAll]="false"
-              [maxSelectedLabels]="2"
-            />
+            <div class="checkbox-group">
+              @for (option of styleOptions; track option.value) {
+                <div class="checkbox-item">
+                  <p-checkbox
+                    [value]="option.value"
+                    formControlName="styles"
+                    [inputId]="'style-' + option.value"
+                  />
+                  <label [for]="'style-' + option.value" class="checkbox-label">
+                    {{ option.label }}
+                  </label>
+                </div>
+              }
+            </div>
           </div>
         </p-accordion-content>
       </p-accordion-panel>
@@ -72,16 +76,20 @@
         </p-accordion-header>
         <p-accordion-content>
           <div class="filter-section">
-            <p-multiselect
-              formControlName="sizes"
-              [options]="sizeOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Todas las tallas"
-              styleClass="w-full"
-              [showToggleAll]="false"
-              display="chip"
-            />
+            <div class="checkbox-group">
+              @for (option of sizeOptions; track option.value) {
+                <div class="checkbox-item">
+                  <p-checkbox
+                    [value]="option.value"
+                    formControlName="sizes"
+                    [inputId]="'size-' + option.value"
+                  />
+                  <label [for]="'size-' + option.value" class="checkbox-label">
+                    {{ option.label }}
+                  </label>
+                </div>
+              }
+            </div>
           </div>
         </p-accordion-content>
       </p-accordion-panel>
@@ -96,26 +104,24 @@
         </p-accordion-header>
         <p-accordion-content>
           <div class="filter-section">
-            <p-multiselect
-              formControlName="colors"
-              [options]="colorOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Todos los colores"
-              styleClass="w-full"
-              [showToggleAll]="false"
-              [maxSelectedLabels]="2"
-            >
-              <ng-template let-option pTemplate="item">
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-5 h-5 rounded-full border border-gray-300"
-                    [style.background-color]="option.hex"
-                  ></div>
-                  <span>{{ option.label }}</span>
+            <div class="checkbox-group">
+              @for (option of colorOptions; track option.value) {
+                <div class="checkbox-item">
+                  <p-checkbox
+                    [value]="option.value"
+                    formControlName="colors"
+                    [inputId]="'color-' + option.value"
+                  />
+                  <label [for]="'color-' + option.value" class="checkbox-label">
+                    <div
+                      class="w-4 h-4 rounded-full border border-gray-300 mr-2"
+                      [style.background-color]="option.hex"
+                    ></div>
+                    {{ option.label }}
+                  </label>
                 </div>
-              </ng-template>
-            </p-multiselect>
+              }
+            </div>
           </div>
         </p-accordion-content>
       </p-accordion-panel>
@@ -150,46 +156,6 @@
         </p-accordion-content>
       </p-accordion-panel>
 
-      <!-- Panel 5: Tags -->
-      <p-accordion-panel value="5">
-        <p-accordion-header>
-          <div class="flex items-center gap-2">
-            <i class="pi pi-tags text-blue-600"></i>
-            <span class="font-medium">Tags</span>
-          </div>
-        </p-accordion-header>
-        <p-accordion-content>
-          <div class="filter-section">
-            <input
-              pInputText
-              type="text"
-              formControlName="tags"
-              placeholder="ej: casual, verano"
-              class="w-full"
-            />
-            <small class="text-gray-500 block mt-2">Ej: casual, verano, deportivo</small>
-          </div>
-        </p-accordion-content>
-      </p-accordion-panel>
-
-      <!-- Panel 6: Productos Destacados -->
-      <p-accordion-panel value="6">
-        <p-accordion-header>
-          <div class="flex items-center gap-2">
-            <i class="pi pi-star text-blue-600"></i>
-            <span class="font-medium">Solo Destacados</span>
-          </div>
-        </p-accordion-header>
-        <p-accordion-content>
-          <div class="filter-section">
-            <div class="flex items-center justify-between">
-              <label class="text-gray-700">Mostrar solo destacados</label>
-              <p-toggleSwitch formControlName="destacado" />
-            </div>
-            <small class="text-gray-500 block mt-2">Mostrar solo productos destacados en el home</small>
-          </div>
-        </p-accordion-content>
-      </p-accordion-panel>
 
     </p-accordion>
     }

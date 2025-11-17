@@ -91,26 +91,6 @@ export class ActiveFiltersComponent {
       });
     }
 
-    // Destacados
-    if (filters.destacado) {
-      result.push({
-        key: 'destacado',
-        label: 'Solo Destacados',
-        icon: 'pi-star',
-        removable: true
-      });
-    }
-
-    // Tags
-    if (filters.tags && filters.tags.length > 0) {
-      const tagsStr = filters.tags.join(', ');
-      result.push({
-        key: 'tags',
-        label: `Tags: ${tagsStr}`,
-        icon: 'pi-tags',
-        removable: true
-      });
-    }
 
     // Ordenamiento (NO removable, solo informativo)
     if (filters.sortBy && filters.sortBy !== 'newest') {

@@ -4,10 +4,9 @@ import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angul
 
 // PrimeNG
 import { AccordionModule } from 'primeng/accordion';
-import { MultiSelectModule } from 'primeng/multiselect';
+import { CheckboxModule } from 'primeng/checkbox';
 import { SliderModule } from 'primeng/slider';
 import { SelectModule } from 'primeng/select';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -37,8 +36,6 @@ interface FilterForm {
   colors: FormControl<ProductColor[] | null>;
   minPrice: FormControl<number | null>;
   maxPrice: FormControl<number | null>;
-  destacado: FormControl<boolean | null>;
-  tags: FormControl<string | null>;
 }
 
 @Component({
@@ -49,10 +46,9 @@ interface FilterForm {
     ReactiveFormsModule,
     FormsModule,
     AccordionModule,
-    MultiSelectModule,
+    CheckboxModule,
     SliderModule,
     SelectModule,
-    ToggleSwitchModule,
     ButtonModule,
     InputTextModule,
     IconFieldModule,
@@ -83,8 +79,6 @@ export class FilterSidebarComponent implements OnInit {
     colors: new FormControl<ProductColor[]>([]),
     minPrice: new FormControl<number | null>(null),
     maxPrice: new FormControl<number | null>(null),
-    destacado: new FormControl<boolean>(false),
-    tags: new FormControl<string>(''),
   });
 
   // Opciones de filtros
@@ -228,9 +222,7 @@ export class FilterSidebarComponent implements OnInit {
       sizes: formValue.sizes?.length ? formValue.sizes : undefined,
       colors: formValue.colors?.length ? formValue.colors : undefined,
       minPrice: formValue.minPrice ?? undefined,
-      maxPrice: formValue.maxPrice ?? undefined,
-      destacado: formValue.destacado ?? undefined,
-      tags: formValue.tags ? formValue.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined
+      maxPrice: formValue.maxPrice ?? undefined
     };
 
     this.filtersApplied.emit(filters);
@@ -253,9 +245,7 @@ export class FilterSidebarComponent implements OnInit {
       sizes: [],
       colors: [],
       minPrice: null,
-      maxPrice: null,
-      destacado: false,
-      tags: ''
+      maxPrice: null
     });
 
     const resetRange: [number, number] = [this.minPrice(), this.maxPrice()];
@@ -275,8 +265,6 @@ export class FilterSidebarComponent implements OnInit {
     if (formValue.sizes?.length) count++;
     if (formValue.colors?.length) count++;
     if (formValue.minPrice !== null || formValue.maxPrice !== null) count++;
-    if (formValue.destacado) count++;
-    if (formValue.tags && formValue.tags.trim().length > 0) count++;
 
     return count;
   }
@@ -291,9 +279,7 @@ export class FilterSidebarComponent implements OnInit {
       sizes: filters.sizes || [],
       colors: filters.colors || [],
       minPrice: filters.minPrice ?? null,
-      maxPrice: filters.maxPrice ?? null,
-      destacado: filters.destacado ?? false,
-      tags: filters.tags?.join(', ') || ''
+      maxPrice: filters.maxPrice ?? null
     });
 
     // Actualizar slider

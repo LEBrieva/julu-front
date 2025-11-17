@@ -150,7 +150,6 @@ export interface ProductVariant {
   size: ProductSize;
   color: ProductColor;
   stock: number;
-  price: number;
 }
 
 /**
@@ -226,7 +225,6 @@ export interface CreateProductVariantDto {
   size: ProductSize;
   color: ProductColor;
   stock: number;
-  price: number;
 }
 
 /**
@@ -255,7 +253,6 @@ export interface AddVariantDto {
   size: ProductSize;
   color: ProductColor;
   stock: number;
-  price: number;
 }
 
 /**
@@ -264,7 +261,6 @@ export interface AddVariantDto {
  */
 export interface UpdateSingleVariantDto {
   stock?: number;
-  price?: number;
 }
 
 /**
@@ -283,7 +279,6 @@ export interface FilterProductDto {
   style?: ProductStyle;
   code?: string;
   status?: ProductStatus;
-  tags?: string[];
   size?: ProductSize;
   color?: ProductColor;
 
@@ -299,9 +294,6 @@ export interface FilterProductDto {
   sizes?: ProductSize[];        // Tallas múltiples (P, M, G, GG)
   colors?: ProductColor[];      // Colores múltiples
   styles?: ProductStyle[];      // Estilos múltiples (solo remeras: regular, oversize, slim_fit)
-
-  // Filtro de destacados
-  destacado?: boolean;
 }
 
 // ===========================

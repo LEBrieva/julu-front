@@ -76,7 +76,7 @@
 
           <!-- 2. Price -->
           <div class="product-price-large">
-            {{ selectedVariant()?.price || product()!.basePrice | currency:'ARS':'symbol-narrow':'1.0-0' }}
+            {{ product()!.basePrice | currency:'ARS':'symbol-narrow':'1.0-0' }}
           </div>
 
           <!-- 3. Rating + Reviews -->
