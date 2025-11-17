@@ -179,6 +179,9 @@ export interface Product {
 /**
  * Interface de Producto en listado (respuesta simplificada para tabla)
  * Devuelto por: GET /products (con paginación)
+ * 
+ * ACTUALIZACIÓN: Ahora incluye el array completo de variantes para permitir
+ * la selección de color/tamaño directamente desde el catálogo público.
  */
 export interface ProductListItem {
   id: string;
@@ -191,6 +194,7 @@ export interface ProductListItem {
   style?: string;
   totalVariants: number;
   totalStock: number;
+  variants: ProductVariant[]; // NUEVO: Array de variantes para selectores en catalog
   tags?: string[];
   destacado?: boolean;
   images?: string[];

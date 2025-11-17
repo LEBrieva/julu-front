@@ -37,29 +37,95 @@
         {{ product().name }}
       </h3>
 
-      <!-- Código -->
-      <p class="text-sm text-gray-500">
-        Código: {{ product().code }}
-      </p>
-
       <!-- Precio -->
       <div class="flex items-center justify-between mt-2">
-        <span class="text-2xl font-bold text-primary-600">
-          {{ formattedPrice() }}
-        </span>
+        <div class="flex flex-col">
+          @if (selectedVariant() && finalPrice() !== product().basePrice) {
+            <span class="text-sm text-gray-400 line-through">
+              {{ formattedPrice() }}
+            </span>
+          }
+          <span class="text-2xl font-bold text-primary-600">
+            {{ formattedFinalPrice() }}
+          </span>
+        </div>
       </div>
 
-      <!-- Tags (opcional) -->
-      @if (product().tags?.length) {
-        <div class="flex flex-wrap gap-1 mt-2">
-          @for (tag of product().tags!; track tag) {
-            <p-tag
-              [value]="tag"
-              severity="secondary"
-              class="text-xs"
-            ></p-tag>
+      <!-- Selectores de Variantes -->
+      @if (hasVariants()) {
+        <div class="variant-selectors mt-3 space-y-3" (click)="$event.stopPropagation()">
+          <!-- Selector de Color -->
+          @if (availableColors().length > 0) {
+            <div>
+              <label class="text-xs font-medium text-gray-600 mb-2 block">
+                Color: {{ selectedColor() ? getColorName(selectedColor()!) : 'Selecciona' }}
+              </label>
+              <div class="flex gap-2 flex-wrap">
+                @for (color of availableColors(); track color) {
+                  <button
+                    type="button"
+                    (click)="selectColor(color)"
+                    [pTooltip]="getColorName(color)"
+                    tooltipPosition="top"
+                    class="color-swatch"
+                    [class.selected]="selectedColor() === color"
+                    [style.backgroundColor]="getColorHex(color)"
+                  >
+                    @if (selectedColor() === color) {
+                      <i class="pi pi-check text-white text-xs"></i>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+          
+          <!-- Selector de Tamaño -->
+          @if (selectedColor() && availableSizes().length > 0) {
+            <div>
+              <label class="text-xs font-medium text-gray-600 mb-2 block">
+                Tamaño
+              </label>
+              <div class="flex gap-2 flex-wrap">
+                @for (size of availableSizes(); track size) {
+                  <button
+                    type="button"
+                    (click)="selectSize(size)"
+                    class="size-button"
+                    [class.selected]="selectedSize() === size"
+                  >
+                    {{ formatSize(size) }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Indicador de Stock Bajo -->
+          @if (isLowStock()) {
+            <p class="text-xs text-orange-600 flex items-center gap-1">
+              <i class="pi pi-exclamation-triangle"></i>
+              ¡Solo quedan {{ selectedVariant()!.stock }} unidades!
+            </p>
           }
         </div>
+
+        <!-- Botón Agregar al Carrito -->
+        <div class="mt-3" (click)="$event.stopPropagation()">
+          <p-button
+            label="Agregar al Carrito"
+            icon="pi pi-shopping-cart"
+            [disabled]="!canAddToCart()"
+            [loading]="isAddingToCart()"
+            (onClick)="addToCart($event)"
+            styleClass="w-full"
+            [severity]="canAddToCart() ? 'primary' : 'secondary'"
+          ></p-button>
+        </div>
+      } @else {
+        <p class="text-sm text-gray-500 italic mt-3">
+          Ver detalles para más opciones
+        </p>
       }
     </div>
   </p-card>
@@ -106,10 +172,6 @@
             {{ product().name }}
           </h3>
 
-          <p class="text-sm text-gray-500 mb-3">
-            Código: {{ product().code }}
-          </p>
-
           <!-- Descripción corta (si existe) -->
           @if ('description' in product() && product().description) {
             <p class="text-sm text-gray-600 line-clamp-2 mb-3">
@@ -117,26 +179,94 @@
             </p>
           }
 
-          <!-- Tags -->
-          @if (product().tags?.length) {
-            <div class="flex flex-wrap gap-1 mb-3">
-              @for (tag of product().tags!; track tag) {
-                <p-tag
-                  [value]="tag"
-                  severity="secondary"
-                  class="text-xs"
-                ></p-tag>
+          <!-- Selectores de Variantes (Modo List) -->
+          @if (hasVariants()) {
+            <div class="variant-selectors space-y-2 mb-3" (click)="$event.stopPropagation()">
+              <!-- Selector de Color -->
+              @if (availableColors().length > 0) {
+                <div>
+                  <label class="text-xs font-medium text-gray-600 mb-1 block">
+                    Color: {{ selectedColor() ? getColorName(selectedColor()!) : 'Selecciona' }}
+                  </label>
+                  <div class="flex gap-2 flex-wrap">
+                    @for (color of availableColors(); track color) {
+                      <button
+                        type="button"
+                        (click)="selectColor(color)"
+                        [pTooltip]="getColorName(color)"
+                        tooltipPosition="top"
+                        class="color-swatch"
+                        [class.selected]="selectedColor() === color"
+                        [style.backgroundColor]="getColorHex(color)"
+                      >
+                        @if (selectedColor() === color) {
+                          <i class="pi pi-check text-white text-xs"></i>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              
+              <!-- Selector de Tamaño -->
+              @if (selectedColor() && availableSizes().length > 0) {
+                <div>
+                  <label class="text-xs font-medium text-gray-600 mb-1 block">
+                    Tamaño
+                  </label>
+                  <div class="flex gap-2 flex-wrap">
+                    @for (size of availableSizes(); track size) {
+                      <button
+                        type="button"
+                        (click)="selectSize(size)"
+                        class="size-button"
+                        [class.selected]="selectedSize() === size"
+                      >
+                        {{ formatSize(size) }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Indicador de Stock Bajo -->
+              @if (isLowStock()) {
+                <p class="text-xs text-orange-600 flex items-center gap-1">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  ¡Solo quedan {{ selectedVariant()!.stock }} unidades!
+                </p>
               }
             </div>
           }
         </div>
 
-        <!-- Footer con precio -->
-        <div class="flex items-center justify-between">
-          <span class="text-3xl font-bold text-primary-600">
-            {{ formattedPrice() }}
-          </span>
-          <i class="pi pi-arrow-right text-primary-600 text-xl"></i>
+        <!-- Footer con precio y botón -->
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col">
+            @if (selectedVariant() && finalPrice() !== product().basePrice) {
+              <span class="text-sm text-gray-400 line-through">
+                {{ formattedPrice() }}
+              </span>
+            }
+            <span class="text-3xl font-bold text-primary-600">
+              {{ formattedFinalPrice() }}
+            </span>
+          </div>
+          
+          @if (hasVariants()) {
+            <div (click)="$event.stopPropagation()">
+              <p-button
+                label="Agregar"
+                icon="pi pi-shopping-cart"
+                [disabled]="!canAddToCart()"
+                [loading]="isAddingToCart()"
+                (onClick)="addToCart($event)"
+                [severity]="canAddToCart() ? 'primary' : 'secondary'"
+              ></p-button>
+            </div>
+          } @else {
+            <i class="pi pi-arrow-right text-primary-600 text-xl"></i>
+          }
         </div>
       </div>
     </div>
