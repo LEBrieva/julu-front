@@ -1,5 +1,17 @@
 <div class="container mx-auto px-4 py-8 max-w-6xl">
-  <h1 class="text-3xl font-bold mb-6">Finalizar Compra como Invitado</h1>
+  <!-- Header con título y botón cerrar -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Finalizar Compra como Invitado</h1>
+    <button
+      type="button"
+      (click)="goBackToCart()"
+      class="p-2 hover:bg-gray-100 rounded-full transition-colors"
+      title="Volver al carrito"
+      aria-label="Cerrar y volver al carrito"
+    >
+      <i class="pi pi-times text-2xl text-gray-600"></i>
+    </button>
+  </div>
 
   <!-- Steps indicator -->
   <div class="mb-8">

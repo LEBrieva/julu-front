@@ -187,6 +187,10 @@ export class GuestCheckoutComponent implements OnInit {
     });
   }
 
+  goBackToCart() {
+    this.router.navigate(['/cart']);
+  }
+
   getFieldError(fieldName: string, form: any = this.addressForm): string | null {
     const field = form.get(fieldName);
     if (field?.invalid && field?.touched) {
