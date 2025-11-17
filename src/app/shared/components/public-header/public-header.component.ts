@@ -9,7 +9,6 @@ import { CartDrawerService } from '../../../core/services/cart-drawer.service';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
 import { MenuItem } from 'primeng/api';
 
 /**
@@ -31,8 +30,7 @@ import { MenuItem } from 'primeng/api';
     RouterModule,
     ButtonModule,
     MenuModule,
-    AvatarModule,
-    BadgeModule
+    AvatarModule
   ],
   templateUrl: './public-header.component.html',
   styleUrl: './public-header.component.css'

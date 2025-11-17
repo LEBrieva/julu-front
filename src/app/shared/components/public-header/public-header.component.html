@@ -28,11 +28,12 @@
         (click)="goToCart()"
         aria-label="Ver carrito"
       >
-        @if (cartItemsCount() > 0) {
-          <i class="pi pi-shopping-cart" pBadge [value]="cartItemsCount().toString()" severity="danger"></i>
-        } @else {
+        <div class="cart-icon-wrapper">
           <i class="pi pi-shopping-cart"></i>
-        }
+          @if (cartItemsCount() > 0) {
+            <span class="cart-badge">{{ cartItemsCount() }}</span>
+          }
+        </div>
       </button>
 
       <!-- User menu (si está logueado) -->

@@ -112,13 +112,54 @@
   font-size: 1.5rem;
 }
 
-/* Badge del carrito */
-.cart-button i::ng-deep .p-badge {
-  min-width: 1.25rem;
-  height: 1.25rem;
-  line-height: 1.25rem;
-  font-size: 0.625rem;
+/* Cart Icon Wrapper */
+.cart-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge del carrito - Estilo iOS/Material */
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444; /* Rojo vibrante */
+  color: white;
+  font-size: 11px;
   font-weight: 600;
+  border-radius: 9px; /* Círculo perfecto */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid white; /* Borde blanco para destacar */
+  line-height: 1;
+  animation: badgeAppear 0.3s ease-out;
+}
+
+@keyframes badgeAppear {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Si el número es mayor a 99, ajustar */
+.cart-badge {
+  max-width: 24px;
+  font-size: 10px;
 }
 
 /* ========== USER MENU ========== */
