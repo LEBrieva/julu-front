@@ -135,13 +135,8 @@ export class CartService {
         .pipe(
           tap((cart) => {
             this.userCartSignal.set(cart);
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Agregado',
-              detail: 'Producto agregado al carrito',
-              life: 3000,
-            });
             // Abrir el drawer automáticamente (solo si NO estamos en /cart)
+            // El drawer ya indica visualmente que se agregó el producto, no necesitamos toast
             this.openDrawerIfNotInCartPage();
           }),
           catchError((error) => {
@@ -182,13 +177,8 @@ export class CartService {
       }
 
       this.saveGuestCart(items);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Agregado',
-        detail: 'Producto agregado al carrito',
-        life: 3000,
-      });
       // Abrir el drawer automáticamente (solo si NO estamos en /cart)
+      // El drawer ya indica visualmente que se agregó el producto, no necesitamos toast
       this.openDrawerIfNotInCartPage();
       return of(void 0);
     }
