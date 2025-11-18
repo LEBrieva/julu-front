@@ -110,8 +110,19 @@ export class RegisterComponent implements OnInit {
     }
 
     this.loading.set(true);
-    const formValue = this.registerForm.getRawValue(); // getRawValue incluye disabled fields
+    const formValue = this.registerForm.getRawValue();
     const prefilled = this.prefilledData();
+
+    // 🔍 LOG: Datos del formulario
+    console.log('📝 [FRONTEND] Datos del formulario:', {
+      email: formValue.email,
+      password: formValue.password,
+      passwordLength: formValue.password?.length,
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      phone: formValue.phone,
+      linkedGuestOrderId: prefilled?.orderId
+    });
 
     this.authService
       .register({
@@ -120,15 +131,19 @@ export class RegisterComponent implements OnInit {
         firstName: formValue.firstName,
         lastName: formValue.lastName,
         phone: formValue.phone,
-        linkedGuestOrderId: prefilled?.orderId, // Vincula la orden guest
+        linkedGuestOrderId: prefilled?.orderId,
       })
       .subscribe({
         next: () => {
+          console.log('✅ [FRONTEND] Registro exitoso, intentando auto-login...');
+          console.log('🔑 [FRONTEND] Login con email:', formValue.email, 'password length:', formValue.password?.length);
+
           // Auto-login después del registro
           this.authService
             .login(formValue.email, formValue.password)
             .subscribe({
               next: () => {
+                console.log('✅ [FRONTEND] Auto-login exitoso');
                 this.messageService.add({
                   severity: 'success',
                   summary: 'Cuenta Creada',
@@ -138,7 +153,8 @@ export class RegisterComponent implements OnInit {
                 });
                 this.router.navigate(['/products']);
               },
-              error: () => {
+              error: (loginError) => {
+                console.error('❌ [FRONTEND] Error en auto-login:', loginError);
                 this.loading.set(false);
                 this.messageService.add({
                   severity: 'warn',
@@ -151,6 +167,7 @@ export class RegisterComponent implements OnInit {
             });
         },
         error: (error) => {
+          console.error('❌ [FRONTEND] Error en registro:', error);
           this.loading.set(false);
           this.messageService.add({
             severity: 'error',
