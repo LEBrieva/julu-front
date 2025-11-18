@@ -30,6 +30,7 @@ import { InputMaskModule } from 'primeng/inputmask';
     DividerModule,
     InputMaskModule,
   ],
+  providers: [MessageService],
   templateUrl: './guest-checkout.html',
   styleUrls: ['./guest-checkout.css'],
 })
