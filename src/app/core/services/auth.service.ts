@@ -137,6 +137,43 @@ export class AuthService {
   }
 
   /**
+   * Register - Registrar un nuevo usuario
+   *
+   * FLUJO:
+   * 1. POST /auth/register con datos del usuario
+   * 2. Backend crea usuario y opcionalmente vincula orden guest
+   * 3. Backend responde con { user }
+   * 4. El componente debe llamar a login() después para autenticar
+   *
+   * @param registerDto Datos de registro del usuario
+   * @returns Observable con el usuario creado
+   */
+  register(registerDto: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    linkedGuestOrderId?: string;
+  }): Observable<{ user: User }> {
+    return this.http
+      .post<{ user: User }>(
+        `${this.apiUrl}/auth/register`,
+        registerDto,
+        { withCredentials: true }
+      )
+      .pipe(
+        tap((response) => {
+          console.log('✅ Usuario registrado:', response.user.email);
+        }),
+        catchError((error) => {
+          console.error('❌ Error en registro:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
    * Refresh - Renovar accessToken cuando expira
    *
    * FLUJO:

@@ -1,0 +1,18 @@
+/* Estilos específicos para campos deshabilitados */
+input:disabled {
+  background-color: #f9fafb !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Ajustes para PrimeNG Password en modo disabled */
+:host ::ng-deep .p-password .p-inputtext:disabled {
+  background-color: #f9fafb !important;
+  cursor: not-allowed;
+}
+
+/* Mejorar visualización de campos pre-llenados */
+:host ::ng-deep .p-inputtext:disabled {
+  border-color: #e5e7eb;
+  color: #6b7280;
+}

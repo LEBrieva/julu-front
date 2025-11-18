@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASES 5, 6, 7, 8a, 8b y 8c completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos.
+**Estado actual**: FASES 5, 6, 7, 8a, 8b, 8c y 10 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos. Sistema de registro post-compra para usuarios guest con vinculación automática de órdenes y direcciones.
 
 ---
 
@@ -83,10 +83,14 @@ src/app/
 │   │   │       ├── user-detail.component.html
 │   │   │       └── user-detail.component.css
 │   ├── auth/                  # Autenticación
-│   │   └── login/
-│   │       ├── login.component.ts     # ✅ Componente de login
-│   │       ├── login.component.html   # ✅ Template con PrimeNG
-│   │       └── login.component.css    # ✅ Estilos con Tailwind
+│   │   ├── login/
+│   │   │   ├── login.component.ts     # ✅ Componente de login
+│   │   │   ├── login.component.html   # ✅ Template con PrimeNG
+│   │   │   └── login.component.css    # ✅ Estilos con Tailwind
+│   │   └── register/          # ✅ FASE 10: Registro post-compra
+│   │       ├── register.component.ts  # ✅ Formulario reactivo con auto-login
+│   │       ├── register.component.html # ✅ Template con campos pre-llenados
+│   │       └── register.component.css  # ✅ Estilos para campos deshabilitados
 │   ├── home/                  # ✅ FASE 8a: Landing page pública
 │   │   └── home.component.ts          # Hero, categorías, destacados
 │   └── products/              # Catálogo público
@@ -136,7 +140,7 @@ src/app/
 ### AuthService (Signal-based)
 Ver `core/services/auth.service.ts`
 - **Signals**: `currentUser`, `isAuthenticated`, `isAdmin` (todos computed/readonly)
-- **Métodos**: `login()`, `logout()`, `refresh()`, `initializeAuth()`, `getCurrentUser()`
+- **Métodos**: `login()`, `logout()`, `refresh()`, `initializeAuth()`, `getCurrentUser()`, `register()`
 - **Activity tracking**: Silent refresh cada 55 min si usuario activo, logout diferenciado por rol si inactivo
 - **Uso en componentes**: `authService.currentUser()`, `isAuthenticated()`, `isAdmin()`
 
@@ -609,6 +613,110 @@ DELETE /cart                    # Vaciar carrito
 
 ---
 
+### ✅ FASE 10: Guest Checkout & Post-Purchase Registration
+
+Sistema completo para permitir que usuarios anónimos completen compras y luego creen cuentas vinculando automáticamente su orden.
+
+#### Flujo de Usuario
+
+```
+Guest completa compra → /order-success-guest/:id
+  ↓ (clic "Crear Cuenta")
+Navega a /register con datos pre-llenados
+  ↓ (completa password + términos)
+POST /auth/register (con linkedGuestOrderId)
+  ↓
+Backend vincula orden + crea dirección
+  ↓
+Auto-login automático
+  ↓
+Redirect a /products con toast: "Orden ORD-XXX vinculada" ✅
+```
+
+#### Componentes Implementados
+
+**RegisterComponent** (`/register`):
+- Formulario reactivo con validaciones completas
+- **Campos pre-llenados** (desde router state):
+  - Email, firstName, lastName, phone (deshabilitados visualmente)
+  - Datos extraídos de `shippingAddress` de la orden guest
+- **Campos requeridos** (usuario completa):
+  - Password (min 6 caracteres, con PrimeNG Password strength indicator)
+  - Confirm Password (validación de coincidencia)
+  - Accept Terms (checkbox required)
+- **Banner informativo**: Muestra número de orden si viene de guest checkout
+- **Auto-login**: Después de registro exitoso, llama `login()` automáticamente
+- **Manejo de errores**: Toasts diferenciados (success, warn, error)
+
+**OrderSuccessGuestComponent** actualizado:
+- Método `goToRegister()` prepara datos:
+  - Parsea `fullName` → `firstName` + `lastName`
+  - Pasa `orderId` y `orderNumber` en router state
+  - Navega a `/register` con state completo
+
+#### AuthService - Método register()
+
+```typescript
+register(registerDto: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  linkedGuestOrderId?: string;  // ← Vincula orden guest
+}): Observable<{ user: User }>
+```
+
+- Endpoint: `POST /auth/register`
+- Retorna usuario creado (backend ya vinculó orden y creó address)
+- Frontend debe llamar `login()` después para autenticar
+
+#### Validaciones
+
+**Frontend:**
+- Email válido (email validator)
+- Passwords coincidentes (custom validator)
+- Términos aceptados (requiredTrue)
+- Min 2 caracteres para nombres
+
+**Backend:**
+- Email único (ConflictException si ya existe)
+- **Orden no hijackeable**:
+  - ✅ Mismo usuario reintenta vincular → Success (idempotente)
+  - ❌ Usuario diferente intenta vincular → `BadRequestException`
+- Password hasheado con bcrypt
+- Rate limiting: 3 registros/minuto (Throttle)
+
+#### Persistencia de Datos
+
+**Sin persistencia en router state** (decisión arquitectónica):
+- Datos viajan solo en memoria vía `router.navigate({ state })`
+- Si usuario recarga `/register` → pierde datos pre-llenados
+- **Razón**: Simplicidad + seguridad (no exponer endpoint público de órdenes guest)
+- **Trade-off aceptado**: 99% de usuarios registran inmediatamente
+
+#### Rutas Actualizadas
+
+```typescript
+// app.routes.ts
+{
+  path: 'register',
+  loadComponent: () =>
+    import('./features/auth/register/register.component').then(
+      (m) => m.RegisterComponent
+    )
+}
+```
+
+#### Integración Backend
+
+Ver `../ecommerce-back/CLAUDE.md` sección "Guest Checkout & Post-Purchase Registration" para:
+- `UserRegistrationService` (Facade pattern)
+- `OrderService.linkGuestOrderToUser()` con validaciones
+- Arquitectura sin dependencias circulares (AuthModule imports OrderModule)
+
+---
+
 ## 📚 Recursos
 
 ### Documentación Oficial
@@ -674,4 +782,21 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-16 (FASE 8c completada: Página de detalle de producto completa con galería de imágenes, selector inteligente de variantes, breadcrumbs, tabs informativos con PrimeNG v20, carousel de productos relacionados de la misma categoría, y sistema completo de meta tags SEO dinámicos con Open Graph y Twitter Cards. Implementado `seo.util.ts` reutilizable con helpers de truncado, sanitización y construcción de URLs. Product Detail ahora tiene full SEO para social sharing y Google indexing.)
+**Última actualización**: 2025-11-18
+
+**FASE 10 - Guest Checkout & Post-Purchase Registration** ✅ COMPLETADA:
+- **RegisterComponent** implementado con formulario reactivo completo
+  - Campos pre-llenados y deshabilitados (email, nombre, teléfono) desde router state
+  - Validación de passwords coincidentes y términos aceptados
+  - Banner informativo si viene de guest checkout
+  - Auto-login post-registro exitoso
+- **AuthService.register()** agregado con soporte para `linkedGuestOrderId`
+- **OrderSuccessGuestComponent** actualizado:
+  - Método `goToRegister()` parsea `fullName` y pasa datos completos en state
+  - Botón "Crear Cuenta" navega a `/register` con pre-llenado
+- **Ruta `/register`** agregada con lazy loading
+- **Integración backend**: Vinculación automática de orden guest + creación de dirección default
+- **Validaciones estrictas**: Prevención de hijacking de órdenes (idempotente mismo usuario, bloqueado usuario diferente)
+- **UX optimizada**: Sin persistencia en router state (decisión arquitectónica), registro inmediato post-compra
+
+**FASE 8c** - Página de detalle de producto completa con galería de imágenes, selector inteligente de variantes, breadcrumbs, tabs informativos con PrimeNG v20, carousel de productos relacionados de la misma categoría, y sistema completo de meta tags SEO dinámicos con Open Graph y Twitter Cards. Implementado `seo.util.ts` reutilizable con helpers de truncado, sanitización y construcción de URLs.

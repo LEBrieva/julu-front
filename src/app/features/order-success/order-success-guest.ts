@@ -40,8 +40,29 @@ export class OrderSuccessGuestComponent implements OnInit {
     }
   }
 
-  goToLogin() {
-    this.router.navigate(['/login']);
+  goToRegister() {
+    const currentOrder = this.order();
+
+    if (!currentOrder) {
+      this.router.navigate(['/register']);
+      return;
+    }
+
+    // Separar fullName en firstName + lastName
+    const nameParts = currentOrder.shippingAddress.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    this.router.navigate(['/register'], {
+      state: {
+        email: currentOrder.shippingAddress.email,
+        firstName,
+        lastName,
+        phone: currentOrder.shippingAddress.phone,
+        orderId: currentOrder.id,
+        orderNumber: currentOrder.orderNumber,
+      },
+    });
   }
 
   continueShopping() {

@@ -1,0 +1,191 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full">
+    <!-- Banner informativo si viene de guest order -->
+    @if (prefilledData(); as data) {
+      <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-start">
+          <i class="pi pi-info-circle text-blue-500 mt-0.5 mr-3"></i>
+          <div>
+            <h3 class="font-semibold text-blue-900 mb-1">
+              Crea tu cuenta para acceder a tu orden
+            </h3>
+            <p class="text-sm text-blue-700">
+              Orden <span class="font-mono font-semibold">{{ data.orderNumber }}</span> lista para ser vinculada a tu perfil
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Card de registro -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="pt-6 px-6">
+          <h2 class="text-2xl font-bold text-gray-900">Crear Cuenta</h2>
+          <p class="mt-2 text-sm text-gray-600">
+            Completa tus datos para registrarte
+          </p>
+        </div>
+      </ng-template>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Email (pre-llenado si viene de guest order) -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            Email
+          </label>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
+            type="email"
+            placeholder="tu@email.com"
+            class="w-full"
+            [class.disabled:opacity-60]="registerForm.get('email')?.disabled"
+          />
+          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <small class="text-red-500 mt-1 block">
+              {{ getErrorMessage('email') }}
+            </small>
+          }
+        </div>
+
+        <!-- Nombre (pre-llenado) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre
+            </label>
+            <input
+              pInputText
+              id="firstName"
+              formControlName="firstName"
+              placeholder="Juan"
+              class="w-full"
+              [class.disabled:opacity-60]="registerForm.get('firstName')?.disabled"
+            />
+            @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
+              <small class="text-red-500 mt-1 block">
+                {{ getErrorMessage('firstName') }}
+              </small>
+            }
+          </div>
+
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+              Apellido
+            </label>
+            <input
+              pInputText
+              id="lastName"
+              formControlName="lastName"
+              placeholder="Pérez"
+              class="w-full"
+              [class.disabled:opacity-60]="registerForm.get('lastName')?.disabled"
+            />
+            @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
+              <small class="text-red-500 mt-1 block">
+                {{ getErrorMessage('lastName') }}
+              </small>
+            }
+          </div>
+        </div>
+
+        <!-- Teléfono (pre-llenado, opcional) -->
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+            Teléfono <span class="text-gray-400">(opcional)</span>
+          </label>
+          <input
+            pInputText
+            id="phone"
+            formControlName="phone"
+            placeholder="+54 11 1234-5678"
+            class="w-full"
+            [class.disabled:opacity-60]="registerForm.get('phone')?.disabled"
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            Contraseña
+          </label>
+          <p-password
+            formControlName="password"
+            placeholder="Mínimo 6 caracteres"
+            [toggleMask]="true"
+            [feedback]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <small class="text-red-500 mt-1 block">
+              {{ getErrorMessage('password') }}
+            </small>
+          }
+        </div>
+
+        <!-- Confirmar Password -->
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+            Confirmar Contraseña
+          </label>
+          <p-password
+            formControlName="confirmPassword"
+            placeholder="Repite tu contraseña"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (registerForm.get('confirmPassword')?.touched && !passwordsMatch()) {
+            <small class="text-red-500 mt-1 block">
+              Las contraseñas no coinciden
+            </small>
+          }
+        </div>
+
+        <!-- Términos y condiciones -->
+        <div class="flex items-start">
+          <p-checkbox
+            formControlName="acceptTerms"
+            [binary]="true"
+            inputId="acceptTerms"
+            class="mr-2"
+          />
+          <label for="acceptTerms" class="text-sm text-gray-700 cursor-pointer">
+            Acepto los <a href="#" class="text-blue-600 hover:underline">términos y condiciones</a>
+            y la <a href="#" class="text-blue-600 hover:underline">política de privacidad</a>
+          </label>
+        </div>
+        @if (registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched) {
+          <small class="text-red-500 mt-1 block">
+            Debes aceptar los términos y condiciones
+          </small>
+        }
+
+        <!-- Botón Submit -->
+        <p-button
+          type="submit"
+          label="Crear Cuenta"
+          icon="pi pi-user-plus"
+          styleClass="w-full"
+          [loading]="loading()"
+          [disabled]="registerForm.invalid || !passwordsMatch() || loading()"
+        />
+      </form>
+
+      <ng-template pTemplate="footer">
+        <div class="text-center pb-4">
+          <span class="text-sm text-gray-600">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login" class="text-blue-600 hover:underline font-medium">
+              Inicia sesión
+            </a>
+          </span>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+</div>

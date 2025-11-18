@@ -71,6 +71,16 @@ export const routes: Routes = [
       )
   },
 
+  // ========== REGISTER (sin layout, standalone) ==========
+
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register.component').then(
+        (m) => m.RegisterComponent
+      )
+  },
+
   // ========== RUTAS ADMIN (authGuard + adminGuard) ==========
 
   {
