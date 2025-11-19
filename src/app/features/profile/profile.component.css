@@ -33,54 +33,7 @@
 
 /* ==================== SIDEBAR MENU ==================== */
 
-/* Estilos del menú lateral */
-.profile-sidebar :host ::ng-deep .p-menu {
-  border: none;
-  background: transparent;
-  padding: 0;
-}
-
-/* Items del menú */
-.profile-sidebar :host ::ng-deep .p-menuitem-link {
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
-}
-
-.profile-sidebar :host ::ng-deep .p-menuitem-link:hover {
-  background: var(--p-surface-hover, #f3f4f6);
-}
-
-/* Item activo (simulación con CSS) */
-.profile-sidebar :host ::ng-deep .p-focus .p-menuitem-link {
-  background: var(--p-primary-50, #eff6ff);
-  border-left: 3px solid var(--p-primary-500, #3b82f6);
-}
-
-/* Iconos del menú */
-.profile-sidebar :host ::ng-deep .p-menuitem-icon {
-  color: var(--p-text-muted-color, #6b7280);
-  margin-right: 0.75rem;
-}
-
-/* Texto del menú */
-.profile-sidebar :host ::ng-deep .p-menuitem-text {
-  color: var(--p-text-color, #374151);
-  font-weight: 500;
-}
-
-/* Mobile: Menú más compacto */
-@media (max-width: 1023px) {
-  .profile-sidebar :host ::ng-deep .p-menuitem-link {
-    padding: 0.625rem 0.75rem;
-    font-size: 0.875rem;
-  }
-
-  .profile-sidebar :host ::ng-deep .p-menuitem-icon {
-    font-size: 1rem;
-    margin-right: 0.5rem;
-  }
-}
+/* El menú ahora usa Tailwind directamente en el HTML, no necesita CSS adicional */
 
 /* ==================== CONTENIDO PRINCIPAL ==================== */
 

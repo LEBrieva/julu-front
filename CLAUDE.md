@@ -796,11 +796,16 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 **FASE 11 - User Profile & Login Refactor** ✅ COMPLETADA:
 
 ### Perfil de Usuario:
-- **ProfileComponent** implementado con PrimeNG v20 Tabs (3 tabs)
-  - **Tab 1: Información Personal** - Formulario reactivo para actualizar firstName, lastName, phone (email disabled)
-  - **Tab 2: Seguridad** - Cambio de password con validación de password actual + PrimeNG Password strength indicator
-  - **Tab 3: Historial de Órdenes** - Tabla con órdenes del usuario (reutiliza OrderService)
-  - **Botón "Volver"** centrado debajo de las tabs (usa location.back())
+- **ProfileComponent** implementado con navegación lateral simple (3 secciones)
+  - **Menú lateral**: HTML + Tailwind (NO PrimeNG Menu) para máxima simplicidad y control
+    - Estado activo controlado por signal `activeSection`
+    - Clases condicionales con `[class.bg-blue-50]`, `[class.border-l-4]`, etc.
+    - Persistencia visual del ítem activo (no se pierde al hacer clic fuera)
+    - Navegación con query params: `/profile?tab=orders` abre directamente la sección de órdenes
+  - **Sección 1: Información Personal** - Formulario reactivo para actualizar firstName, lastName, phone (email disabled)
+  - **Sección 2: Seguridad** - Cambio de password con validación de password actual + PrimeNG Password strength indicator
+  - **Sección 3: Historial de Órdenes** - Tabla con órdenes del usuario (reutiliza OrderService)
+  - **Botón "Volver"** centrado arriba (usa location.back())
 - **Backend endpoints**:
   - `PATCH /auth/profile` - Actualiza info personal (firstName, lastName, phone)
   - `POST /auth/change-password` - Cambia password con validación + invalida todos los refresh tokens (logout automático)
@@ -808,7 +813,9 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
   - `updateProfile(data)` - Actualiza perfil y sincroniza signal currentUser
   - `changePassword(data)` - Cambia password → Logout automático → Redirect a /login
 - **Ruta `/profile`** protegida con `authGuard`
-- **Link "Mi Perfil"** agregado en header (public-header dropdown)
+- **Links en header** (public-header dropdown):
+  - "Mi Perfil" → `/profile` (abre sección "Información Personal")
+  - "Mis Órdenes" → `/profile?tab=orders` (abre directamente sección de órdenes)
 - **UX Features**:
   - Headless ConfirmDialog al cambiar password (advierte logout en todos los dispositivos)
   - Botones deshabilitados si form.invalid o form.pristine
@@ -816,7 +823,9 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
   - Empty state en historial de órdenes con botón "Ver Productos"
   - Toasts de confirmación/error en todas las operaciones
   - Rate limiting: 5 intentos/minuto en change-password
+  - Menú lateral simple y expandible (fácil agregar nuevas secciones)
 - **Sincronización reactiva**: Cambios en perfil se reflejan en header automáticamente
+- **Arquitectura simplificada**: Menú HTML puro sin dependencias de PrimeNG MenuItem API (más mantenible)
 
 ### Login Refactor (Página → Popup):
 - **Ruta `/login` ELIMINADA** - Login ahora es popup en header (NO página dedicada)

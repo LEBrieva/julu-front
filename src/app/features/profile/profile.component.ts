@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -14,13 +14,11 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { CardModule } from 'primeng/card';
-import { MenuModule } from 'primeng/menu';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { PopoverModule } from 'primeng/popover';
 import { Popover } from 'primeng/popover';
-import { MenuItem } from 'primeng/api';
 import { OrderListItem, Order } from '../../core/models/order.model';
 import { PaginatedResponse } from '../../core/models/api-response.model';
 import { OrderSummaryPopoverComponent } from '../../shared/components/order-summary-popover/order-summary-popover.component';
@@ -37,7 +35,6 @@ import { OrderDetailDrawerComponent } from '../../shared/components/order-detail
     InputTextModule,
     PasswordModule,
     CardModule,
-    MenuModule,
     TableModule,
     TagModule,
     ConfirmDialogModule,
@@ -54,6 +51,7 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private orderService = inject(OrderService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private location = inject(Location);
@@ -79,26 +77,15 @@ export class ProfileComponent implements OnInit {
   // ViewChild para el popover
   @ViewChild('orderPopover') orderPopover!: Popover;
 
-  // Menu items
-  menuItems: MenuItem[] = [
-    {
-      label: 'Información Personal',
-      icon: 'pi pi-user',
-      command: () => this.activeSection.set('personal')
-    },
-    {
-      label: 'Seguridad',
-      icon: 'pi pi-lock',
-      command: () => this.activeSection.set('security')
-    },
-    {
-      label: 'Mis Órdenes',
-      icon: 'pi pi-shopping-cart',
-      command: () => this.activeSection.set('orders')
-    }
-  ];
-
   ngOnInit() {
+    // Leer query param para abrir tab específico (ej: /profile?tab=orders)
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'] as 'personal' | 'security' | 'orders' | undefined;
+      if (tab && ['personal', 'security', 'orders'].includes(tab)) {
+        this.activeSection.set(tab);
+      }
+    });
+
     this.initProfileForm();
     this.initPasswordForm();
     this.loadOrders();

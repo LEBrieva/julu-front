@@ -14,7 +14,52 @@
   <div class="profile-container">
     <!-- ==================== SIDEBAR - MENÚ LATERAL ==================== -->
     <aside class="profile-sidebar">
-      <p-menu [model]="menuItems" />
+      <nav class="flex flex-col gap-2">
+        <button
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all"
+          [class.bg-blue-50]="activeSection() === 'personal'"
+          [class.text-blue-600]="activeSection() === 'personal'"
+          [class.font-semibold]="activeSection() === 'personal'"
+          [class.border-l-4]="activeSection() === 'personal'"
+          [class.border-blue-500]="activeSection() === 'personal'"
+          [class.text-gray-700]="activeSection() !== 'personal'"
+          [class.hover:bg-gray-100]="activeSection() !== 'personal'"
+          (click)="activeSection.set('personal')"
+        >
+          <i class="pi pi-user text-xl"></i>
+          <span>Información Personal</span>
+        </button>
+
+        <button
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all"
+          [class.bg-blue-50]="activeSection() === 'security'"
+          [class.text-blue-600]="activeSection() === 'security'"
+          [class.font-semibold]="activeSection() === 'security'"
+          [class.border-l-4]="activeSection() === 'security'"
+          [class.border-blue-500]="activeSection() === 'security'"
+          [class.text-gray-700]="activeSection() !== 'security'"
+          [class.hover:bg-gray-100]="activeSection() !== 'security'"
+          (click)="activeSection.set('security')"
+        >
+          <i class="pi pi-lock text-xl"></i>
+          <span>Seguridad</span>
+        </button>
+
+        <button
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all"
+          [class.bg-blue-50]="activeSection() === 'orders'"
+          [class.text-blue-600]="activeSection() === 'orders'"
+          [class.font-semibold]="activeSection() === 'orders'"
+          [class.border-l-4]="activeSection() === 'orders'"
+          [class.border-blue-500]="activeSection() === 'orders'"
+          [class.text-gray-700]="activeSection() !== 'orders'"
+          [class.hover:bg-gray-100]="activeSection() !== 'orders'"
+          (click)="activeSection.set('orders')"
+        >
+          <i class="pi pi-shopping-cart text-xl"></i>
+          <span>Mis Órdenes</span>
+        </button>
+      </nav>
     </aside>
 
     <!-- ==================== CONTENIDO PRINCIPAL ==================== -->

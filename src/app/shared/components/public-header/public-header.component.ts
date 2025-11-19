@@ -124,7 +124,7 @@ export class PublicHeaderComponent {
    * Navegar al tab de órdenes en el perfil del usuario
    */
   goToOrders(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/profile'], { queryParams: { tab: 'orders' } });
   }
 
   /**
