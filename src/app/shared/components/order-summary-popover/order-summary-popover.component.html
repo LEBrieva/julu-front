@@ -1,0 +1,55 @@
+@if (order) {
+  <div class="popover-content">
+    <!-- Header: Número de orden + badges -->
+    <div class="header">
+      <h3 class="order-number">{{ order.orderNumber }}</h3>
+      <div class="badges">
+        <p-tag
+          [value]="formatOrderStatus(order.status)"
+          [severity]="getOrderStatusSeverity(order.status)"
+        />
+        <p-tag
+          [value]="formatPaymentStatus(order.paymentStatus)"
+          [severity]="getPaymentStatusSeverity(order.paymentStatus)"
+        />
+      </div>
+    </div>
+
+    <!-- Preview de items (scroll si hay más de 4) -->
+    <div class="items-preview">
+      <h4 class="items-title">Productos ({{ order.items.length }})</h4>
+      <div class="items-list">
+        @for (item of order.items; track item.productId + item.variantSKU) {
+          <div class="item">
+            <img
+              [src]="item.productImage || 'assets/images/placeholder-product.png'"
+              [alt]="item.productName"
+              class="item-image"
+            />
+            <div class="item-info">
+              <div class="item-name">{{ item.productName }}</div>
+              <div class="item-quantity">x{{ item.quantity }}</div>
+            </div>
+            <div class="item-price">
+              ${{ item.subtotal | number: '1.2-2' }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="total">
+      <span class="total-label">Total:</span>
+      <span class="total-amount">${{ order.total | number: '1.2-2' }}</span>
+    </div>
+
+    <!-- Botón para ver detalle completo -->
+    <p-button
+      label="Ver Detalle Completo"
+      icon="pi pi-external-link"
+      styleClass="w-full"
+      (onClick)="onViewFullDetail()"
+    />
+  </div>
+}

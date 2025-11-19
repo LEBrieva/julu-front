@@ -1,0 +1,180 @@
+<p-drawer
+  [(visible)]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  [position]="'left'"
+  [style]="{ width: '50rem' }"
+  [modal]="true"
+>
+  <ng-template #header>
+    <h2 class="drawer-title">Detalle de Orden</h2>
+  </ng-template>
+
+  @if (order) {
+    <div class="drawer-content">
+      <!-- ==================== HEADER: Número + Fecha + Badges ==================== -->
+      <div class="section section-header">
+        <h3 class="order-number">{{ order.orderNumber }}</h3>
+        <p class="order-date">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        <div class="badges">
+          <p-tag
+            [value]="formatOrderStatus(order.status)"
+            [severity]="getOrderStatusSeverity(order.status)"
+          />
+          <p-tag
+            [value]="formatPaymentStatus(order.paymentStatus)"
+            [severity]="getPaymentStatusSeverity(order.paymentStatus)"
+          />
+          @if (order.isGuest) {
+            <p-tag value="Invitado" severity="secondary" />
+          }
+        </div>
+      </div>
+
+      <!-- ==================== SECCIÓN: CLIENTE ==================== -->
+      <div class="section">
+        <h4 class="section-title">
+          <i class="pi pi-user mr-2"></i>
+          Información del Cliente
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Nombre:</span>
+            <span class="info-value">{{ order.shippingAddress.fullName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ order.shippingAddress.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Teléfono:</span>
+            <span class="info-value">{{ order.shippingAddress.phone }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="info-label">Dirección:</span>
+            <span class="info-value">
+              {{ order.shippingAddress.street }}, {{ order.shippingAddress.city }},
+              {{ order.shippingAddress.state }}, {{ order.shippingAddress.zipCode }},
+              {{ order.shippingAddress.country }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SECCIÓN: ITEMS ==================== -->
+      <div class="section">
+        <h4 class="section-title">
+          <i class="pi pi-shopping-bag mr-2"></i>
+          Productos ({{ order.items.length }})
+        </h4>
+        <p-table [value]="order.items" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Producto</th>
+              <th>Variante</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-right">Precio</th>
+              <th class="text-right">Subtotal</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <!-- Producto (imagen + nombre) -->
+              <td>
+                <div class="product-cell">
+                  <img
+                    [src]="item.productImage || 'assets/images/placeholder-product.png'"
+                    [alt]="item.productName"
+                    class="product-image"
+                  />
+                  <span class="product-name">{{ item.productName }}</span>
+                </div>
+              </td>
+
+              <!-- Variante (talla + color) -->
+              <td>
+                <div class="variant-cell">
+                  <div class="variant-size">{{ formatSize(item.variantSize) }}</div>
+                  <div class="variant-color">
+                    <span
+                      class="color-chip"
+                      [style.background-color]="getColorHex(item.variantColor)"
+                    ></span>
+                    <span>{{ formatColor(item.variantColor) }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Cantidad -->
+              <td class="text-center">
+                <span class="quantity-badge">{{ item.quantity }}</span>
+              </td>
+
+              <!-- Precio unitario -->
+              <td class="text-right">
+                ${{ item.price | number: '1.2-2' }}
+              </td>
+
+              <!-- Subtotal -->
+              <td class="text-right font-semibold">
+                ${{ item.subtotal | number: '1.2-2' }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- ==================== SECCIÓN: TOTALES ==================== -->
+      <div class="section">
+        <h4 class="section-title">
+          <i class="pi pi-calculator mr-2"></i>
+          Resumen de Pago
+        </h4>
+        <div class="totals-box">
+          <div class="total-row">
+            <span>Subtotal:</span>
+            <span>${{ order.subtotal | number: '1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span>Envío:</span>
+            <span>${{ order.shippingCost | number: '1.2-2' }}</span>
+          </div>
+          <div class="total-row total-final">
+            <span>Total:</span>
+            <span>${{ order.total | number: '1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SECCIÓN: PAGO ==================== -->
+      <div class="section">
+        <h4 class="section-title">
+          <i class="pi pi-credit-card mr-2"></i>
+          Información de Pago
+        </h4>
+        <div class="payment-info">
+          <div class="payment-method">
+            <i [class]="getPaymentMethodIcon(order.paymentMethod)"></i>
+            <span>{{ formatPaymentMethod(order.paymentMethod) }}</span>
+          </div>
+          @if (order.notes) {
+            <div class="order-notes">
+              <strong>Notas:</strong> {{ order.notes }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    <div class="drawer-footer">
+      <p-button
+        label="Cerrar"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onClose()"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

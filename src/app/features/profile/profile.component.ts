@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -14,12 +14,17 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { CardModule } from 'primeng/card';
-import { TabsModule } from 'primeng/tabs';
+import { MenuModule } from 'primeng/menu';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { OrderListItem } from '../../core/models/order.model';
+import { PopoverModule } from 'primeng/popover';
+import { Popover } from 'primeng/popover';
+import { MenuItem } from 'primeng/api';
+import { OrderListItem, Order } from '../../core/models/order.model';
 import { PaginatedResponse } from '../../core/models/api-response.model';
+import { OrderSummaryPopoverComponent } from '../../shared/components/order-summary-popover/order-summary-popover.component';
+import { OrderDetailDrawerComponent } from '../../shared/components/order-detail-drawer/order-detail-drawer.component';
 
 @Component({
   selector: 'app-profile',
@@ -32,10 +37,13 @@ import { PaginatedResponse } from '../../core/models/api-response.model';
     InputTextModule,
     PasswordModule,
     CardModule,
-    TabsModule,
+    MenuModule,
     TableModule,
     TagModule,
     ConfirmDialogModule,
+    PopoverModule,
+    OrderSummaryPopoverComponent,
+    OrderDetailDrawerComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './profile.component.html',
@@ -55,6 +63,7 @@ export class ProfileComponent implements OnInit {
   loadingProfile = signal(false);
   loadingPassword = signal(false);
   loadingOrders = signal(false);
+  activeSection = signal<'personal' | 'security' | 'orders'>('personal');
 
   // Formularios
   profileForm!: FormGroup;
@@ -63,6 +72,31 @@ export class ProfileComponent implements OnInit {
   // Órdenes
   orders = signal<OrderListItem[]>([]);
   ordersError = signal(false);
+  selectedOrder = signal<Order | null>(null);
+  loadingOrderDetail = signal(false);
+  drawerVisible = signal(false);
+
+  // ViewChild para el popover
+  @ViewChild('orderPopover') orderPopover!: Popover;
+
+  // Menu items
+  menuItems: MenuItem[] = [
+    {
+      label: 'Información Personal',
+      icon: 'pi pi-user',
+      command: () => this.activeSection.set('personal')
+    },
+    {
+      label: 'Seguridad',
+      icon: 'pi pi-lock',
+      command: () => this.activeSection.set('security')
+    },
+    {
+      label: 'Mis Órdenes',
+      icon: 'pi pi-shopping-cart',
+      command: () => this.activeSection.set('orders')
+    }
+  ];
 
   ngOnInit() {
     this.initProfileForm();
@@ -237,8 +271,43 @@ export class ProfileComponent implements OnInit {
     this.loadOrders();
   }
 
-  viewOrder(orderId: string) {
-    this.router.navigate(['/order-success', orderId]);
+  /**
+   * Abre popover con resumen de orden + carga detalle completo
+   */
+  displayOrder(event: Event, orderListItem: OrderListItem) {
+    this.loadingOrderDetail.set(true);
+
+    this.orderService.getOrderById(orderListItem.id).subscribe({
+      next: (fullOrder: Order) => {
+        this.selectedOrder.set(fullOrder);
+        this.loadingOrderDetail.set(false);
+        this.orderPopover.show(event);
+      },
+      error: (error) => {
+        this.loadingOrderDetail.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al Cargar Orden',
+          detail: error.error?.message || 'No se pudo cargar el detalle de la orden',
+        });
+      },
+    });
+  }
+
+  /**
+   * Abre drawer de detalle completo (desde popover)
+   */
+  onViewFullDetail(order: Order) {
+    this.drawerVisible.set(true);
+    this.orderPopover.hide(); // Cerrar popover al abrir drawer
+  }
+
+  /**
+   * Cierra drawer y limpia orden seleccionada
+   */
+  onDrawerClose() {
+    this.drawerVisible.set(false);
+    this.selectedOrder.set(null);
   }
 
   getSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined {

@@ -1,0 +1,270 @@
+/* ==================== DRAWER RESPONSIVE ==================== */
+
+/* Mobile: Drawer ocupa 100% del ancho */
+@media (max-width: 768px) {
+  :host ::ng-deep .p-drawer {
+    width: 100% !important;
+  }
+}
+
+/* Tablet: Drawer ocupa 90% del ancho */
+@media (min-width: 769px) and (max-width: 1023px) {
+  :host ::ng-deep .p-drawer {
+    width: 90% !important;
+  }
+}
+
+/* ==================== HEADER ==================== */
+
+.drawer-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ==================== CONTENIDO ==================== */
+
+.drawer-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+/* Secciones generales */
+.section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--p-surface-border, #e5e7eb);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--p-text-color, #374151);
+  display: flex;
+  align-items: center;
+}
+
+/* ==================== HEADER SECTION ==================== */
+
+.section-header {
+  background: var(--p-surface-50, #f9fafb);
+  padding: 1.5rem;
+  margin: 0 -1.5rem 1.5rem -1.5rem;
+  border-bottom: 2px solid var(--p-primary-500, #3b82f6);
+}
+
+.order-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--p-text-color, #111827);
+}
+
+.order-date {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #6b7280);
+  margin: 0 0 0.75rem 0;
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ==================== CLIENTE SECTION ==================== */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.info-value {
+  font-size: 0.9375rem;
+  color: var(--p-text-color, #374151);
+}
+
+/* ==================== ITEMS TABLE ==================== */
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.product-image {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
+.product-name {
+  font-weight: 500;
+  color: var(--p-text-color, #374151);
+}
+
+.variant-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.variant-size {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--p-text-color, #374151);
+}
+
+.variant-color {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.color-chip {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1px solid var(--p-surface-300, #d1d5db);
+  flex-shrink: 0;
+}
+
+.quantity-badge {
+  display: inline-block;
+  background: var(--p-primary-50, #eff6ff);
+  color: var(--p-primary-700, #1d4ed8);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* ==================== TOTALES ==================== */
+
+.totals-box {
+  background: var(--p-surface-50, #f9fafb);
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: var(--p-text-color, #374151);
+}
+
+.total-row:not(:last-child) {
+  border-bottom: 1px solid var(--p-surface-200, #e5e7eb);
+}
+
+.total-final {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--p-primary-600, #2563eb);
+  padding-top: 0.75rem;
+}
+
+/* ==================== PAGO ==================== */
+
+.payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: var(--p-text-color, #374151);
+}
+
+.payment-method i {
+  font-size: 1.5rem;
+  color: var(--p-primary-500, #3b82f6);
+}
+
+.order-notes {
+  padding: 0.75rem;
+  background: var(--p-surface-100, #f3f4f6);
+  border-left: 3px solid var(--p-primary-500, #3b82f6);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.order-notes strong {
+  color: var(--p-text-color, #374151);
+}
+
+/* ==================== FOOTER ==================== */
+
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ==================== TABLE UTILITIES ==================== */
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* ==================== PRIMENG OVERRIDES ==================== */
+
+/* Table responsive */
+@media (max-width: 768px) {
+  :host ::ng-deep .p-datatable table {
+    font-size: 0.875rem;
+  }
+
+  :host ::ng-deep .p-datatable .product-image {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}

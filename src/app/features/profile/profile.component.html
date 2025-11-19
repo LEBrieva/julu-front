@@ -1,236 +1,7 @@
 <div class="container mx-auto px-4 py-8 max-w-6xl">
-  <h1 class="text-3xl font-bold mb-6">Mi Perfil</h1>
-
-  <p-tabs [value]="0">
-    <p-tablist>
-      <p-tab [value]="0">
-        <i class="pi pi-user mr-2"></i>
-        Información Personal
-      </p-tab>
-      <p-tab [value]="1">
-        <i class="pi pi-lock mr-2"></i>
-        Seguridad
-      </p-tab>
-      <p-tab [value]="2">
-        <i class="pi pi-shopping-cart mr-2"></i>
-        Mis Órdenes
-      </p-tab>
-    </p-tablist>
-
-    <p-tabpanels>
-      <!-- ==================== TAB 1: INFORMACIÓN PERSONAL ==================== -->
-      <p-tabpanel [value]="0">
-        <p-card>
-        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- First Name -->
-            <div class="flex flex-col gap-2">
-              <label for="firstName" class="font-semibold">Nombre</label>
-              <input
-                id="firstName"
-                type="text"
-                pInputText
-                formControlName="firstName"
-                placeholder="Tu nombre"
-              />
-              @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
-                <small class="text-red-500">Nombre requerido (mín 2 caracteres)</small>
-              }
-            </div>
-
-            <!-- Last Name -->
-            <div class="flex flex-col gap-2">
-              <label for="lastName" class="font-semibold">Apellido</label>
-              <input
-                id="lastName"
-                type="text"
-                pInputText
-                formControlName="lastName"
-                placeholder="Tu apellido"
-              />
-              @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
-                <small class="text-red-500">Apellido requerido (mín 2 caracteres)</small>
-              }
-            </div>
-
-            <!-- Email (disabled) -->
-            <div class="flex flex-col gap-2">
-              <label for="email" class="font-semibold">Email</label>
-              <input
-                id="email"
-                type="email"
-                pInputText
-                formControlName="email"
-                class="bg-gray-100"
-              />
-              <small class="text-gray-500">El email no se puede modificar</small>
-            </div>
-
-            <!-- Phone -->
-            <div class="flex flex-col gap-2">
-              <label for="phone" class="font-semibold">Teléfono</label>
-              <input
-                id="phone"
-                type="tel"
-                pInputText
-                formControlName="phone"
-                placeholder="Tu teléfono (opcional)"
-              />
-            </div>
-          </div>
-
-          <!-- Botón Guardar -->
-          <div class="mt-6">
-            <p-button
-              type="submit"
-              label="Guardar Cambios"
-              icon="pi pi-check"
-              [loading]="loadingProfile()"
-              [disabled]="profileForm.invalid || profileForm.pristine"
-            />
-          </div>
-        </form>
-        </p-card>
-      </p-tabpanel>
-
-      <!-- ==================== TAB 2: SEGURIDAD ==================== -->
-      <p-tabpanel [value]="1">
-        <p-card>
-        <h3 class="text-xl font-bold mb-4">Cambiar Contraseña</h3>
-        <p class="text-gray-600 mb-6">
-          Al cambiar tu contraseña, cerrarás sesión en todos tus dispositivos.
-        </p>
-
-        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
-          <div class="flex flex-col gap-4 max-w-md">
-            <!-- Current Password -->
-            <div class="flex flex-col gap-2">
-              <label for="currentPassword" class="font-semibold">Contraseña Actual</label>
-              <p-password
-                id="currentPassword"
-                formControlName="currentPassword"
-                [feedback]="false"
-                [toggleMask]="true"
-                placeholder="Tu contraseña actual"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-              />
-              @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
-                <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
-              }
-            </div>
-
-            <!-- New Password -->
-            <div class="flex flex-col gap-2">
-              <label for="newPassword" class="font-semibold">Nueva Contraseña</label>
-              <p-password
-                id="newPassword"
-                formControlName="newPassword"
-                [feedback]="true"
-                [toggleMask]="true"
-                placeholder="Tu nueva contraseña"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-              />
-              @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
-                <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
-              }
-            </div>
-
-            <!-- Botón Cambiar -->
-            <div class="mt-4">
-              <p-button
-                type="submit"
-                label="Cambiar Contraseña"
-                icon="pi pi-lock"
-                severity="warn"
-                [loading]="loadingPassword()"
-                [disabled]="passwordForm.invalid"
-              />
-            </div>
-          </div>
-        </form>
-        </p-card>
-      </p-tabpanel>
-
-      <!-- ==================== TAB 3: HISTORIAL DE ÓRDENES ==================== -->
-      <p-tabpanel [value]="2">
-        <p-card>
-        @if (loadingOrders()) {
-          <div class="flex justify-center items-center py-8">
-            <i class="pi pi-spin pi-spinner text-4xl"></i>
-          </div>
-        } @else if (ordersError()) {
-          <!-- Error State -->
-          <div class="text-center py-12">
-            <i class="pi pi-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Error al cargar órdenes</h3>
-            <p class="text-gray-600 mb-6">No se pudieron cargar tus órdenes. Por favor, intenta nuevamente.</p>
-            <p-button
-              label="Reintentar"
-              icon="pi pi-refresh"
-              (onClick)="retryLoadOrders()"
-            />
-          </div>
-        } @else if (orders().length === 0) {
-          <!-- Empty State -->
-          <div class="text-center py-12">
-            <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">No tienes órdenes aún</h3>
-            <p class="text-gray-600 mb-6">¡Explora nuestra tienda y realiza tu primera compra!</p>
-            <p-button
-              label="Ver Productos"
-              icon="pi pi-shopping-bag"
-              routerLink="/products"
-            />
-          </div>
-        } @else {
-          <!-- Tabla de Órdenes -->
-          <p-table
-            [value]="orders()"
-            [paginator]="false"
-            styleClass="p-datatable-sm"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Número de Orden</th>
-                <th>Fecha</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-order>
-              <tr>
-                <td><strong>{{ order.orderNumber }}</strong></td>
-                <td>{{ order.createdAt | date: 'dd/MM/yyyy' }}</td>
-                <td>${{ order.total | number: '1.2-2' }}</td>
-                <td>
-                  <p-tag
-                    [value]="getStatusLabel(order.status)"
-                    [severity]="getSeverity(order.status)"
-                  />
-                </td>
-                <td>
-                  <p-button
-                    label="Ver Detalle"
-                    icon="pi pi-eye"
-                    size="small"
-                    [text]="true"
-                    (onClick)="viewOrder(order.id)"
-                  />
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        }
-        </p-card>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
-
-  <!-- Botón Volver -->
-  <div class="flex justify-center mt-6">
+  <!-- Header con título y botón Volver -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Mi Perfil</h1>
     <p-button
       label="Volver"
       icon="pi pi-arrow-left"
@@ -239,7 +10,244 @@
       (onClick)="goBack()"
     />
   </div>
+
+  <div class="profile-container">
+    <!-- ==================== SIDEBAR - MENÚ LATERAL ==================== -->
+    <aside class="profile-sidebar">
+      <p-menu [model]="menuItems" />
+    </aside>
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <main class="profile-content">
+      <!-- ==================== SECCIÓN: INFORMACIÓN PERSONAL ==================== -->
+      @if (activeSection() === 'personal') {
+        <p-card>
+          <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- First Name -->
+              <div class="flex flex-col gap-2">
+                <label for="firstName" class="font-semibold">Nombre</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  pInputText
+                  formControlName="firstName"
+                  placeholder="Tu nombre"
+                />
+                @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
+                  <small class="text-red-500">Nombre requerido (mín 2 caracteres)</small>
+                }
+              </div>
+
+              <!-- Last Name -->
+              <div class="flex flex-col gap-2">
+                <label for="lastName" class="font-semibold">Apellido</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  pInputText
+                  formControlName="lastName"
+                  placeholder="Tu apellido"
+                />
+                @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
+                  <small class="text-red-500">Apellido requerido (mín 2 caracteres)</small>
+                }
+              </div>
+
+              <!-- Email (disabled) -->
+              <div class="flex flex-col gap-2">
+                <label for="email" class="font-semibold">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  pInputText
+                  formControlName="email"
+                  class="bg-gray-100"
+                />
+                <small class="text-gray-500">El email no se puede modificar</small>
+              </div>
+
+              <!-- Phone -->
+              <div class="flex flex-col gap-2">
+                <label for="phone" class="font-semibold">Teléfono</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  pInputText
+                  formControlName="phone"
+                  placeholder="Tu teléfono (opcional)"
+                />
+              </div>
+            </div>
+
+            <!-- Botón Guardar -->
+            <div class="mt-6">
+              <p-button
+                type="submit"
+                label="Guardar Cambios"
+                icon="pi pi-check"
+                [loading]="loadingProfile()"
+                [disabled]="profileForm.invalid || profileForm.pristine"
+              />
+            </div>
+          </form>
+        </p-card>
+      }
+
+      <!-- ==================== SECCIÓN: SEGURIDAD ==================== -->
+      @if (activeSection() === 'security') {
+        <p-card>
+          <h3 class="text-xl font-bold mb-4">Cambiar Contraseña</h3>
+          <p class="text-gray-600 mb-6">
+            Al cambiar tu contraseña, cerrarás sesión en todos tus dispositivos.
+          </p>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+            <div class="flex flex-col gap-4 max-w-md">
+              <!-- Current Password -->
+              <div class="flex flex-col gap-2">
+                <label for="currentPassword" class="font-semibold">Contraseña Actual</label>
+                <p-password
+                  id="currentPassword"
+                  formControlName="currentPassword"
+                  [feedback]="false"
+                  [toggleMask]="true"
+                  placeholder="Tu contraseña actual"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                />
+                @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+                  <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
+                }
+              </div>
+
+              <!-- New Password -->
+              <div class="flex flex-col gap-2">
+                <label for="newPassword" class="font-semibold">Nueva Contraseña</label>
+                <p-password
+                  id="newPassword"
+                  formControlName="newPassword"
+                  [feedback]="true"
+                  [toggleMask]="true"
+                  placeholder="Tu nueva contraseña"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                />
+                @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+                  <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
+                }
+              </div>
+
+              <!-- Botón Cambiar -->
+              <div class="mt-4">
+                <p-button
+                  type="submit"
+                  label="Cambiar Contraseña"
+                  icon="pi pi-lock"
+                  severity="warn"
+                  [loading]="loadingPassword()"
+                  [disabled]="passwordForm.invalid"
+                />
+              </div>
+            </div>
+          </form>
+        </p-card>
+      }
+
+      <!-- ==================== SECCIÓN: HISTORIAL DE ÓRDENES ==================== -->
+      @if (activeSection() === 'orders') {
+        <p-card>
+          @if (loadingOrders()) {
+            <div class="flex justify-center items-center py-8">
+              <i class="pi pi-spin pi-spinner text-4xl"></i>
+            </div>
+          } @else if (ordersError()) {
+            <!-- Error State -->
+            <div class="text-center py-12">
+              <i class="pi pi-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+              <h3 class="text-xl font-semibold mb-2">Error al cargar órdenes</h3>
+              <p class="text-gray-600 mb-6">No se pudieron cargar tus órdenes. Por favor, intenta nuevamente.</p>
+              <p-button
+                label="Reintentar"
+                icon="pi pi-refresh"
+                (onClick)="retryLoadOrders()"
+              />
+            </div>
+          } @else if (orders().length === 0) {
+            <!-- Empty State -->
+            <div class="text-center py-12">
+              <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
+              <h3 class="text-xl font-semibold mb-2">No tienes órdenes aún</h3>
+              <p class="text-gray-600 mb-6">¡Explora nuestra tienda y realiza tu primera compra!</p>
+              <p-button
+                label="Ver Productos"
+                icon="pi pi-shopping-bag"
+                routerLink="/products"
+              />
+            </div>
+          } @else {
+            <!-- Tabla de Órdenes -->
+            <p-table
+              [value]="orders()"
+              [paginator]="false"
+              styleClass="p-datatable-sm"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Número de Orden</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-order>
+                <tr>
+                  <td><strong>{{ order.orderNumber }}</strong></td>
+                  <td>{{ order.createdAt | date: 'dd/MM/yyyy' }}</td>
+                  <td>${{ order.total | number: '1.2-2' }}</td>
+                  <td>
+                    <p-tag
+                      [value]="getStatusLabel(order.status)"
+                      [severity]="getSeverity(order.status)"
+                    />
+                  </td>
+                  <td>
+                    <p-button
+                      label="Ver Detalle"
+                      icon="pi pi-eye"
+                      size="small"
+                      [text]="true"
+                      (onClick)="displayOrder($event, order)"
+                    />
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+
+          <!-- Popover de Resumen -->
+          <p-popover #orderPopover appendTo="body">
+            <ng-template #content>
+              <app-order-summary-popover
+                [order]="selectedOrder()"
+                (viewFullDetail)="onViewFullDetail($event)"
+              />
+            </ng-template>
+          </p-popover>
+        </p-card>
+      }
+    </main>
+  </div>
 </div>
+
+<!-- Drawer de Detalle Completo -->
+<app-order-detail-drawer
+  [order]="selectedOrder()"
+  [visible]="drawerVisible()"
+  (visibleChange)="drawerVisible.set($event)"
+  (close)="onDrawerClose()"
+/>
 
 <!-- ConfirmDialog para cambio de contraseña -->
 <p-confirmDialog />

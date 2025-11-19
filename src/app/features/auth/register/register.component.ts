@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -22,7 +22,6 @@ import { getErrorMessage } from '../../../shared/utils/form-errors.util';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     ButtonModule,
     InputTextModule,
     PasswordModule,

@@ -1,3 +1,111 @@
+/* ==================== LAYOUT RESPONSIVO ==================== */
+
+/* Contenedor principal con grid */
+.profile-container {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile: Layout stacked (menú arriba, contenido abajo) */
+@media (max-width: 1023px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+  }
+}
+
+/* Desktop: Layout side-by-side (menú izquierda, contenido derecha) */
+@media (min-width: 1024px) {
+  .profile-container {
+    grid-template-columns: 250px 1fr;
+  }
+
+  .profile-sidebar {
+    border-right: 1px solid var(--p-surface-border, #e5e7eb);
+    padding-right: 1.5rem;
+  }
+}
+
+/* ==================== SIDEBAR MENU ==================== */
+
+/* Estilos del menú lateral */
+.profile-sidebar :host ::ng-deep .p-menu {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* Items del menú */
+.profile-sidebar :host ::ng-deep .p-menuitem-link {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.profile-sidebar :host ::ng-deep .p-menuitem-link:hover {
+  background: var(--p-surface-hover, #f3f4f6);
+}
+
+/* Item activo (simulación con CSS) */
+.profile-sidebar :host ::ng-deep .p-focus .p-menuitem-link {
+  background: var(--p-primary-50, #eff6ff);
+  border-left: 3px solid var(--p-primary-500, #3b82f6);
+}
+
+/* Iconos del menú */
+.profile-sidebar :host ::ng-deep .p-menuitem-icon {
+  color: var(--p-text-muted-color, #6b7280);
+  margin-right: 0.75rem;
+}
+
+/* Texto del menú */
+.profile-sidebar :host ::ng-deep .p-menuitem-text {
+  color: var(--p-text-color, #374151);
+  font-weight: 500;
+}
+
+/* Mobile: Menú más compacto */
+@media (max-width: 1023px) {
+  .profile-sidebar :host ::ng-deep .p-menuitem-link {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .profile-sidebar :host ::ng-deep .p-menuitem-icon {
+    font-size: 1rem;
+    margin-right: 0.5rem;
+  }
+}
+
+/* ==================== CONTENIDO PRINCIPAL ==================== */
+
+.profile-content {
+  min-height: 400px;
+}
+
+/* Animación suave al cambiar de sección */
+.profile-content > * {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== ESTILOS EXISTENTES (mantenidos) ==================== */
+
 /* Email field disabled style */
 input.bg-gray-100 {
   cursor: not-allowed;

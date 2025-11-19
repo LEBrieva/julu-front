@@ -1,0 +1,120 @@
+/* Contenedor principal */
+.popover-content {
+  width: 16rem;
+  padding: 1rem;
+}
+
+/* Header */
+.header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--p-surface-border, #e5e7eb);
+}
+
+.order-number {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--p-text-color, #374151);
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Items Preview */
+.items-preview {
+  margin-bottom: 1rem;
+}
+
+.items-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.items-list {
+  max-height: 12rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--p-surface-300, #d1d5db) transparent;
+}
+
+.items-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.items-list::-webkit-scrollbar-thumb {
+  background-color: var(--p-surface-300, #d1d5db);
+  border-radius: 3px;
+}
+
+.item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--p-surface-100, #f3f4f6);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item-image {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--p-text-color, #374151);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-quantity {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.item-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--p-text-color, #374151);
+  flex-shrink: 0;
+}
+
+/* Total */
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--p-surface-border, #e5e7eb);
+}
+
+.total-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--p-text-color, #374151);
+}
+
+.total-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--p-primary-color, #3b82f6);
+}
