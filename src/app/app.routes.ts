@@ -8,7 +8,8 @@ import { cartNotEmptyGuard } from './core/guards/cart-not-empty.guard';
  *
  * ESTRUCTURA:
  * - Rutas públicas con layout: /, /products (usan PublicLayoutComponent)
- * - Login: /login (sin layout, página standalone)
+ * - Login: Popup en header (NO tiene ruta dedicada)
+ * - Register: /register (sin layout, página standalone)
  * - Carrito: /cart (público para anónimos)
  * - Checkout: /checkout (requiere authGuard + cartNotEmptyGuard)
  * - Order Success: /order-success/:id (requiere authGuard)
@@ -59,16 +60,6 @@ export const routes: Routes = [
           import('./features/cart/cart').then((m) => m.CartComponent)
       }
     ]
-  },
-
-  // ========== LOGIN (sin layout, standalone) ==========
-
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/login/login.component').then(
-        (m) => m.LoginComponent
-      )
   },
 
   // ========== REGISTER (sin layout, standalone) ==========

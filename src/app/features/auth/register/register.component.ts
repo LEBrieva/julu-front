@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -37,6 +37,7 @@ export class RegisterComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private messageService = inject(MessageService);
+  private location = inject(Location);
 
   registerForm!: FormGroup;
   loading = signal(false);
@@ -159,5 +160,12 @@ export class RegisterComponent implements OnInit {
           });
         },
       });
+  }
+
+  /**
+   * Navegar a la página anterior
+   */
+  goBack(): void {
+    this.location.back();
   }
 }

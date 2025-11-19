@@ -177,13 +177,14 @@
       </form>
 
       <ng-template pTemplate="footer">
-        <div class="text-center pb-4">
-          <span class="text-sm text-gray-600">
-            ¿Ya tienes cuenta?
-            <a routerLink="/login" class="text-blue-600 hover:underline font-medium">
-              Inicia sesión
-            </a>
-          </span>
+        <div class="flex justify-center pb-4">
+          <p-button
+            label="Volver"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="goBack()"
+          />
         </div>
       </ng-template>
     </p-card>

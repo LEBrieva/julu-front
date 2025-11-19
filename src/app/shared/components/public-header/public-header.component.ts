@@ -1,15 +1,20 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
 import { CartDrawerService } from '../../../core/services/cart-drawer.service';
+import { getErrorMessage } from '../../utils/form-errors.util';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
-import { MenuItem } from 'primeng/api';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 
 /**
  * Header público de la tienda
@@ -28,10 +33,15 @@ import { MenuItem } from 'primeng/api';
   imports: [
     CommonModule,
     RouterModule,
+    ReactiveFormsModule,
     ButtonModule,
     MenuModule,
-    AvatarModule
+    AvatarModule,
+    ConfirmPopupModule,
+    InputTextModule,
+    PasswordModule
   ],
+  providers: [ConfirmationService],
   templateUrl: './public-header.component.html',
   styleUrl: './public-header.component.css'
 })
@@ -40,14 +50,34 @@ export class PublicHeaderComponent {
   private cartService = inject(CartService);
   private cartDrawerService = inject(CartDrawerService);
   private router = inject(Router);
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+
+  // Public para acceso en template
+  confirmationService = inject(ConfirmationService);
 
   // Signals
   currentUser = this.authService.currentUser;
   isAuthenticated = this.authService.isAuthenticated;
   isAdmin = this.authService.isAdmin;
+  loadingLogin = signal(false);
 
   // Badge del carrito (reactivo)
   cartItemsCount = this.cartService.totalItems;
+
+  // Formulario de login
+  loginForm: FormGroup;
+
+  // Helper para errores de validación
+  getErrorMessage = getErrorMessage;
+
+  constructor() {
+    // Inicializar formulario de login
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
 
   // Menu items para user menu (cuando está logueado)
   userMenuItems: MenuItem[] = [
@@ -159,5 +189,57 @@ export class PublicHeaderComponent {
     const lastInitial = user.lastName?.charAt(0)?.toUpperCase() || '';
 
     return firstInitial + lastInitial || 'U';
+  }
+
+  /**
+   * Abrir popup de login
+   */
+  openLoginPopup(event: Event): void {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: '', // Lo manejamos en el template custom
+      acceptVisible: false, // Ocultar botón de aceptar
+      rejectVisible: false, // Ocultar botón de rechazar
+      closable: true // Permitir cerrar con X o ESC
+    });
+  }
+
+  /**
+   * Manejador del submit del formulario de login
+   */
+  onLoginSubmit(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.loadingLogin.set(true);
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.loadingLogin.set(false);
+
+        // Cerrar popup
+        this.confirmationService.close();
+
+        // Resetear formulario
+        this.loginForm.reset();
+
+        // Mostrar toast de bienvenida
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Bienvenido',
+          detail: `Hola ${response.user.firstName}!`,
+          life: 3000
+        });
+
+        // Permanecer en la página actual (NO redirigir)
+      },
+      error: (error) => {
+        this.loadingLogin.set(false);
+        // El error.interceptor ya mostró el toast de error
+      }
+    });
   }
 }

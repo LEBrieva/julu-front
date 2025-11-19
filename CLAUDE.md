@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASES 5, 6, 7, 8a, 8b, 8c, 10 y 11 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos. Sistema de registro post-compra para usuarios guest con vinculación automática de órdenes y direcciones.
+**Estado actual**: FASES 5, 6, 7, 8a, 8b, 8c, 10 y 11 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos. Sistema de registro post-compra para usuarios guest con vinculación automática de órdenes y direcciones. Perfil de usuario con gestión de información personal, cambio de contraseña, e historial de órdenes. Login refactorizado de página dedicada a popup en header con UX mejorada (sin redirects, permanece en página actual).
 
 ---
 
@@ -83,13 +83,13 @@ src/app/
 │   │   │       ├── user-detail.component.html
 │   │   │       └── user-detail.component.css
 │   ├── auth/                  # Autenticación
-│   │   ├── login/
-│   │   │   ├── login.component.ts     # ✅ Componente de login
-│   │   │   ├── login.component.html   # ✅ Template con PrimeNG
-│   │   │   └── login.component.css    # ✅ Estilos con Tailwind
+│   │   ├── login/             # ⚠️ LEGACY (ruta /login eliminada, ahora es popup en header)
+│   │   │   ├── login.component.ts     # Código legacy, puede eliminarse
+│   │   │   ├── login.component.html
+│   │   │   └── login.component.css
 │   │   └── register/          # ✅ FASE 10: Registro post-compra
 │   │       ├── register.component.ts  # ✅ Formulario reactivo con auto-login
-│   │       ├── register.component.html # ✅ Template con campos pre-llenados
+│   │       ├── register.component.html # ✅ Template con botón "Volver"
 │   │       └── register.component.css  # ✅ Estilos para campos deshabilitados
 │   ├── home/                  # ✅ FASE 8a: Landing page pública
 │   │   └── home.component.ts          # Hero, categorías, destacados
@@ -111,6 +111,10 @@ src/app/
 │   │   ├── form-errors.util.ts        # ✅ Helper para manejo de errores de formularios
 │   │   └── seo.util.ts                # ✅ FASE 8c: Helpers SEO (truncate, buildUrl, sanitize)
 │   ├── components/            # Componentes reutilizables
+│   │   ├── public-header/             # ✅ FASE 11: Header con login popup
+│   │   │   ├── public-header.component.ts    # Botón login + ConfirmPopup
+│   │   │   ├── public-header.component.html  # FormGroup de login integrado
+│   │   │   └── public-header.component.css   # Estilos para botón y popup
 │   │   ├── image-upload/              # ✅ FASE 5 bis: Upload de imágenes
 │   │   │   ├── image-upload.component.ts
 │   │   │   ├── image-upload.component.html
@@ -122,7 +126,7 @@ src/app/
 │   └── pipes/                 # TODO: Pipes personalizados
 │
 ├── app.config.ts              # Configuración global (providers, interceptors)
-├── app.routes.ts              # ✅ Rutas configuradas (login, products, admin/*)
+├── app.routes.ts              # ✅ Rutas configuradas (register, products, admin/*, profile)
 ├── app.ts                     # Root component
 └── app.html                   # Root template (toast + router-outlet)
 ```
@@ -787,13 +791,16 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-18
+**Última actualización**: 2025-11-19
 
-**FASE 11 - User Profile** ✅ COMPLETADA:
-- **ProfileComponent** implementado con PrimeNG TabView (3 tabs)
+**FASE 11 - User Profile & Login Refactor** ✅ COMPLETADA:
+
+### Perfil de Usuario:
+- **ProfileComponent** implementado con PrimeNG v20 Tabs (3 tabs)
   - **Tab 1: Información Personal** - Formulario reactivo para actualizar firstName, lastName, phone (email disabled)
   - **Tab 2: Seguridad** - Cambio de password con validación de password actual + PrimeNG Password strength indicator
-  - **Tab 3: Historial de Órdenes** - Tabla paginada con órdenes del usuario (reutiliza OrderService)
+  - **Tab 3: Historial de Órdenes** - Tabla con órdenes del usuario (reutiliza OrderService)
+  - **Botón "Volver"** centrado debajo de las tabs (usa location.back())
 - **Backend endpoints**:
   - `PATCH /auth/profile` - Actualiza info personal (firstName, lastName, phone)
   - `POST /auth/change-password` - Cambia password con validación + invalida todos los refresh tokens (logout automático)
@@ -806,10 +813,39 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
   - Headless ConfirmDialog al cambiar password (advierte logout en todos los dispositivos)
   - Botones deshabilitados si form.invalid o form.pristine
   - Loading states en todos los botones
-  - Empty state en historial de órdenes
+  - Empty state en historial de órdenes con botón "Ver Productos"
   - Toasts de confirmación/error en todas las operaciones
   - Rate limiting: 5 intentos/minuto en change-password
 - **Sincronización reactiva**: Cambios en perfil se reflejan en header automáticamente
+
+### Login Refactor (Página → Popup):
+- **Ruta `/login` ELIMINADA** - Login ahora es popup en header (NO página dedicada)
+- **PublicHeaderComponent** actualizado:
+  - **Botón de login circular** (icono `pi-user`) visible solo cuando NO está autenticado
+  - Posicionado a la derecha del carrito para consistencia visual
+  - **PrimeNG ConfirmPopup** con formulario de login completo:
+    - Campos email/password con validaciones centralizadas
+    - Loading state en botón submit
+    - Link "Regístrate" que navega a `/register`
+    - Sin botones "Yes/No" (acceptVisible/rejectVisible: false)
+    - Sin header gigante (diseño minimalista)
+  - **Lógica de login**:
+    - Permanece en página actual después de login exitoso (NO redirect)
+    - Toast de bienvenida personalizado con nombre del usuario
+    - Cierra popup automáticamente
+    - Resetea formulario
+- **auth.guard.ts** actualizado:
+  - Redirige a `/` (home) en vez de `/login` cuando usuario NO autenticado
+  - Muestra toast informativo: "Inicia sesión para acceder a esta sección"
+  - Usuario puede hacer clic en botón de login del header
+- **RegisterComponent** actualizado:
+  - Link "Inicia sesión" ELIMINADO del footer
+  - Reemplazado por botón "Volver" centrado (usa location.back())
+  - Login solo accesible desde botón en header
+- **Flujos de usuario**:
+  - Usuario anónimo → clic botón header → popup login → éxito → permanece en página
+  - Usuario anónimo intenta `/profile` → guard bloquea → redirect home + toast → clic login → éxito
+  - Desde popup login → clic "Regístrate" → navega a `/register` → después puede volver con botón
 
 **FASE 10 - Guest Checkout & Post-Purchase Registration** ✅ COMPLETADA:
 - **RegisterComponent** implementado con formulario reactivo completo

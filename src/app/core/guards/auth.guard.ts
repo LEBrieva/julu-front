@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { MessageService } from 'primeng/api';
 
 /**
  * Auth Guard - Protege rutas que requieren autenticación
@@ -25,7 +26,7 @@ import { AuthService } from '../services/auth.service';
  * 2. authGuard se ejecuta ANTES de cargar el componente
  * 3. Verifica si el usuario está autenticado (currentUser existe)
  * 4. Si está autenticado → return true (permite acceso)
- * 5. Si NO está autenticado → redirect a /login (bloquea acceso)
+ * 5. Si NO está autenticado → redirect a home + toast (bloquea acceso)
  *
  * IMPORTANTE:
  * - Esta validación es solo UX (mejorar experiencia de usuario)
@@ -36,6 +37,7 @@ import { AuthService } from '../services/auth.service';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const messageService = inject(MessageService);
 
   // Verificar si el usuario está autenticado (currentUser es un signal)
   const isAuthenticated = authService.isAuthenticated();
@@ -46,17 +48,19 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Usuario NO autenticado → Redirigir a login
-  console.log('⛔ AuthGuard: Usuario no autenticado, redirigiendo a /login');
+  // Usuario NO autenticado → Redirigir a home y mostrar toast
+  console.log('⛔ AuthGuard: Usuario no autenticado, redirigiendo a home');
 
-  // Guardar la URL a la que intentaba acceder para redirigir después del login
-  // Ejemplo: Usuario intentó /cart → guardamos "/cart" → después de login, lo llevamos ahí
-  const returnUrl = state.url;
-
-  // Navegar a login con el returnUrl como query param
-  router.navigate(['/login'], {
-    queryParams: { returnUrl }
+  // Mostrar toast informativo
+  messageService.add({
+    severity: 'info',
+    summary: 'Autenticación Requerida',
+    detail: 'Inicia sesión para acceder a esta sección',
+    life: 4000
   });
+
+  // Navegar a home (donde el usuario puede hacer clic en el botón de login del header)
+  router.navigate(['/']);
 
   return false; // Bloquear acceso
 };

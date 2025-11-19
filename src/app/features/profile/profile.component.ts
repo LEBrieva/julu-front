@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -48,6 +48,7 @@ export class ProfileComponent implements OnInit {
   private router = inject(Router);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private location = inject(Location);
 
   // Signals
   currentUser = this.authService.currentUser;
@@ -260,5 +261,12 @@ export class ProfileComponent implements OnInit {
       cancelled: 'Cancelado',
     };
     return labels[status] || status;
+  }
+
+  /**
+   * Navegar a la página anterior
+   */
+  goBack(): void {
+    this.location.back();
   }
 }

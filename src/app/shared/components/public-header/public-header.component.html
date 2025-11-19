@@ -20,7 +20,7 @@
       </a>
     </nav>
 
-    <!-- Acciones (carrito + user) -->
+    <!-- Acciones (carrito + login/user) -->
     <div class="header-actions">
       <!-- Carrito -->
       <button
@@ -36,8 +36,19 @@
         </div>
       </button>
 
+      <!-- Botón Login (si NO está logueado) -->
+      @if (!isAuthenticated()) {
+        <button
+          class="login-button"
+          (click)="openLoginPopup($event)"
+          aria-label="Iniciar sesión"
+        >
+          <i class="pi pi-user"></i>
+        </button>
+      }
+
       <!-- User menu (si está logueado) -->
-      @if (isAuthenticated(); as authenticated) {
+      @if (isAuthenticated()) {
         <div class="user-menu">
           <p-avatar
             [image]="currentUser()?.avatar"
@@ -62,3 +73,68 @@
     <!-- TODO: Implementar menú mobile si es necesario -->
   </div>
 </header>
+
+<!-- ConfirmPopup de Login -->
+<p-confirmpopup>
+  <ng-template #content let-message>
+    <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+      <!-- Formulario -->
+      <div class="flex flex-col gap-4 p-4">
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label for="popup-email" class="font-semibold">Email</label>
+          <input
+            id="popup-email"
+            type="email"
+            pInputText
+            formControlName="email"
+            placeholder="tu@email.com"
+            class="w-full"
+          />
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <small class="text-red-500">{{ getErrorMessage(loginForm.get('email')!) }}</small>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-2">
+          <label for="popup-password" class="font-semibold">Contraseña</label>
+          <p-password
+            id="popup-password"
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            placeholder="Tu contraseña"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <small class="text-red-500">{{ getErrorMessage(loginForm.get('password')!) }}</small>
+          }
+        </div>
+
+        <!-- Botón Submit -->
+        <p-button
+          type="submit"
+          label="Iniciar Sesión"
+          icon="pi pi-sign-in"
+          [loading]="loadingLogin()"
+          [disabled]="loginForm.invalid"
+          styleClass="w-full"
+        />
+
+        <!-- Link a Registro -->
+        <div class="text-center pt-2 border-t border-surface-200">
+          <span class="text-sm text-gray-600">¿No tienes cuenta? </span>
+          <a
+            routerLink="/register"
+            class="text-sm text-primary-500 hover:text-primary-700 font-semibold cursor-pointer"
+            (click)="confirmationService.close()"
+          >
+            Regístrate
+          </a>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+</p-confirmpopup>
