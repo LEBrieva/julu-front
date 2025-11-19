@@ -8,7 +8,7 @@ Este es el frontend de una aplicación e-commerce completa construida con Angula
 - **Admin Dashboard**: Panel de administración para gestionar productos, órdenes y usuarios (requiere rol ADMIN)
 - **User Store**: Tienda pública para usuarios finales (navegación de productos, carrito, checkout)
 
-**Estado actual**: FASES 5, 6, 7, 8a, 8b, 8c y 10 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos. Sistema de registro post-compra para usuarios guest con vinculación automática de órdenes y direcciones.
+**Estado actual**: FASES 5, 6, 7, 8a, 8b, 8c, 10 y 11 completadas. Sistema CRUD de productos con gestión avanzada de variantes (tamaños P/M/G/GG, colores en español, stock y precios individuales), edición inline granular, validaciones de duplicados, y tabla estructurada con headers. Sistema completo de upload/gestión de imágenes de productos (hasta 5 imágenes, preview, validaciones). Sistema completo de administración de órdenes con filtros avanzados, cambio de estado inline, y vista detalle completa. Sistema completo de gestión de usuarios con upload de avatar a Cloudinary, edición inline de estado/teléfono, sincronización reactiva con AuthService, y componente reutilizable de overlay de avatar. Home Landing Page con hero section, grid de categorías con imágenes, carousel de productos destacados, catálogo público con filtros avanzados por query params, y página de detalle de producto completa con galería de imágenes, selector de variantes, breadcrumbs, tabs informativos, carousel de productos relacionados, y meta tags SEO dinámicos. Sistema de registro post-compra para usuarios guest con vinculación automática de órdenes y direcciones.
 
 ---
 
@@ -93,6 +93,10 @@ src/app/
 │   │       └── register.component.css  # ✅ Estilos para campos deshabilitados
 │   ├── home/                  # ✅ FASE 8a: Landing page pública
 │   │   └── home.component.ts          # Hero, categorías, destacados
+│   ├── profile/               # ✅ FASE 11: Perfil de usuario
+│   │   ├── profile.component.ts       # 3 tabs: Info personal, Seguridad, Órdenes
+│   │   ├── profile.component.html     # TabView con formularios reactivos
+│   │   └── profile.component.css      # Estilos para inputs deshabilitados
 │   └── products/              # Catálogo público
 │       ├── product-list.component.ts  # ✅ FASE 8b: Catálogo con filtros avanzados
 │       └── product-detail/            # ✅ FASE 8c: Detalle de producto
@@ -654,8 +658,9 @@ Redirect a /products con toast: "Orden ORD-XXX vinculada" ✅
   - Pasa `orderId` y `orderNumber` en router state
   - Navega a `/register` con state completo
 
-#### AuthService - Método register()
+#### AuthService - Métodos principales
 
+**register()**:
 ```typescript
 register(registerDto: {
   email: string;
@@ -783,6 +788,28 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 ---
 
 **Última actualización**: 2025-11-18
+
+**FASE 11 - User Profile** ✅ COMPLETADA:
+- **ProfileComponent** implementado con PrimeNG TabView (3 tabs)
+  - **Tab 1: Información Personal** - Formulario reactivo para actualizar firstName, lastName, phone (email disabled)
+  - **Tab 2: Seguridad** - Cambio de password con validación de password actual + PrimeNG Password strength indicator
+  - **Tab 3: Historial de Órdenes** - Tabla paginada con órdenes del usuario (reutiliza OrderService)
+- **Backend endpoints**:
+  - `PATCH /auth/profile` - Actualiza info personal (firstName, lastName, phone)
+  - `POST /auth/change-password` - Cambia password con validación + invalida todos los refresh tokens (logout automático)
+- **AuthService métodos** (frontend):
+  - `updateProfile(data)` - Actualiza perfil y sincroniza signal currentUser
+  - `changePassword(data)` - Cambia password → Logout automático → Redirect a /login
+- **Ruta `/profile`** protegida con `authGuard`
+- **Link "Mi Perfil"** agregado en header (public-header dropdown)
+- **UX Features**:
+  - Headless ConfirmDialog al cambiar password (advierte logout en todos los dispositivos)
+  - Botones deshabilitados si form.invalid o form.pristine
+  - Loading states en todos los botones
+  - Empty state en historial de órdenes
+  - Toasts de confirmación/error en todas las operaciones
+  - Rate limiting: 5 intentos/minuto en change-password
+- **Sincronización reactiva**: Cambios en perfil se reflejan en header automáticamente
 
 **FASE 10 - Guest Checkout & Post-Purchase Registration** ✅ COMPLETADA:
 - **RegisterComponent** implementado con formulario reactivo completo

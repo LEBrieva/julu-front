@@ -84,19 +84,17 @@ export class PublicHeaderComponent {
   ];
 
   /**
-   * Navegar al perfil del usuario
+   * Navegar al perfil del usuario (FASE 11)
    */
   goToProfile(): void {
-    // TODO FASE 9+: Implementar página de perfil de usuario
-    console.log('Navigate to profile');
+    this.router.navigate(['/profile']);
   }
 
   /**
-   * Navegar a las órdenes del usuario
+   * Navegar al tab de órdenes en el perfil del usuario
    */
   goToOrders(): void {
-    // TODO FASE 9: Implementar página de órdenes del usuario
-    console.log('Navigate to orders');
+    this.router.navigate(['/profile']);
   }
 
   /**

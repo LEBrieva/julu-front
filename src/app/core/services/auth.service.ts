@@ -251,6 +251,64 @@ export class AuthService {
   }
 
   /**
+   * Actualizar información del perfil del usuario
+   *
+   * Permite actualizar firstName, lastName y phone
+   * Actualiza automáticamente el signal currentUser con los datos nuevos
+   *
+   * @param data Datos a actualizar (firstName, lastName, phone)
+   * @returns Observable con el usuario actualizado
+   */
+  updateProfile(data: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  }): Observable<{ user: User }> {
+    return this.http
+      .patch<{ user: User }>(`${this.apiUrl}/auth/profile`, data, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((response) => {
+          console.log('✅ Perfil actualizado');
+          this.currentUserSignal.set(response.user);
+        }),
+        catchError((error) => {
+          console.error('❌ Error al actualizar perfil:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Cambiar contraseña del usuario
+   *
+   * Valida password actual y actualiza a nueva contraseña
+   * IMPORTANTE: Invalida TODOS los refresh tokens (fuerza logout en todos los dispositivos)
+   *
+   * @param data currentPassword y newPassword
+   * @returns Observable con mensaje de éxito
+   */
+  changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(`${this.apiUrl}/auth/change-password`, data, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap(() => {
+          console.log('✅ Contraseña cambiada exitosamente');
+        }),
+        catchError((error) => {
+          console.error('❌ Error al cambiar contraseña:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
    * Decodificar JWT para leer el payload
    *
    * IMPORTANTE: Solo estamos LEYENDO el token, no verificando la firma.
