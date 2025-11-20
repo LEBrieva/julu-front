@@ -1,10 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
 import { CartDrawerService } from '../../../core/services/cart-drawer.service';
+import { ProductService } from '../../../core/services/product.service';
+import { ProductListItem } from '../../../core/models/product.model';
 import { getErrorMessage } from '../../utils/form-errors.util';
 
 // PrimeNG imports
@@ -14,6 +18,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { DialogModule } from 'primeng/dialog';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 
 /**
@@ -39,16 +44,18 @@ import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
     AvatarModule,
     ConfirmPopupModule,
     InputTextModule,
-    PasswordModule
+    PasswordModule,
+    DialogModule
   ],
   providers: [ConfirmationService],
   templateUrl: './public-header.component.html',
   styleUrl: './public-header.component.css'
 })
-export class PublicHeaderComponent {
+export class PublicHeaderComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private cartService = inject(CartService);
   private cartDrawerService = inject(CartDrawerService);
+  private productService = inject(ProductService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
@@ -61,12 +68,19 @@ export class PublicHeaderComponent {
   isAuthenticated = this.authService.isAuthenticated;
   isAdmin = this.authService.isAdmin;
   loadingLogin = signal(false);
+  searchVisible = signal(false);
+  searchResults = signal<ProductListItem[]>([]);
+  searchLoading = signal(false);
 
   // Badge del carrito (reactivo)
   cartItemsCount = this.cartService.totalItems;
 
-  // Formulario de login
+  // Formularios
   loginForm: FormGroup;
+  searchControl = new FormControl('');
+
+  // Subscripciones
+  private searchSubscription?: Subscription;
 
   // Helper para errores de validación
   getErrorMessage = getErrorMessage;
@@ -77,6 +91,49 @@ export class PublicHeaderComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  ngOnInit(): void {
+    // Configurar búsqueda en tiempo real con debounce
+    this.searchSubscription = this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300), // Esperar 300ms después de que el usuario deje de escribir
+        distinctUntilChanged(), // Solo emitir si el valor cambió
+        switchMap((query) => {
+          // Si el query está vacío, limpiar resultados
+          if (!query || query.trim().length === 0) {
+            this.searchResults.set([]);
+            this.searchLoading.set(false);
+            return of({ data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } });
+          }
+
+          // Mostrar loading mientras busca
+          this.searchLoading.set(true);
+
+          // Llamar al servicio de búsqueda (catálogo público)
+          return this.productService.getPublicCatalog({
+            search: query.trim(),
+            page: 1,
+            limit: 8 // Limitar a 8 resultados
+          });
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.searchResults.set(response.data);
+          this.searchLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error al buscar productos:', error);
+          this.searchResults.set([]);
+          this.searchLoading.set(false);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    // Limpiar suscripción al destruir el componente
+    this.searchSubscription?.unsubscribe();
   }
 
   // Menu items para user menu (cuando está logueado)
@@ -241,5 +298,45 @@ export class PublicHeaderComponent {
         // El error.interceptor ya mostró el toast de error
       }
     });
+  }
+
+  /**
+   * Abrir modal de búsqueda
+   */
+  openSearchModal(): void {
+    this.searchVisible.set(true);
+  }
+
+  /**
+   * Manejar cambios de visibilidad del modal de búsqueda
+   * Se ejecuta cuando el modal se abre/cierra (por ESC, clic fuera, etc.)
+   */
+  onSearchVisibleChange(visible: boolean): void {
+    this.searchVisible.set(visible);
+
+    // Si se cerró el modal, limpiar todo
+    if (!visible) {
+      this.searchControl.setValue('', { emitEvent: false }); // No emitir evento para evitar búsqueda
+      this.searchResults.set([]);
+      this.searchLoading.set(false);
+    }
+  }
+
+  /**
+   * Cerrar modal de búsqueda y limpiar estado
+   */
+  closeSearchModal(): void {
+    this.searchVisible.set(false);
+    this.searchControl.setValue('', { emitEvent: false }); // No emitir evento para evitar búsqueda
+    this.searchResults.set([]);
+    this.searchLoading.set(false);
+  }
+
+  /**
+   * Navegar a detalle de producto y cerrar modal
+   */
+  goToProduct(productId: string): void {
+    this.closeSearchModal();
+    this.router.navigate(['/products', productId]);
   }
 }
