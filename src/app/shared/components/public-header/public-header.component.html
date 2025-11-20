@@ -148,79 +148,68 @@
   </ng-template>
 </p-confirmpopup>
 
-<!-- Modal de Búsqueda -->
-<p-dialog
-  [visible]="searchVisible()"
-  (visibleChange)="onSearchVisibleChange($event)"
-  [modal]="true"
-  [dismissableMask]="true"
-  [closable]="false"
-  [closeOnEscape]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [showHeader]="false"
-  position="top"
-  styleClass="search-modal"
-  appendTo="body"
->
-  <div class="search-modal-wrapper">
-    <!-- Input de búsqueda -->
-    <input
-      type="text"
-      pInputText
-      [formControl]="searchControl"
-      placeholder="Buscar productos..."
-      class="search-input"
-      autofocus
-    />
+<!-- Modal de Búsqueda - Custom Overlay -->
+@if (searchVisible()) {
+  <div class="search-overlay-backdrop" (click)="closeSearchModal()">
+    <div class="search-overlay-content" (click)="$event.stopPropagation()">
+      <!-- Input de búsqueda -->
+      <input
+        #searchInput
+        type="text"
+        pInputText
+        [formControl]="searchControl"
+        placeholder="Buscar productos..."
+        class="search-input"
+      />
 
-    <!-- Loading indicator -->
-    @if (searchLoading()) {
-      <div class="search-loading">
-        <i class="pi pi-spin pi-spinner text-2xl text-blue-500"></i>
-        <span class="text-gray-600">Buscando...</span>
-      </div>
-    }
+      <!-- Loading indicator -->
+      @if (searchLoading()) {
+        <div class="search-loading">
+          <i class="pi pi-spin pi-spinner text-2xl text-blue-500"></i>
+          <span class="text-gray-600">Buscando...</span>
+        </div>
+      }
 
-    <!-- Resultados de búsqueda -->
-    @if (!searchLoading() && searchResults().length > 0) {
-      <div class="search-results">
-        @for (product of searchResults(); track product.id) {
-          <div class="search-result-item" (click)="goToProduct(product.id)">
-            <!-- Imagen del producto -->
-            <div class="result-image">
-              @if (product.images && product.images.length > 0) {
-                <img [src]="product.images[product.featuredImageIndex || 0]" [alt]="product.name" />
-              } @else {
-                <div class="result-image-placeholder">
-                  <i class="pi pi-image"></i>
-                </div>
-              }
-            </div>
-
-            <!-- Info del producto -->
-            <div class="result-info">
-              <h4 class="result-name">{{ product.name }}</h4>
-              <p class="result-category">{{ product.category }}</p>
-              <div class="result-price">
-                Desde ${{ product.basePrice | number: '1.0-0' }}
+      <!-- Resultados de búsqueda -->
+      @if (!searchLoading() && searchResults().length > 0) {
+        <div class="search-results">
+          @for (product of searchResults(); track product.id) {
+            <div class="search-result-item" (click)="goToProduct(product.id)">
+              <!-- Imagen del producto -->
+              <div class="result-image">
+                @if (product.images && product.images.length > 0) {
+                  <img [src]="product.images[product.featuredImageIndex || 0]" [alt]="product.name" />
+                } @else {
+                  <div class="result-image-placeholder">
+                    <i class="pi pi-image"></i>
+                  </div>
+                }
               </div>
+
+              <!-- Info del producto -->
+              <div class="result-info">
+                <h4 class="result-name">{{ product.name }}</h4>
+                <p class="result-category">{{ product.category }}</p>
+                <div class="result-price">
+                  Desde ${{ product.basePrice | number: '1.0-0' }}
+                </div>
+              </div>
+
+              <!-- Icono de navegación -->
+              <i class="pi pi-arrow-right text-gray-400"></i>
             </div>
+          }
+        </div>
+      }
 
-            <!-- Icono de navegación -->
-            <i class="pi pi-arrow-right text-gray-400"></i>
-          </div>
-        }
-      </div>
-    }
-
-    <!-- Empty state (solo si buscó y no hay resultados) -->
-    @if (!searchLoading() && searchControl.value && searchControl.value.trim().length > 0 && searchResults().length === 0) {
-      <div class="search-empty">
-        <i class="pi pi-search text-4xl text-gray-300"></i>
-        <p class="text-gray-600">No se encontraron productos</p>
-        <p class="text-sm text-gray-500">Intenta con otras palabras clave</p>
-      </div>
-    }
+      <!-- Empty state (solo si buscó y no hay resultados) -->
+      @if (!searchLoading() && searchControl.value && searchControl.value.trim().length > 0 && searchResults().length === 0) {
+        <div class="search-empty">
+          <i class="pi pi-search text-4xl text-gray-300"></i>
+          <p class="text-gray-600">No se encontraron productos</p>
+          <p class="text-sm text-gray-500">Intenta con otras palabras clave</p>
+        </div>
+      }
+    </div>
   </div>
-</p-dialog>
+}

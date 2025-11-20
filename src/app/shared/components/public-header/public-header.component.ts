@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,7 +18,6 @@ import { AvatarModule } from 'primeng/avatar';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { DialogModule } from 'primeng/dialog';
 import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
 
 /**
@@ -44,8 +43,7 @@ import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
     AvatarModule,
     ConfirmPopupModule,
     InputTextModule,
-    PasswordModule,
-    DialogModule
+    PasswordModule
   ],
   providers: [ConfirmationService],
   templateUrl: './public-header.component.html',
@@ -81,6 +79,9 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
 
   // Subscripciones
   private searchSubscription?: Subscription;
+
+  // ViewChild para el input de búsqueda
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   // Helper para errores de validación
   getErrorMessage = getErrorMessage;
@@ -129,11 +130,26 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
           this.searchLoading.set(false);
         }
       });
+
+    // Listener para cerrar modal con ESC
+    document.addEventListener('keydown', this.handleEscKey.bind(this));
   }
 
   ngOnDestroy(): void {
     // Limpiar suscripción al destruir el componente
     this.searchSubscription?.unsubscribe();
+
+    // Limpiar listener de ESC
+    document.removeEventListener('keydown', this.handleEscKey.bind(this));
+  }
+
+  /**
+   * Manejar tecla ESC para cerrar modal
+   */
+  private handleEscKey(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.searchVisible()) {
+      this.closeSearchModal();
+    }
   }
 
   // Menu items para user menu (cuando está logueado)
@@ -301,25 +317,15 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Abrir modal de búsqueda
+   * Abrir modal de búsqueda y hacer focus en el input
    */
   openSearchModal(): void {
     this.searchVisible.set(true);
-  }
 
-  /**
-   * Manejar cambios de visibilidad del modal de búsqueda
-   * Se ejecuta cuando el modal se abre/cierra (por ESC, clic fuera, etc.)
-   */
-  onSearchVisibleChange(visible: boolean): void {
-    this.searchVisible.set(visible);
-
-    // Si se cerró el modal, limpiar todo
-    if (!visible) {
-      this.searchControl.setValue('', { emitEvent: false }); // No emitir evento para evitar búsqueda
-      this.searchResults.set([]);
-      this.searchLoading.set(false);
-    }
+    // Esperar a que el DOM se actualice y hacer focus en el input
+    setTimeout(() => {
+      this.searchInput?.nativeElement.focus();
+    }, 0);
   }
 
   /**

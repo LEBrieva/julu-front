@@ -253,38 +253,44 @@
   width: 100%;
 }
 
-/* ========== SEARCH MODAL STYLES ========== */
+/* ========== SEARCH OVERLAY CUSTOM ========== */
 
-/* Backdrop con blur (solo para el modal de búsqueda) */
-:host ::ng-deep .p-dialog-mask:has(.search-modal) {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(0, 0, 0, 0.3) !important;
+/* Backdrop con blur */
+.search-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  padding-top: 5rem;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease-out;
 }
 
-/* Modal posicionado arriba */
-:host ::ng-deep .search-modal {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor del contenido del overlay */
+.search-overlay-content {
   width: 90vw;
   max-width: 700px;
-  margin-top: 5rem; /* Posicionarlo cerca del header */
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Sin padding en el contenido, solo el input */
-:host ::ng-deep .search-modal .p-dialog-content {
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-/* Wrapper del modal de búsqueda */
-.search-modal-wrapper {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
+  cursor: default; /* Resetear cursor dentro del contenido */
+  align-self: flex-start; /* Alinear arriba */
 }
 
 /* Input de búsqueda minimalista */
@@ -477,10 +483,13 @@
     font-size: 1.25rem;
   }
 
-  /* Ajustar modal en tablet */
-  :host ::ng-deep .search-modal {
+  /* Ajustar overlay en tablet */
+  .search-overlay-backdrop {
+    padding-top: 4rem;
+  }
+
+  .search-overlay-content {
     width: 95vw;
-    margin-top: 4rem;
   }
 
   .search-input {
@@ -549,10 +558,13 @@
     font-size: 1rem;
   }
 
-  /* Ajustar modal en mobile pequeño */
-  :host ::ng-deep .search-modal {
+  /* Ajustar overlay en mobile pequeño */
+  .search-overlay-backdrop {
+    padding-top: 3rem;
+  }
+
+  .search-overlay-content {
     width: 95vw;
-    margin-top: 3rem;
   }
 
   .search-input {
