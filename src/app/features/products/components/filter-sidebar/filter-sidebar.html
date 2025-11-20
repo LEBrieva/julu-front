@@ -3,41 +3,6 @@
     @if (showAccordion()) {
       <p-accordion [multiple]="true" [value]="activeIndex()">
 
-      <!-- Panel 0: Búsqueda -->
-      <p-accordion-panel value="0">
-        <p-accordion-header>
-          <div class="flex items-center gap-2">
-            <i class="pi pi-search text-blue-600"></i>
-            <span class="font-medium">Búsqueda</span>
-          </div>
-        </p-accordion-header>
-        <p-accordion-content>
-          <div class="filter-section">
-            <div class="search-wrapper">
-              <p-iconfield class="search-input">
-                <p-inputicon styleClass="pi pi-search"></p-inputicon>
-                <input
-                  pInputText
-                  type="text"
-                  formControlName="search"
-                  placeholder="Buscar remeras..."
-                  class="w-full"
-                />
-              </p-iconfield>
-              @if (filterForm.get('search')?.value) {
-                <p-button
-                  icon="pi pi-times"
-                  (onClick)="clearSearch()"
-                  severity="secondary"
-                  [outlined]="true"
-                  [rounded]="true"
-                />
-              }
-            </div>
-          </div>
-        </p-accordion-content>
-      </p-accordion-panel>
-
       <!-- Panel 1: Estilos -->
       <p-accordion-panel value="1">
         <p-accordion-header>

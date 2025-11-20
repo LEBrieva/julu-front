@@ -345,4 +345,17 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
     this.closeSearchModal();
     this.router.navigate(['/products', productId]);
   }
+
+  /**
+   * Ver todos los resultados en /products con el término de búsqueda
+   */
+  viewAllResults(): void {
+    const searchTerm = this.searchControl.value;
+    if (searchTerm && searchTerm.trim().length > 0) {
+      this.closeSearchModal();
+      this.router.navigate(['/products'], {
+        queryParams: { search: searchTerm.trim() }
+      });
+    }
+  }
 }

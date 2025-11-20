@@ -112,6 +112,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   activeFiltersCount = computed(() => {
     const filters = this.activeFilters();
     let count = 0;
+    if (filters.search && filters.search.trim().length > 0) count++;
     if (filters.styles?.length) count++;
     if (filters.sizes?.length) count++;
     if (filters.colors?.length) count++;
@@ -242,6 +243,9 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Remover el filtro específico
     switch (filterKey) {
+      case 'search':
+        delete currentFilters.search;
+        break;
       case 'styles':
         delete currentFilters.styles;
         break;

@@ -30,7 +30,6 @@ import {
 import { ProductService } from '../../../../core/services/product.service';
 
 interface FilterForm {
-  search: FormControl<string | null>;
   styles: FormControl<ProductStyle[] | null>;
   sizes: FormControl<ProductSize[] | null>;
   colors: FormControl<ProductColor[] | null>;
@@ -73,7 +72,6 @@ export class FilterSidebarComponent implements OnInit {
 
   // Form
   filterForm = new FormGroup<FilterForm>({
-    search: new FormControl<string>(''),
     styles: new FormControl<ProductStyle[]>([]),
     sizes: new FormControl<ProductSize[]>([]),
     colors: new FormControl<ProductColor[]>([]),
@@ -114,8 +112,8 @@ export class FilterSidebarComponent implements OnInit {
   // Contador de filtros activos
   activeFiltersCount = signal<number>(0);
 
-  // Control de paneles del acordeón (0 = Búsqueda expandida por defecto)
-  activeIndex = signal<string[]>(['0']);
+  // Control de paneles del acordeón (1 = Estilos expandido por defecto)
+  activeIndex = signal<string[]>(['1']);
   
   // Flag para controlar la visibilidad del acordeón y forzar su recreación
   showAccordion = signal<boolean>(true);
@@ -217,7 +215,6 @@ export class FilterSidebarComponent implements OnInit {
     const formValue = this.filterForm.value;
 
     const filters: FilterProductDto = {
-      search: formValue.search?.trim() || undefined,
       styles: formValue.styles?.length ? formValue.styles : undefined,
       sizes: formValue.sizes?.length ? formValue.sizes : undefined,
       colors: formValue.colors?.length ? formValue.colors : undefined,
@@ -229,18 +226,10 @@ export class FilterSidebarComponent implements OnInit {
   }
 
   /**
-   * Limpia el campo de búsqueda
-   */
-  clearSearch(): void {
-    this.filterForm.patchValue({ search: '' });
-  }
-
-  /**
    * Limpia todos los filtros
    */
   clearFilters(): void {
     this.filterForm.reset({
-      search: '',
       styles: [],
       sizes: [],
       colors: [],
@@ -274,7 +263,6 @@ export class FilterSidebarComponent implements OnInit {
    */
   private loadFiltersFromInput(filters: FilterProductDto): void {
     this.filterForm.patchValue({
-      search: filters.search || '',
       styles: filters.styles || [],
       sizes: filters.sizes || [],
       colors: filters.colors || [],

@@ -44,6 +44,16 @@ export class ActiveFiltersComponent {
     const filters = this.filters();
     const result: ActiveFilter[] = [];
 
+    // Búsqueda (si viene del header)
+    if (filters.search && filters.search.trim().length > 0) {
+      result.push({
+        key: 'search',
+        label: `Búsqueda: "${filters.search}"`,
+        icon: 'pi-search',
+        removable: true
+      });
+    }
+
     // Estilos
     if (filters.styles && filters.styles.length > 0) {
       const stylesStr = filters.styles.map(s => formatStyle(s)).join(', ');

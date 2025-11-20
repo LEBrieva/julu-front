@@ -52,16 +52,12 @@
   opacity: 0.8;
 }
 
-.brand-icon {
-  font-size: 1.75rem;
-  color: #3b82f6; /* Azul primario */
-}
-
-.brand-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.025em;
+/* Logo GIF */
+.brand-logo {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 /* ========== SUB-HEADER (Fila 2: Navegación centrada) ========== */
@@ -327,6 +323,16 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
+/* Botón "Buscar todos" */
+.search-view-all {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
 /* Resultados de búsqueda */
 .search-results {
   display: flex;
@@ -461,12 +467,8 @@
     padding: 0.5rem 1rem 0.75rem;
   }
 
-  .brand-name {
-    font-size: 1.25rem;
-  }
-
-  .brand-icon {
-    font-size: 1.5rem;
+  .brand-logo {
+    height: 60px;
   }
 
   /* Reducir tamaño de los botones circulares */
@@ -526,8 +528,8 @@
     padding: 0.5rem 1rem 0.75rem;
   }
 
-  .brand-name {
-    display: none; /* Solo mostrar icono en pantallas muy pequeñas */
+  .brand-logo {
+    height: 50px;
   }
 
   .header-actions {

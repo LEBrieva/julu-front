@@ -12,11 +12,14 @@
       </button>
     </div>
 
-    <!-- Centro: Logo y marca -->
+    <!-- Centro: Logo -->
     <div class="header-brand">
       <a routerLink="/" class="brand-link">
-        <i class="pi pi-shopping-bag brand-icon"></i>
-        <span class="brand-name">Urban Style</span>
+        <img
+          src="/assets/gifs/logo-white.gif"
+          alt="Logo"
+          class="brand-logo"
+        />
       </a>
     </div>
 
@@ -167,6 +170,21 @@
         <div class="search-loading">
           <i class="pi pi-spin pi-spinner text-2xl text-blue-500"></i>
           <span class="text-gray-600">Buscando...</span>
+        </div>
+      }
+
+      <!-- Botón "Buscar todos" (solo cuando hay resultados) -->
+      @if (!searchLoading() && searchResults().length > 0) {
+        <div class="search-view-all">
+          <p-button
+            label="Buscar todos"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            (onClick)="viewAllResults()"
+            [text]="true"
+            severity="secondary"
+            size="small"
+          />
         </div>
       }
 
