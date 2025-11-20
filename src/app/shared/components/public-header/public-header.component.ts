@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, Af
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
@@ -98,6 +98,12 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
     // Configurar búsqueda en tiempo real con debounce
     this.searchSubscription = this.searchControl.valueChanges
       .pipe(
+        tap((query) => {
+          // Activar loading INMEDIATAMENTE si hay texto válido (antes del debounce)
+          if (query && query.trim().length > 0) {
+            this.searchLoading.set(true);
+          }
+        }),
         debounceTime(300), // Esperar 300ms después de que el usuario deje de escribir
         distinctUntilChanged(), // Solo emitir si el valor cambió
         switchMap((query) => {
@@ -107,9 +113,6 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
             this.searchLoading.set(false);
             return of({ data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } });
           }
-
-          // Mostrar loading mientras busca
-          this.searchLoading.set(true);
 
           // Llamar al servicio de búsqueda (catálogo público)
           return this.productService.getPublicCatalog({
