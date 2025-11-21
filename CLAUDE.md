@@ -791,7 +791,32 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 
 ---
 
-**Última actualización**: 2025-11-19
+**Última actualización**: 2025-11-20
+
+### Recent Updates (2025-11-20)
+
+**Admin Orders - View Current User Profile** ✅:
+- **Order Model** (`order.model.ts`):
+  - Agregado campo `userId?: string` en interface `Order`
+  - Permite identificar al usuario propietario de órdenes registradas
+- **UserDetailComponent** en modo readonly:
+  - Agregado input `readonly: boolean` para desactivar edición
+  - Estado readonly: Avatar sin cursor clickeable, campos deshabilitados
+  - Footer simplificado: Solo botón "Cerrar" (sin "Guardar Cambios")
+- **OrderDetailComponent** (`admin/orders/order-detail`):
+  - Nueva fila "Tipo de Orden" con badge (Invitado/Registrado)
+  - Botón "Ver perfil actual" visible solo para órdenes de usuarios registrados
+  - Lazy loading del usuario: GET `/users/:userId` solo cuando admin hace clic
+  - Popup con `UserDetailComponent` en modo readonly
+  - Loading state en botón mientras carga usuario
+- **PublicHeaderComponent** - Fix menu dinámico:
+  - Convertido `userMenuItems` de propiedad estática a getter dinámico
+  - Ahora se recalcula automáticamente cuando cambia `isAdmin()`
+  - Fix: "Panel Admin" aparece inmediatamente después de login (sin necesidad de navegar)
+- **Arquitectura de datos**:
+  - Tabla de órdenes: Muestra `customerName` del snapshot (sin requests extra)
+  - Detalle de orden: Muestra snapshot + botón para ver perfil actual
+  - Popup de usuario: Lazy loading solo cuando admin necesita (1 request bajo demanda)
 
 **FASE 11 - User Profile & Login Refactor** ✅ COMPLETADA:
 
