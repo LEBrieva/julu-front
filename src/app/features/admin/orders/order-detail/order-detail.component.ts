@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 
 // Services and models
 import { OrderService } from '../../../../core/services/order.service';
+import { UserService } from '../../../../core/services/user.service';
 import {
   Order,
   OrderStatus,
@@ -26,6 +27,10 @@ import {
   getPaymentMethodIcon,
   CHANGE_STATUS_OPTIONS
 } from '../../../../core/models/order.model';
+import { User } from '../../../../core/models/user.model';
+
+// Shared Components
+import { UserDetailComponent } from '../../users/user-detail/user-detail.component';
 
 /**
  * OrderDetailComponent - Vista detalle de orden (Admin)
@@ -50,7 +55,8 @@ import {
     TableModule,
     ToastModule,
     Select,
-    SkeletonModule
+    SkeletonModule,
+    UserDetailComponent
   ],
   providers: [MessageService],
   templateUrl: './order-detail.component.html',
@@ -59,6 +65,7 @@ import {
 export class OrderDetailComponent implements OnInit {
   // Services
   private orderService = inject(OrderService);
+  private userService = inject(UserService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private messageService = inject(MessageService);
@@ -68,6 +75,11 @@ export class OrderDetailComponent implements OnInit {
   loading = true;
   updatingStatus = false;
   selectedStatus: OrderStatus | null = null;
+
+  // User detail modal state
+  showUserDetail = signal(false);
+  selectedUser = signal<User | null>(null);
+  loadingUser = signal(false);
 
   // Opciones de dropdown
   changeStatusOptions = CHANGE_STATUS_OPTIONS;
@@ -194,5 +206,41 @@ export class OrderDetailComponent implements OnInit {
   getTotalItems(): number {
     if (!this.order) return 0;
     return this.order.items.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  /**
+   * Abre el modal con el perfil actual del usuario (solo si no es guest)
+   */
+  viewUserProfile(): void {
+    if (!this.order || !this.order.userId) {
+      return;
+    }
+
+    this.loadingUser.set(true);
+
+    this.userService.getUserById(this.order.userId).subscribe({
+      next: (user) => {
+        this.selectedUser.set(user);
+        this.showUserDetail.set(true);
+        this.loadingUser.set(false);
+      },
+      error: (error) => {
+        console.error('Error al cargar usuario:', error);
+        this.loadingUser.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo cargar el perfil del usuario'
+        });
+      }
+    });
+  }
+
+  /**
+   * Cierra el modal de detalle de usuario
+   */
+  closeUserDetail(): void {
+    this.showUserDetail.set(false);
+    this.selectedUser.set(null);
   }
 }

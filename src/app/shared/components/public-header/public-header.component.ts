@@ -155,39 +155,44 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Menu items para user menu (cuando está logueado)
-  userMenuItems: MenuItem[] = [
-    {
-      label: 'Mi Perfil',
-      icon: 'pi pi-user',
-      command: () => this.goToProfile()
-    },
-    {
-      label: 'Mis Órdenes',
-      icon: 'pi pi-shopping-cart',
-      command: () => this.goToOrders()
-    },
-    ...(this.isAdmin()
-      ? [
-          {
-            separator: true
-          },
-          {
-            label: 'Panel Admin',
-            icon: 'pi pi-cog',
-            command: () => this.goToAdmin()
-          }
-        ]
-      : []),
-    {
-      separator: true
-    },
-    {
-      label: 'Cerrar Sesión',
-      icon: 'pi pi-sign-out',
-      command: () => this.logout()
-    }
-  ];
+  /**
+   * Menu items para user menu (cuando está logueado)
+   * Getter dinámico que se recalcula cada vez según el estado de autenticación
+   */
+  get userMenuItems(): MenuItem[] {
+    return [
+      {
+        label: 'Mi Perfil',
+        icon: 'pi pi-user',
+        command: () => this.goToProfile()
+      },
+      {
+        label: 'Mis Órdenes',
+        icon: 'pi pi-shopping-cart',
+        command: () => this.goToOrders()
+      },
+      ...(this.isAdmin()
+        ? [
+            {
+              separator: true
+            },
+            {
+              label: 'Panel Admin',
+              icon: 'pi pi-cog',
+              command: () => this.goToAdmin()
+            }
+          ]
+        : []),
+      {
+        separator: true
+      },
+      {
+        label: 'Cerrar Sesión',
+        icon: 'pi pi-sign-out',
+        command: () => this.logout()
+      }
+    ];
+  }
 
   /**
    * Navegar al perfil del usuario (FASE 11)

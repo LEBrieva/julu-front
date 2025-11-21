@@ -55,6 +55,7 @@ export class UserDetailComponent {
   // Inputs
   user = input.required<User | null>();
   visible = input.required<boolean>();
+  readonly = input<boolean>(false);  // Modo solo lectura
 
   // Outputs
   visibleChange = output<boolean>();
@@ -116,10 +117,13 @@ export class UserDetailComponent {
   }
 
   /**
-   * Abre el overlay con el avatar ampliado
+   * Abre el overlay con el avatar ampliado (solo si no es readonly)
    */
   onAvatarClick(): void {
-    this.showAvatarOverlay.set(true);
+    // En modo readonly, no permitir cambio de avatar
+    if (!this.readonly()) {
+      this.showAvatarOverlay.set(true);
+    }
   }
 
   /**

@@ -73,6 +73,7 @@ export interface ShippingAddress {
 export interface Order {
   id: string;
   orderNumber: string;
+  userId?: string;  // ID del usuario (undefined si es guest)
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   subtotal: number;

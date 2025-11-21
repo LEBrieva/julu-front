@@ -27,12 +27,16 @@
           <img
             [src]="avatarPreview() || user()!.avatar"
             [alt]="user()!.firstName || 'User'"
-            class="user-avatar-large avatar-clickable"
+            [class]="readonly() ? 'user-avatar-large' : 'user-avatar-large avatar-clickable'"
             (click)="onAvatarClick()"
-            title="Click para ampliar"
+            [title]="readonly() ? user()!.firstName || 'Usuario' : 'Click para ampliar'"
           />
         } @else {
-          <div class="user-avatar-large-placeholder avatar-clickable" (click)="onAvatarClick()" title="Click para ampliar">
+          <div
+            [class]="readonly() ? 'user-avatar-large-placeholder' : 'user-avatar-large-placeholder avatar-clickable'"
+            (click)="onAvatarClick()"
+            [title]="readonly() ? user()!.firstName || 'Usuario' : 'Click para ampliar'"
+          >
             {{ user()!.firstName?.charAt(0) || 'U' }}{{ user()!.lastName?.charAt(0) || 'U' }}
           </div>
         }
@@ -57,44 +61,55 @@
           </div>
         </div>
 
-        <!-- Estado (editable) -->
+        <!-- Estado (editable o solo lectura) -->
         <div class="info-item">
           <label class="info-label">Estado</label>
           <div>
-            <p-select
-              [(ngModel)]="editableStatus"
-              [options]="statusOptions"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="w-full"
-            >
-              <ng-template pTemplate="selectedItem" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getStatusSeverity(option.value)"
-                />
-              </ng-template>
-              <ng-template pTemplate="item" let-option>
-                <p-tag
-                  [value]="option.label"
-                  [severity]="getStatusSeverity(option.value)"
-                />
-              </ng-template>
-            </p-select>
+            @if (readonly()) {
+              <p-tag
+                [value]="user()!.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
+                [severity]="getStatusSeverity(user()!.status)"
+              />
+            } @else {
+              <p-select
+                [(ngModel)]="editableStatus"
+                [options]="statusOptions"
+                optionLabel="label"
+                optionValue="value"
+                styleClass="w-full"
+              >
+                <ng-template pTemplate="selectedItem" let-option>
+                  <p-tag
+                    [value]="option.label"
+                    [severity]="getStatusSeverity(option.value)"
+                  />
+                </ng-template>
+                <ng-template pTemplate="item" let-option>
+                  <p-tag
+                    [value]="option.label"
+                    [severity]="getStatusSeverity(option.value)"
+                  />
+                </ng-template>
+              </p-select>
+            }
           </div>
         </div>
 
-        <!-- Teléfono (editable) -->
+        <!-- Teléfono (editable o solo lectura) -->
         <div class="info-item">
           <label class="info-label">Teléfono</label>
           <div class="flex items-center gap-2">
-            <input
-              pInputText
-              type="text"
-              [(ngModel)]="editablePhone"
-              placeholder="No especificado"
-              class="w-full"
-            />
+            @if (readonly()) {
+              <p class="info-value">{{ user()!.phone || 'No especificado' }}</p>
+            } @else {
+              <input
+                pInputText
+                type="text"
+                [(ngModel)]="editablePhone"
+                placeholder="No especificado"
+                class="w-full"
+              />
+            }
           </div>
         </div>
 
@@ -135,25 +150,40 @@
 
   <!-- Footer -->
   <ng-template pTemplate="footer">
-    <div class="flex justify-between w-full">
-      <button
-        pButton
-        type="button"
-        label="Cerrar"
-        icon="pi pi-times"
-        (click)="closeDialog()"
-        class="p-button-outlined"
-      ></button>
-      <button
-        pButton
-        type="button"
-        label="Guardar Cambios"
-        icon="pi pi-check"
-        (click)="saveChanges()"
-        [disabled]="!hasChanges()"
-        class="p-button-primary"
-      ></button>
-    </div>
+    @if (readonly()) {
+      <!-- Modo solo lectura: solo botón cerrar centrado -->
+      <div class="flex justify-center w-full">
+        <button
+          pButton
+          type="button"
+          label="Cerrar"
+          icon="pi pi-times"
+          (click)="closeDialog()"
+          class="p-button-outlined"
+        ></button>
+      </div>
+    } @else {
+      <!-- Modo edición: botones cerrar y guardar -->
+      <div class="flex justify-between w-full">
+        <button
+          pButton
+          type="button"
+          label="Cerrar"
+          icon="pi pi-times"
+          (click)="closeDialog()"
+          class="p-button-outlined"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Guardar Cambios"
+          icon="pi pi-check"
+          (click)="saveChanges()"
+          [disabled]="!hasChanges()"
+          class="p-button-primary"
+        ></button>
+      </div>
+    }
   </ng-template>
 </p-dialog>
 

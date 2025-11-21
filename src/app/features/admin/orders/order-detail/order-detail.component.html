@@ -91,6 +91,29 @@
                 {{ order.shippingAddress.phone }}
               </p>
             </div>
+
+            <!-- Tipo de orden + Botón ver perfil (solo si no es guest) -->
+            <div>
+              <label class="text-sm font-medium text-gray-600 block mb-1">
+                Tipo de Orden
+              </label>
+              <div class="flex items-center gap-2">
+                <p-tag
+                  [value]="order.isGuest ? 'Invitado' : 'Registrado'"
+                  [severity]="order.isGuest ? 'secondary' : 'info'"
+                />
+                @if (!order.isGuest && order.userId) {
+                  <p-button
+                    label="Ver perfil actual"
+                    icon="pi pi-user"
+                    size="small"
+                    [text]="true"
+                    (onClick)="viewUserProfile()"
+                    [loading]="loadingUser()"
+                  />
+                }
+              </div>
+            </div>
           </div>
         </p-card>
 
@@ -279,3 +302,11 @@
     }
   </div>
 }
+
+<!-- Modal de detalle del usuario (readonly) -->
+<app-user-detail
+  [user]="selectedUser()"
+  [visible]="showUserDetail()"
+  [readonly]="true"
+  (visibleChange)="closeUserDetail()"
+/>
