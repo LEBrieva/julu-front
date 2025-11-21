@@ -58,6 +58,16 @@ export const routes: Routes = [
         path: 'cart',
         loadComponent: () =>
           import('./features/cart/cart').then((m) => m.CartComponent)
+      },
+
+      // Profile (FASE 11) - Requiere autenticación
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(
+            (m) => m.ProfileComponent
+          )
       }
     ]
   },
@@ -120,16 +130,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/order-success/order-success-guest').then(
         (m) => m.OrderSuccessGuestComponent
-      )
-  },
-
-  // Profile (FASE 11) - Requiere autenticación
-  {
-    path: 'profile',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/profile/profile.component').then(
-        (m) => m.ProfileComponent
       )
   },
 
