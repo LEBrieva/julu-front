@@ -230,6 +230,64 @@
   align-items: center;
 }
 
+/* Contenedor del menú custom */
+.user-menu-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+/* Items del menú */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.menu-item:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.menu-item i {
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+
+.menu-item:hover i {
+  color: #3b82f6;
+}
+
+/* Estilo especial para logout */
+.menu-item.logout {
+  color: #dc2626;
+}
+
+.menu-item.logout:hover {
+  background: #fef2f2;
+}
+
+.menu-item.logout i {
+  color: #dc2626;
+}
+
+/* Separador */
+.menu-separator {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.5rem 0;
+}
+
 /* ========== LOGIN POPUP STYLES ========== */
 :host ::ng-deep .p-confirmpopup {
   width: 24rem;

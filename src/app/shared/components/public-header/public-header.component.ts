@@ -13,12 +13,12 @@ import { getErrorMessage } from '../../utils/form-errors.util';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
+import { Popover } from 'primeng/popover';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 /**
  * Header público de la tienda
@@ -39,11 +39,11 @@ import { MenuItem, ConfirmationService, MessageService } from 'primeng/api';
     RouterModule,
     ReactiveFormsModule,
     ButtonModule,
-    MenuModule,
     AvatarModule,
     ConfirmPopupModule,
     InputTextModule,
-    PasswordModule
+    PasswordModule,
+    Popover
   ],
   providers: [ConfirmationService],
   templateUrl: './public-header.component.html',
@@ -153,45 +153,6 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
     if (event.key === 'Escape' && this.searchVisible()) {
       this.closeSearchModal();
     }
-  }
-
-  /**
-   * Menu items para user menu (cuando está logueado)
-   * Getter dinámico que se recalcula cada vez según el estado de autenticación
-   */
-  get userMenuItems(): MenuItem[] {
-    return [
-      {
-        label: 'Mi Perfil',
-        icon: 'pi pi-user',
-        command: () => this.goToProfile()
-      },
-      {
-        label: 'Mis Órdenes',
-        icon: 'pi pi-shopping-cart',
-        command: () => this.goToOrders()
-      },
-      ...(this.isAdmin()
-        ? [
-            {
-              separator: true
-            },
-            {
-              label: 'Panel Admin',
-              icon: 'pi pi-cog',
-              command: () => this.goToAdmin()
-            }
-          ]
-        : []),
-      {
-        separator: true
-      },
-      {
-        label: 'Cerrar Sesión',
-        icon: 'pi pi-sign-out',
-        command: () => this.logout()
-      }
-    ];
   }
 
   /**

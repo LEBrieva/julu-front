@@ -59,14 +59,40 @@
             shape="circle"
             size="normal"
             [style]="{ cursor: 'pointer' }"
-            (click)="userMenu.toggle($event)"
+            (click)="userMenuPopover.toggle($event)"
           />
 
-          <p-menu
-            #userMenu
-            [model]="userMenuItems"
-            [popup]="true"
-          />
+          <p-popover #userMenuPopover>
+            <div class="user-menu-content">
+              <!-- Mi Perfil -->
+              <button class="menu-item" (click)="goToProfile(); userMenuPopover.hide()">
+                <i class="pi pi-user"></i>
+                <span>Mi Perfil</span>
+              </button>
+
+              <!-- Mis Órdenes -->
+              <button class="menu-item" (click)="goToOrders(); userMenuPopover.hide()">
+                <i class="pi pi-shopping-cart"></i>
+                <span>Mis Órdenes</span>
+              </button>
+
+              <!-- Separator + Panel Admin (solo si es admin) -->
+              @if (isAdmin()) {
+                <div class="menu-separator"></div>
+                <button class="menu-item" (click)="goToAdmin(); userMenuPopover.hide()">
+                  <i class="pi pi-cog"></i>
+                  <span>Panel Admin</span>
+                </button>
+              }
+
+              <!-- Separator + Cerrar Sesión -->
+              <div class="menu-separator"></div>
+              <button class="menu-item logout" (click)="logout(); userMenuPopover.hide()">
+                <i class="pi pi-sign-out"></i>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </p-popover>
         </div>
       }
     </div>
