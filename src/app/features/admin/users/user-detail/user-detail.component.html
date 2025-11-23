@@ -13,15 +13,15 @@
     <div class="flex items-center gap-3">
       <i class="pi pi-user text-blue-500 text-2xl"></i>
       <div>
-        <h3 class="text-xl font-bold text-gray-800 m-0">Detalle de Usuario</h3>
+        <h3 class="text-xl font-bold text-gray-800 m-0">Detalhe do Usuário</h3>
       </div>
     </div>
   </ng-template>
 
-  <!-- Content -->
+  <!-- Conteúdo -->
   @if (user()) {
     <div class="user-detail-content">
-      <!-- Avatar y nombre -->
+      <!-- Avatar e nome -->
       <div class="user-header">
         @if (user()!.avatar || avatarPreview()) {
           <img
@@ -29,13 +29,13 @@
             [alt]="user()!.firstName || 'User'"
             [class]="readonly() ? 'user-avatar-large' : 'user-avatar-large avatar-clickable'"
             (click)="onAvatarClick()"
-            [title]="readonly() ? user()!.firstName || 'Usuario' : 'Click para ampliar'"
+            [title]="readonly() ? user()!.firstName || 'Usuário' : 'Clique para ampliar'"
           />
         } @else {
           <div
             [class]="readonly() ? 'user-avatar-large-placeholder' : 'user-avatar-large-placeholder avatar-clickable'"
             (click)="onAvatarClick()"
-            [title]="readonly() ? user()!.firstName || 'Usuario' : 'Click para ampliar'"
+            [title]="readonly() ? user()!.firstName || 'Usuário' : 'Clique para ampliar'"
           >
             {{ user()!.firstName?.charAt(0) || 'U' }}{{ user()!.lastName?.charAt(0) || 'U' }}
           </div>
@@ -48,26 +48,26 @@
         </div>
       </div>
 
-      <!-- Grid de información -->
+      <!-- Grid de informações -->
       <div class="info-grid">
-        <!-- Rol -->
+        <!-- Função -->
         <div class="info-item">
-          <label class="info-label">Rol</label>
+          <label class="info-label">Função</label>
           <div>
             <p-tag
-              [value]="user()!.role === UserRole.ADMIN ? 'Administrador' : 'Usuario'"
+              [value]="user()!.role === UserRole.ADMIN ? 'Administrador' : 'Usuário'"
               [severity]="getRoleSeverity(user()!.role)"
             />
           </div>
         </div>
 
-        <!-- Estado (editable o solo lectura) -->
+        <!-- Status (editável ou somente leitura) -->
         <div class="info-item">
-          <label class="info-label">Estado</label>
+          <label class="info-label">Status</label>
           <div>
             @if (readonly()) {
               <p-tag
-                [value]="user()!.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
+                [value]="user()!.status === UserStatus.ACTIVE ? 'Ativo' : 'Inativo'"
                 [severity]="getStatusSeverity(user()!.status)"
               />
             } @else {
@@ -95,54 +95,54 @@
           </div>
         </div>
 
-        <!-- Teléfono (editable o solo lectura) -->
+        <!-- Telefone (editável ou somente leitura) -->
         <div class="info-item">
-          <label class="info-label">Teléfono</label>
+          <label class="info-label">Telefone</label>
           <div class="flex items-center gap-2">
             @if (readonly()) {
-              <p class="info-value">{{ user()!.phone || 'No especificado' }}</p>
+              <p class="info-value">{{ user()!.phone || 'Não especificado' }}</p>
             } @else {
               <input
                 pInputText
                 type="text"
                 [(ngModel)]="editablePhone"
-                placeholder="No especificado"
+                placeholder="Não especificado"
                 class="w-full"
               />
             }
           </div>
         </div>
 
-        <!-- Email Verificado -->
+        <!-- E-mail Verificado -->
         <div class="info-item">
-          <label class="info-label">Email Verificado</label>
+          <label class="info-label">E-mail Verificado</label>
           <div class="flex items-center gap-2">
             @if (user()!.emailVerified) {
               <i class="pi pi-check-circle text-green-500 text-xl"></i>
               <span class="text-green-600 font-medium">Verificado</span>
             } @else {
               <i class="pi pi-times-circle text-gray-400 text-xl"></i>
-              <span class="text-gray-500">No verificado</span>
+              <span class="text-gray-500">Não verificado</span>
             }
           </div>
         </div>
 
-        <!-- Último Login -->
+        <!-- Último Acesso -->
         <div class="info-item">
-          <label class="info-label">Último Login</label>
+          <label class="info-label">Último Acesso</label>
           <p class="info-value">{{ formatDate(user()!.lastLogin) }}</p>
         </div>
 
-        <!-- Fecha de Registro -->
+        <!-- Data de Cadastro -->
         <div class="info-item">
-          <label class="info-label">Fecha de Registro</label>
+          <label class="info-label">Data de Cadastro</label>
           <p class="info-value">{{ formatDate(user()!.createdAt) }}</p>
         </div>
       </div>
 
-      <!-- ID (para referencia técnica) -->
+      <!-- ID (para referência técnica) -->
       <div class="user-id">
-        <label class="info-label">ID de Usuario</label>
+        <label class="info-label">ID do Usuário</label>
         <code class="id-code">{{ user()!.id }}</code>
       </div>
     </div>
@@ -151,24 +151,24 @@
   <!-- Footer -->
   <ng-template pTemplate="footer">
     @if (readonly()) {
-      <!-- Modo solo lectura: solo botón cerrar centrado -->
+      <!-- Modo somente leitura: apenas botão fechar centralizado -->
       <div class="flex justify-center w-full">
         <button
           pButton
           type="button"
-          label="Cerrar"
+          label="Fechar"
           icon="pi pi-times"
           (click)="closeDialog()"
           class="p-button-outlined"
         ></button>
       </div>
     } @else {
-      <!-- Modo edición: botones cerrar y guardar -->
+      <!-- Modo edição: botões fechar e salvar -->
       <div class="flex justify-between w-full">
         <button
           pButton
           type="button"
-          label="Cerrar"
+          label="Fechar"
           icon="pi pi-times"
           (click)="closeDialog()"
           class="p-button-outlined"
@@ -176,7 +176,7 @@
         <button
           pButton
           type="button"
-          label="Guardar Cambios"
+          label="Salvar Alterações"
           icon="pi pi-check"
           (click)="saveChanges()"
           [disabled]="!hasChanges()"
@@ -187,7 +187,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ConfirmDialog con template headless para mostrar cambios -->
+<!-- ConfirmDialog com template headless para mostrar alterações -->
 <p-confirmDialog key="saveChanges">
   <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
     <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">

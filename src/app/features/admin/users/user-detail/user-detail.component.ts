@@ -20,14 +20,14 @@ import { UserService } from '../../../../core/services/user.service';
 import { AvatarOverlayComponent } from '../../../../shared/components/avatar-overlay/avatar-overlay.component';
 
 /**
- * UserDetailComponent - Modal de detalle de usuario
+ * UserDetailComponent - Modal de detalhe de usuário
  *
  * Features:
- * - Muestra todos los datos del usuario en formato legible
- * - Avatar o iniciales
- * - Información personal
- * - Estado y rol con tags
- * - Fechas formateadas
+ * - Mostra todos os dados do usuário em formato legível
+ * - Avatar ou iniciais
+ * - Informações pessoais
+ * - Status e função com tags
+ * - Datas formatadas
  */
 @Component({
   selector: 'app-user-detail',
@@ -65,13 +65,13 @@ export class UserDetailComponent {
   readonly UserRole = UserRole;
   readonly UserStatus = UserStatus;
 
-  // Opciones para dropdown de estado
+  // Opções para dropdown de status
   readonly statusOptions = [
-    { label: 'Activo', value: UserStatus.ACTIVE },
-    { label: 'Inactivo', value: UserStatus.INACTIVE }
+    { label: 'Ativo', value: UserStatus.ACTIVE },
+    { label: 'Inativo', value: UserStatus.INACTIVE }
   ];
 
-  // Valores editables (trackean cambios locales)
+  // Valores editáveis (rastreiam mudanças locais)
   editableStatus = signal<UserStatus>(UserStatus.ACTIVE);
   editablePhone = signal<string>('');
 
@@ -80,10 +80,10 @@ export class UserDetailComponent {
   avatarPreview = signal<string | null>(null);
   showAvatarOverlay = signal(false);
 
-  // Cambios pendientes para el headless dialog
+  // Alterações pendentes para o dialog headless
   pendingChanges: string[] = [];
 
-  // Detecta si hay cambios pendientes
+  // Detecta se há alterações pendentes
   hasChanges = computed(() => {
     const currentUser = this.user();
     if (!currentUser) return false;
@@ -96,13 +96,13 @@ export class UserDetailComponent {
   });
 
   constructor() {
-    // Effect para sincronizar valores editables cuando cambia el usuario
+    // Effect para sincronizar valores editáveis quando o usuário muda
     effect(() => {
       const currentUser = this.user();
       if (currentUser) {
         this.editableStatus.set(currentUser.status);
         this.editablePhone.set(currentUser.phone || '');
-        // Resetear avatar al cambiar de usuario
+        // Resetar avatar ao mudar de usuário
         this.selectedAvatarFile.set(null);
         this.avatarPreview.set(null);
       }
@@ -110,37 +110,37 @@ export class UserDetailComponent {
   }
 
   /**
-   * Cierra el dialog
+   * Fecha o dialog
    */
   closeDialog(): void {
     this.visibleChange.emit(false);
   }
 
   /**
-   * Abre el overlay con el avatar ampliado (solo si no es readonly)
+   * Abre o overlay com o avatar ampliado (apenas se não for somente leitura)
    */
   onAvatarClick(): void {
-    // En modo readonly, no permitir cambio de avatar
+    // Em modo somente leitura, não permitir mudança de avatar
     if (!this.readonly()) {
       this.showAvatarOverlay.set(true);
     }
   }
 
   /**
-   * Cierra el overlay del avatar
+   * Fecha o overlay do avatar
    */
   closeAvatarOverlay(): void {
     this.showAvatarOverlay.set(false);
   }
 
   /**
-   * Maneja la selección de un nuevo avatar desde el overlay
+   * Manipula a seleção de um novo avatar desde o overlay
    */
   onAvatarSelected(file: File): void {
-    // Guardar archivo seleccionado
+    // Salvar arquivo selecionado
     this.selectedAvatarFile.set(file);
 
-    // Generar preview para mostrar en el dialog principal después de cerrar el overlay
+    // Gerar preview para mostrar no dialog principal após fechar o overlay
     const reader = new FileReader();
     reader.onload = (e) => {
       this.avatarPreview.set(e.target?.result as string);
@@ -149,18 +149,18 @@ export class UserDetailComponent {
   }
 
   /**
-   * Maneja errores de validación del avatar
+   * Manipula erros de validação do avatar
    */
   onAvatarValidationError(error: string): void {
     this.messageService.add({
       severity: 'warn',
-      summary: 'Archivo no válido',
+      summary: 'Arquivo inválido',
       detail: error
     });
   }
 
   /**
-   * Guarda los cambios del formulario (estado, teléfono y avatar)
+   * Salva as alterações do formulário (status, telefone e avatar)
    */
   saveChanges(): void {
     const currentUser = this.user();
@@ -168,43 +168,43 @@ export class UserDetailComponent {
       return;
     }
 
-    // Construir lista de cambios para el headless dialog
+    // Construir lista de alterações para o dialog headless
     this.pendingChanges = [];
     if (this.editableStatus() !== currentUser.status) {
-      this.pendingChanges.push(`Estado: ${this.editableStatus() === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'}`);
+      this.pendingChanges.push(`Status: ${this.editableStatus() === UserStatus.ACTIVE ? 'Ativo' : 'Inativo'}`);
     }
     if (this.editablePhone() !== (currentUser.phone || '')) {
-      const phoneValue = this.editablePhone() || '(vacío)';
-      this.pendingChanges.push(`Teléfono: ${phoneValue}`);
+      const phoneValue = this.editablePhone() || '(vazio)';
+      this.pendingChanges.push(`Telefone: ${phoneValue}`);
     }
     if (this.selectedAvatarFile()) {
-      this.pendingChanges.push(`Avatar: Nueva imagen seleccionada`);
+      this.pendingChanges.push(`Avatar: Nova imagem selecionada`);
     }
 
     this.confirmationService.confirm({
       key: 'saveChanges',
-      message: `¿Desea guardar los siguientes cambios para ${currentUser.firstName} ${currentUser.lastName}?`,
-      header: 'Confirmar Cambios',
+      message: `Deseja salvar as seguintes alterações para ${currentUser.firstName} ${currentUser.lastName}?`,
+      header: 'Confirmar Alterações',
       icon: 'pi pi-save',
-      acceptLabel: 'Sí, guardar',
+      acceptLabel: 'Sim, salvar',
       rejectLabel: 'Cancelar',
       accept: () => {
         const userToUpdate = this.user();
         if (!userToUpdate || !userToUpdate.id) {
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo obtener el ID del usuario'
+            summary: 'Erro',
+            detail: 'Não foi possível obter o ID do usuário'
           });
           return;
         }
 
-        // Determinar qué hay que actualizar
+        // Determinar o que precisa ser atualizado
         const hasBasicChanges = this.editableStatus() !== userToUpdate.status ||
                                this.editablePhone() !== (userToUpdate.phone || '');
         const hasAvatarChange = this.selectedAvatarFile() !== null;
 
-        // Preparar datos básicos para actualizar
+        // Preparar dados básicos para atualizar
         const updateData: any = {};
         if (this.editableStatus() !== userToUpdate.status) {
           updateData.status = this.editableStatus();
@@ -213,15 +213,15 @@ export class UserDetailComponent {
           updateData.phone = this.editablePhone() || undefined;
         }
 
-        // Crear observable inicial
+        // Criar observable inicial
         let saveObservable = of(userToUpdate);
 
-        // Si hay cambios básicos, actualizar primero
+        // Se houver alterações básicas, atualizar primeiro
         if (hasBasicChanges && Object.keys(updateData).length > 0) {
           saveObservable = this.userService.updateUser(userToUpdate.id, updateData);
         }
 
-        // Si hay avatar, encadenar la subida
+        // Se houver avatar, encadear o upload
         if (hasAvatarChange) {
           const avatarFile = this.selectedAvatarFile();
           if (avatarFile) {
@@ -231,34 +231,34 @@ export class UserDetailComponent {
           }
         }
 
-        // Ejecutar las actualizaciones
+        // Executar as atualizações
         saveObservable.subscribe({
           next: (updatedUser) => {
-            // Emitir el usuario actualizado al componente padre
+            // Emitir o usuário atualizado para o componente pai
             this.userUpdated.emit(updatedUser);
 
-            // Sincronizar valores editables
+            // Sincronizar valores editáveis
             this.editableStatus.set(updatedUser.status);
             this.editablePhone.set(updatedUser.phone || '');
 
-            // Limpiar avatar temporal
+            // Limpar avatar temporário
             this.selectedAvatarFile.set(null);
             this.avatarPreview.set(null);
 
             this.messageService.add({
               severity: 'success',
-              summary: 'Cambios guardados',
-              detail: `Usuario ${updatedUser.firstName} ${updatedUser.lastName} actualizado correctamente`
+              summary: 'Alterações salvas',
+              detail: `Usuário ${updatedUser.firstName} ${updatedUser.lastName} atualizado com sucesso`
             });
 
-            // Cerrar el dialog
+            // Fechar o dialog
             this.closeDialog();
           },
           error: (error) => {
             this.messageService.add({
               severity: 'error',
-              summary: 'Error al guardar cambios',
-              detail: error.error?.message || 'Ocurrió un error al actualizar el usuario'
+              summary: 'Erro ao salvar alterações',
+              detail: error.error?.message || 'Ocorreu um erro ao atualizar o usuário'
             });
           }
         });
@@ -267,11 +267,11 @@ export class UserDetailComponent {
   }
 
   /**
-   * Formatea fecha completa
+   * Formata data completa
    */
   formatDate(date: Date | undefined): string {
     if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('es-AR', {
+    return new Date(date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -281,14 +281,14 @@ export class UserDetailComponent {
   }
 
   /**
-   * Obtiene la severidad del Tag según el rol
+   * Obtém a severidade do Tag de acordo com a função
    */
   getRoleSeverity(role: UserRole): 'success' | 'danger' {
     return role === UserRole.ADMIN ? 'danger' : 'success';
   }
 
   /**
-   * Obtiene la severidad del Tag según el estado
+   * Obtém a severidade do Tag de acordo com o status
    */
   getStatusSeverity(status: UserStatus): 'success' | 'secondary' {
     return status === UserStatus.ACTIVE ? 'success' : 'secondary';

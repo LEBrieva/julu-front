@@ -1,55 +1,55 @@
 <div class="admin-users-container">
   <!-- Header -->
   <div class="page-header">
-    <h2 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h2>
-    <p class="text-gray-600 mt-1">Administra roles y estados de los usuarios</p>
+    <h2 class="text-3xl font-bold text-gray-800">Gestão de Usuários</h2>
+    <p class="text-gray-600 mt-1">Administre funções e status dos usuários</p>
   </div>
 
   <!-- Filtros -->
   <div class="filters-card">
     <div class="filters-grid">
-      <!-- Búsqueda -->
+      <!-- Busca -->
       <div class="filter-item search-input">
         <label for="search" class="filter-label">Buscar</label>
         <input
           pInputText
           id="search"
           type="text"
-          placeholder="Nombre, apellido o email..."
+          placeholder="Nome, sobrenome ou e-mail..."
           [(ngModel)]="searchTerm"
           (keyup.enter)="applyFilters()"
           class="w-full"
         />
       </div>
 
-      <!-- Filtro: Rol -->
+      <!-- Filtro: Função -->
       <div class="filter-item">
-        <label for="role" class="filter-label">Rol</label>
+        <label for="role" class="filter-label">Função</label>
         <p-select
           [(ngModel)]="selectedRole"
           [options]="roleOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="Seleccionar rol"
+          placeholder="Selecionar função"
           class="w-full"
         />
       </div>
 
-      <!-- Filtro: Estado -->
+      <!-- Filtro: Status -->
       <div class="filter-item">
-        <label for="status" class="filter-label">Estado</label>
+        <label for="status" class="filter-label">Status</label>
         <p-select
           [(ngModel)]="selectedStatus"
           [options]="statusOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="Seleccionar estado"
+          placeholder="Selecionar status"
           class="w-full"
         />
       </div>
     </div>
 
-    <!-- Botones de acción -->
+    <!-- Botões de ação -->
     <div class="filter-actions">
       <button
         pButton
@@ -62,7 +62,7 @@
       <button
         pButton
         type="button"
-        label="Limpiar"
+        label="Limpar"
         icon="pi pi-filter-slash"
         (click)="clearFilters()"
         class="p-button-outlined"
@@ -70,7 +70,7 @@
     </div>
   </div>
 
-  <!-- Tabla -->
+  <!-- Tabela -->
   <div class="table-card">
     <p-table
       [value]="users()"
@@ -82,7 +82,7 @@
       [rowsPerPageOptions]="[10, 25, 50]"
       (onLazyLoad)="onLazyLoad($event)"
       [showCurrentPageReport]="true"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuários"
       styleClass="p-datatable-sm p-datatable-striped"
     >
       <!-- Empty state -->
@@ -90,12 +90,12 @@
         <tr>
           <td colspan="7" class="text-center py-8">
             <i class="pi pi-users text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg">No se encontraron usuarios</p>
+            <p class="text-gray-500 text-lg">Nenhum usuário encontrado</p>
             @if (searchTerm() || selectedRole() || selectedStatus()) {
               <button
                 pButton
                 type="button"
-                label="Limpiar filtros"
+                label="Limpar filtros"
                 icon="pi pi-filter-slash"
                 (click)="clearFilters()"
                 class="p-button-text mt-4"
@@ -108,20 +108,20 @@
       <!-- Header -->
       <ng-template pTemplate="header">
         <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Estado</th>
-          <th>Último Login</th>
-          <th>Email Verificado</th>
-          <th class="text-center">Acciones</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Função</th>
+          <th>Status</th>
+          <th>Último Acesso</th>
+          <th>E-mail Verificado</th>
+          <th class="text-center">Ações</th>
         </tr>
       </ng-template>
 
       <!-- Body -->
       <ng-template pTemplate="body" let-user>
         <tr>
-          <!-- Nombre -->
+          <!-- Nome -->
           <td>
             <div class="flex items-center gap-3">
               @if (user.avatar) {
@@ -142,44 +142,44 @@
             </div>
           </td>
 
-          <!-- Email -->
+          <!-- E-mail -->
           <td>
             <span class="text-gray-700">{{ user.email }}</span>
           </td>
 
-          <!-- Rol (read-only) -->
+          <!-- Função (read-only) -->
           <td>
             <p-tag
-              [value]="user.role === UserRole.ADMIN ? 'Administrador' : 'Usuario'"
+              [value]="user.role === UserRole.ADMIN ? 'Administrador' : 'Usuário'"
               [severity]="getRoleSeverity(user.role)"
             />
           </td>
 
-          <!-- Estado (read-only) -->
+          <!-- Status (read-only) -->
           <td>
             <p-tag
-              [value]="user.status === UserStatus.ACTIVE ? 'Activo' : 'Inactivo'"
+              [value]="user.status === UserStatus.ACTIVE ? 'Ativo' : 'Inativo'"
               [severity]="getStatusSeverity(user.status)"
             />
           </td>
 
-          <!-- Último Login -->
+          <!-- Último Acesso -->
           <td>
             <span class="text-gray-600 text-sm">
               {{ formatLastLogin(user.lastLogin) }}
             </span>
           </td>
 
-          <!-- Email Verificado -->
+          <!-- E-mail Verificado -->
           <td class="text-center">
             @if (user.emailVerified) {
-              <i class="pi pi-check-circle text-green-500 text-xl" pTooltip="Email verificado"></i>
+              <i class="pi pi-check-circle text-green-500 text-xl" pTooltip="E-mail verificado"></i>
             } @else {
-              <i class="pi pi-times-circle text-gray-400 text-xl" pTooltip="Email no verificado"></i>
+              <i class="pi pi-times-circle text-gray-400 text-xl" pTooltip="E-mail não verificado"></i>
             }
           </td>
 
-          <!-- Acciones -->
+          <!-- Ações -->
           <td class="text-center">
             <button
               pButton
@@ -187,7 +187,7 @@
               icon="pi pi-pencil"
               class="p-button-rounded p-button-text p-button-info"
               (click)="viewUserDetail(user)"
-              pTooltip="Editar usuario"
+              pTooltip="Editar usuário"
               tooltipPosition="top"
             ></button>
           </td>
@@ -197,10 +197,10 @@
   </div>
 </div>
 
-<!-- ConfirmDialog para confirmaciones -->
+<!-- ConfirmDialog para confirmações -->
 <p-confirmDialog />
 
-<!-- Dialog de detalle de usuario -->
+<!-- Dialog de detalhe de usuário -->
 <app-user-detail
   [user]="selectedUser()"
   [visible]="showDetailDialog()"

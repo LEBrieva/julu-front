@@ -21,15 +21,15 @@ import { User, UserRole, UserStatus, FilterUserDto } from '../../../core/models/
 import { UserDetailComponent } from './user-detail/user-detail.component';
 
 /**
- * AdminUsersComponent - Gestión de usuarios (Admin)
+ * AdminUsersComponent - Gestão de usuários (Admin)
  *
  * Features:
- * - Lista paginada de usuarios
- * - Filtros: role, status
- * - Búsqueda por nombre, apellido o email
- * - Cambio de rol inline (admin <-> user)
- * - Cambio de estado inline (active <-> inactive)
- * - Ver detalle en modal
+ * - Lista paginada de usuários
+ * - Filtros: função, status
+ * - Busca por nome, sobrenome ou e-mail
+ * - Mudança de função inline (administrador <-> usuário)
+ * - Mudança de status inline (ativo <-> inativo)
+ * - Ver detalhe em modal
  */
 @Component({
   selector: 'app-admin-users',
@@ -91,17 +91,17 @@ export class AdminUsersComponent implements OnInit {
   readonly UserRole = UserRole;
   readonly UserStatus = UserStatus;
 
-  // Opciones para dropdowns
+  // Opções para dropdowns
   readonly roleOptions = [
     { label: 'Todos', value: null },
-    { label: 'Admin', value: UserRole.ADMIN },
-    { label: 'Usuario', value: UserRole.USER }
+    { label: 'Administrador', value: UserRole.ADMIN },
+    { label: 'Usuário', value: UserRole.USER }
   ];
 
   readonly statusOptions = [
     { label: 'Todos', value: null },
-    { label: 'Activo', value: UserStatus.ACTIVE },
-    { label: 'Inactivo', value: UserStatus.INACTIVE }
+    { label: 'Ativo', value: UserStatus.ACTIVE },
+    { label: 'Inativo', value: UserStatus.INACTIVE }
   ];
 
   // ==================
@@ -117,7 +117,7 @@ export class AdminUsersComponent implements OnInit {
   // ==================
 
   /**
-   * Carga usuarios del backend con filtros
+   * Carrega usuários do backend com filtros
    */
   loadUsers(): void {
     this.loading.set(true);
@@ -140,8 +140,8 @@ export class AdminUsersComponent implements OnInit {
       error: (error) => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error al cargar usuarios',
-          detail: error.error?.message || 'Ocurrió un error al cargar los usuarios'
+          summary: 'Erro ao carregar usuários',
+          detail: error.error?.message || 'Ocorreu um erro ao carregar os usuários'
         });
         this.loading.set(false);
       }
@@ -149,7 +149,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Handler del lazy loading de PrimeNG Table
+   * Handler do lazy loading de PrimeNG Table
    */
   onLazyLoad(event: TableLazyLoadEvent): void {
     const page = event.first! / event.rows! + 1;
@@ -159,7 +159,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Aplica filtros y resetea a página 1
+   * Aplica filtros e reseta para página 1
    */
   applyFilters(): void {
     this.currentPage.set(1);
@@ -167,7 +167,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Limpia todos los filtros
+   * Limpa todos os filtros
    */
   clearFilters(): void {
     this.selectedRole.set(null);
@@ -178,15 +178,15 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Actualiza un usuario en la lista cuando se edita desde el dialog
+   * Atualiza um usuário na lista quando é editado desde o dialog
    */
   onUserUpdated(updatedUser: User): void {
-    // Actualizar en la lista
+    // Atualizar na lista
     this.users.update(users =>
       users.map(u => u.id === updatedUser.id ? updatedUser : u)
     );
 
-    // Si el usuario actualizado es el usuario actual logueado, sincronizar AuthService
+    // Se o usuário atualizado é o usuário atual logado, sincronizar AuthService
     const currentUser = this.authService.currentUser();
     if (currentUser?.id === updatedUser.id) {
       this.authService.updateCurrentUser(updatedUser);
@@ -194,7 +194,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Abre el diálogo de detalle de usuario
+   * Abre o dialog de detalhe de usuário
    */
   viewUserDetail(user: User): void {
     this.selectedUser.set(user);
@@ -202,7 +202,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   /**
-   * Formatea la fecha de último login
+   * Formata a data do último acesso
    */
   formatLastLogin(date: Date | undefined): string {
     if (!date) return 'Nunca';
@@ -214,23 +214,23 @@ export class AdminUsersComponent implements OnInit {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Hace un momento';
-    if (diffMins < 60) return `Hace ${diffMins} min`;
-    if (diffHours < 24) return `Hace ${diffHours} h`;
-    if (diffDays < 7) return `Hace ${diffDays} días`;
+    if (diffMins < 1) return 'Agora mesmo';
+    if (diffMins < 60) return `Há ${diffMins} min`;
+    if (diffHours < 24) return `Há ${diffHours} h`;
+    if (diffDays < 7) return `Há ${diffDays} dias`;
 
-    return lastLogin.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return lastLogin.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   /**
-   * Obtiene la severidad del Tag según el rol
+   * Obtém a severidade do Tag de acordo com a função
    */
   getRoleSeverity(role: UserRole): 'success' | 'danger' {
     return role === UserRole.ADMIN ? 'danger' : 'success';
   }
 
   /**
-   * Obtiene la severidad del Tag según el estado
+   * Obtém a severidade do Tag de acordo com o status
    */
   getStatusSeverity(status: UserStatus): 'success' | 'secondary' {
     return status === UserStatus.ACTIVE ? 'success' : 'secondary';
