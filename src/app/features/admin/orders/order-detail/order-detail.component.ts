@@ -33,15 +33,15 @@ import { User } from '../../../../core/models/user.model';
 import { UserDetailComponent } from '../../users/user-detail/user-detail.component';
 
 /**
- * OrderDetailComponent - Vista detalle de orden (Admin)
+ * OrderDetailComponent - Vista detalhada de pedido (Admin)
  *
- * Muestra toda la información de una orden organizada en secciones:
- * - Header con número, estados, fecha
- * - Información del cliente
- * - Dirección de envío
- * - Productos (tabla)
- * - Totales y método de pago
- * - Acciones admin (cambiar estado)
+ * Mostra todas as informações de um pedido organizadas em seções:
+ * - Header com número, estados, data
+ * - Informações do cliente
+ * - Endereço de entrega
+ * - Produtos (tabela)
+ * - Totais e método de pagamento
+ * - Ações admin (alterar estado)
  */
 @Component({
   selector: 'app-order-detail',
@@ -98,8 +98,8 @@ export class OrderDetailComponent implements OnInit {
     if (!orderId) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'ID de orden no válido'
+        summary: 'Erro',
+        detail: 'ID de pedido inválido'
       });
       this.router.navigate(['/admin/orders']);
       return;
@@ -109,7 +109,7 @@ export class OrderDetailComponent implements OnInit {
   }
 
   /**
-   * Carga la orden por ID
+   * Carrega o pedido por ID
    */
   loadOrder(id: string): void {
     this.loading = true;
@@ -121,10 +121,10 @@ export class OrderDetailComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error al cargar orden:', error);
+        console.error('Erro ao carregando pedido:', error);
         this.loading = false;
-        // El error.interceptor ya muestra el toast de error
-        // Redirigir de vuelta a la lista después de un delay
+        // O error.interceptor já mostra o toast de erro
+        // Redirecionar de volta à lista depois de um delay
         setTimeout(() => {
           this.router.navigate(['/admin/orders']);
         }, 2000);
@@ -133,14 +133,14 @@ export class OrderDetailComponent implements OnInit {
   }
 
   /**
-   * Volver a la lista de órdenes
+   * Voltar à lista de pedidos
    */
   goBack(): void {
     this.router.navigate(['/admin/orders']);
   }
 
   /**
-   * Cambiar estado de la orden
+   * Alterar estado do pedido
    */
   changeStatus(): void {
     if (!this.order || !this.selectedStatus || this.selectedStatus === this.order.status) {
@@ -156,26 +156,26 @@ export class OrderDetailComponent implements OnInit {
 
         this.messageService.add({
           severity: 'success',
-          summary: 'Estado Actualizado',
-          detail: `La orden se actualizó a ${formatOrderStatus(updatedOrder.status)}`
+          summary: 'Estado Atualizado',
+          detail: `O pedido foi atualizado para ${formatOrderStatus(updatedOrder.status)}`
         });
 
         this.updatingStatus = false;
       },
       error: (error) => {
-        console.error('Error al actualizar estado:', error);
-        // Resetear el dropdown al estado original
+        console.error('Erro ao atualizar estado:', error);
+        // Resetar o dropdown para o estado original
         if (this.order) {
           this.selectedStatus = this.order.status;
         }
         this.updatingStatus = false;
-        // El error.interceptor ya muestra el toast de error
+        // O error.interceptor já mostra o toast de erro
       }
     });
   }
 
   /**
-   * Formatea una fecha a string largo (DD/MM/YYYY, HH:MM)
+   * Formata uma data para string longo (DD/MM/YYYY, HH:MM)
    */
   formatDateLong(date: Date): string {
     if (!date) return '-';
@@ -191,7 +191,7 @@ export class OrderDetailComponent implements OnInit {
   }
 
   /**
-   * Formatea un número a moneda (real brasileño)
+   * Formata um número para moeda (real brasileiro)
    */
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('pt-BR', {
@@ -201,7 +201,7 @@ export class OrderDetailComponent implements OnInit {
   }
 
   /**
-   * Calcula el total de items en la orden
+   * Calcula o total de itens no pedido
    */
   getTotalItems(): number {
     if (!this.order) return 0;
@@ -209,7 +209,7 @@ export class OrderDetailComponent implements OnInit {
   }
 
   /**
-   * Abre el modal con el perfil actual del usuario (solo si no es guest)
+   * Abre o modal com o perfil atual do usuário (apenas se não for guest)
    */
   viewUserProfile(): void {
     if (!this.order || !this.order.userId) {
@@ -225,19 +225,19 @@ export class OrderDetailComponent implements OnInit {
         this.loadingUser.set(false);
       },
       error: (error) => {
-        console.error('Error al cargar usuario:', error);
+        console.error('Erro ao carregando usuário:', error);
         this.loadingUser.set(false);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo cargar el perfil del usuario'
+          summary: 'Erro',
+          detail: 'Não foi possível carregar o perfil do usuário'
         });
       }
     });
   }
 
   /**
-   * Cierra el modal de detalle de usuario
+   * Fecha o modal de detalhe do usuário
    */
   closeUserDetail(): void {
     this.showUserDetail.set(false);

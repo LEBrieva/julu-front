@@ -59,11 +59,11 @@
         />
 
         <!-- Título -->
-        <h1 class="page-title">REMERAS</h1>
+        <h1 class="page-title">CAMISETAS</h1>
 
         <!-- Controles derechos -->
         <div class="header-right-controls">
-          <!-- Ordenamiento -->
+          <!-- Ordenamento -->
           <p-select
             [(ngModel)]="sortBy"
             (onChange)="onSortChange($event)"
@@ -81,7 +81,7 @@
             [outlined]="true"
             severity="secondary"
             class="view-toggle-button"
-            pTooltip="Cambiar vista"
+            pTooltip="Mudar visualização"
             tooltipPosition="bottom"
           />
         </div>
@@ -95,7 +95,7 @@
           styleClass="w-16 h-16"
           strokeWidth="4"
         />
-        <p class="text-gray-600 mt-4 text-lg">Cargando remeras...</p>
+        <p class="text-gray-600 mt-4 text-lg">Carregando camisetas...</p>
       </div>
     }
 
@@ -105,7 +105,7 @@
         <i class="pi pi-exclamation-triangle text-6xl text-red-500"></i>
         <p class="text-red-600 mt-4 text-lg">{{ error() }}</p>
         <p-button
-          label="Reintentar"
+          label="Tentar Novamente"
           icon="pi pi-refresh"
           (onClick)="retryLoad()"
           severity="danger"
@@ -120,10 +120,10 @@
       <div class="state-container empty-state">
         <i class="pi pi-inbox text-8xl text-gray-400"></i>
         @if (activeFiltersCount() > 0) {
-          <p class="text-gray-700 mt-4 text-xl">No se encontraron remeras con estos filtros</p>
-          <p class="text-gray-500 mt-2">Prueba con otros filtros</p>
+          <p class="text-gray-700 mt-4 text-xl">Nenhuma camiseta encontrada com estes filtros</p>
+          <p class="text-gray-500 mt-2">Tente outros filtros</p>
           <p-button
-            label="Limpiar Filtros"
+            label="Limpar Filtros"
             icon="pi pi-times"
             (onClick)="onFiltersClear()"
             severity="secondary"
@@ -131,7 +131,7 @@
             class="mt-6"
           />
         } @else {
-          <p class="text-gray-700 mt-4 text-xl">No hay remeras disponibles en este momento</p>
+          <p class="text-gray-700 mt-4 text-xl">Nenhuma camiseta disponível no momento</p>
         }
       </div>
     }
@@ -174,7 +174,7 @@
           [rowsPerPageOptions]="rowsPerPageOptions"
           (onPageChange)="onPageChange($event)"
           [showCurrentPageReport]="true"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} remeras"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} camisetas"
         />
       </div>
     }

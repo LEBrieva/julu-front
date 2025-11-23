@@ -6,7 +6,7 @@
         styleClass="w-16 h-16"
         strokeWidth="4"
       />
-      <p class="text-gray-600 mt-4 text-lg">Cargando producto...</p>
+      <p class="text-gray-600 mt-4 text-lg">Carregando produto...</p>
     </div>
   }
 
@@ -17,14 +17,14 @@
       <p class="text-red-600 mt-4 text-xl">{{ error() }}</p>
       <div class="flex gap-3 mt-6">
         <p-button
-          label="Volver al catálogo"
+          label="Voltar ao Catálogo"
           icon="pi pi-arrow-left"
           (onClick)="goBack()"
           severity="secondary"
           [outlined]="true"
         />
         <p-button
-          label="Reintentar"
+          label="Tentar Novamente"
           icon="pi pi-refresh"
           (onClick)="retry()"
           severity="danger"
@@ -89,9 +89,9 @@
             <span class="reviews-text">{{ reviewsCount() }} reviews</span>
           </div>
 
-          <!-- 4. Color Selector -->
+          <!-- 4. Seletor de Cor -->
           <div class="option-group">
-            <label class="option-label">Color</label>
+            <label class="option-label">Cor</label>
             <div class="color-chips">
               @for (color of availableColors(); track color) {
                 <button
@@ -112,12 +112,12 @@
             }
           </div>
 
-          <!-- 5. Size Selector -->
+          <!-- 5. Seletor de Tamanho -->
           <div class="option-group">
             <div class="option-header">
-              <label class="option-label">Size</label>
+              <label class="option-label">Tamanho</label>
               <button class="size-guide-link">
-                Size Guide <i class="pi pi-angle-right"></i>
+                Guia de Tamanho <i class="pi pi-angle-right"></i>
               </button>
             </div>
             <div class="size-buttons">
@@ -134,9 +134,9 @@
             </div>
           </div>
 
-          <!-- 6. Quantity -->
+          <!-- 6. Quantidade -->
           <div class="option-group">
-            <label class="option-label">Quantity</label>
+            <label class="option-label">Quantidade</label>
             <p-inputNumber
               [(ngModel)]="quantity"
               [showButtons]="true"
@@ -148,7 +148,7 @@
               [disabled]="!selectedVariant()"
             />
             @if (selectedVariant()) {
-              <span class="stock-info-text">{{ selectedVariant()!.stock }} in stock</span>
+              <span class="stock-info-text">{{ selectedVariant()!.stock }} em estoque</span>
             }
           </div>
 
@@ -168,40 +168,40 @@
               [outlined]="true"
               severity="secondary"
               size="large"
-              pTooltip="Add to favorites"
+              pTooltip="Adicionar aos favoritos"
             />
           </div>
         </div>
       </div>
 
-      <!-- Tabs Section (Product Description, Reviews, Shipping, Returns) -->
+      <!-- Seção de Abas (Descrição do Produto, Avaliações, Entrega, Devoluções) -->
       <div class="product-tabs-section">
         <p-tabs value="0">
           <p-tablist>
-            <p-tab value="0">Product Description</p-tab>
-            <p-tab value="1">Customer Reviews</p-tab>
-            <p-tab value="2">Shipping Information</p-tab>
-            <p-tab value="3">Return Policy</p-tab>
+            <p-tab value="0">Descrição</p-tab>
+            <p-tab value="1">Avaliações</p-tab>
+            <p-tab value="2">Entrega</p-tab>
+            <p-tab value="3">Devolução</p-tab>
           </p-tablist>
 
           <p-tabpanels>
-            <!-- Tab 1: Product Description -->
+            <!-- Aba 1: Descrição do Produto -->
             <p-tabpanel value="0">
               <div class="tab-content">
                 <p class="tab-content-text">
-                  {{ product()?.description || 'No description available for this product.' }}
+                  {{ product()?.description || 'Nenhuma descrição disponível para este produto.' }}
                 </p>
 
-                <h4 class="tab-content-subtitle">Specifications</h4>
+                <h4 class="tab-content-subtitle">Especificações</h4>
                 <div class="specs-grid">
                   <div class="spec-item">
-                    <strong>Category:</strong> {{ formatEnumValue(product()!.category) }}
+                    <strong>Categoria:</strong> {{ formatEnumValue(product()!.category) }}
                   </div>
                   <div class="spec-item">
-                    <strong>Style:</strong> {{ formatStyle(product()!.style) }}
+                    <strong>Estilo:</strong> {{ formatStyle(product()!.style) }}
                   </div>
                   <div class="spec-item">
-                    <strong>Code:</strong> {{ product()!.code }}
+                    <strong>Código:</strong> {{ product()!.code }}
                   </div>
                 </div>
 
@@ -216,41 +216,41 @@
               </div>
             </p-tabpanel>
 
-            <!-- Tab 2: Customer Reviews -->
+            <!-- Aba 2: Avaliações de Clientes -->
             <p-tabpanel value="1">
               <div class="tab-content">
                 <div class="reviews-placeholder">
                   <p class="text-gray-500 italic mb-4">
-                    Review system will be available in future phases.
+                    O sistema de avaliações estará disponível em fases futuras.
                   </p>
                   <div class="review-summary">
-                    <p><strong>Average Rating:</strong> {{ rating() }}/5.0 ★★★★☆</p>
-                    <p><strong>Total Reviews:</strong> {{ reviewsCount() }}</p>
+                    <p><strong>Classificação Média:</strong> {{ rating() }}/5.0 ★★★★☆</p>
+                    <p><strong>Total de Avaliações:</strong> {{ reviewsCount() }}</p>
                   </div>
                 </div>
               </div>
             </p-tabpanel>
 
-            <!-- Tab 3: Shipping Information -->
+            <!-- Aba 3: Informações de Entrega -->
             <p-tabpanel value="2">
               <div class="tab-content">
                 <p class="tab-content-text">
-                  Free shipping on orders over $50.
+                  Frete grátis em compras acima de R$ 200.
                 </p>
                 <p class="tab-content-text">
-                  Estimated delivery: 3-5 business days.
+                  Entrega estimada: 3-5 dias úteis.
                 </p>
               </div>
             </p-tabpanel>
 
-            <!-- Tab 4: Return Policy -->
+            <!-- Aba 4: Política de Devoluções -->
             <p-tabpanel value="3">
               <div class="tab-content">
                 <p class="tab-content-text">
-                  30-day return policy. Items must be in original condition with tags attached.
+                  Política de devolução de 30 dias. Os produtos devem estar em condições originais com etiquetas anexadas.
                 </p>
                 <p class="tab-content-text">
-                  Refunds will be processed within 5-7 business days after we receive your return.
+                  Os reembolsos serão processados em 5-7 dias úteis após recebermos sua devolução.
                 </p>
               </div>
             </p-tabpanel>
@@ -258,9 +258,9 @@
         </p-tabs>
       </div>
 
-      <!-- RELATED PRODUCTS SECTION (FASE 8c) -->
+      <!-- SEÇÃO DE PRODUTOS RELACIONADOS (FASE 8c) -->
       <div class="related-products-section">
-        <h2 class="related-products-title">Productos Relacionados</h2>
+        <h2 class="related-products-title">Produtos Relacionados</h2>
 
         @if (relatedLoading()) {
           <div class="related-loading">
@@ -268,7 +268,7 @@
               styleClass="w-12 h-12"
               strokeWidth="4"
             />
-            <p class="text-gray-600 mt-3">Cargando productos relacionados...</p>
+            <p class="text-gray-600 mt-3">Carregando produtos relacionados...</p>
           </div>
         } @else if (relatedError()) {
           <div class="related-error">
@@ -298,7 +298,7 @@
         } @else {
           <div class="related-empty">
             <i class="pi pi-inbox text-gray-400 text-4xl"></i>
-            <p class="text-gray-500 mt-3">No hay productos relacionados disponibles</p>
+            <p class="text-gray-500 mt-3">Nenhum produto relacionado disponível</p>
           </div>
         }
       </div>

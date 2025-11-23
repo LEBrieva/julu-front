@@ -1,4 +1,4 @@
-<!-- Toast para notificaciones -->
+<!-- Toast para notificações -->
 <p-toast />
 
 <!-- Loading skeleton -->
@@ -16,14 +16,14 @@
   </div>
 }
 
-<!-- Contenido principal (solo si cargó) -->
+<!-- Conteúdo principal (apenas se carregou) -->
 @if (!loading && order) {
   <div class="p-4">
     <!-- Header -->
     <div class="mb-6">
-      <!-- Botón volver -->
+      <!-- Botão voltar -->
       <p-button
-        label="Volver a Órdenes"
+        label="Voltar para Pedidos"
         icon="pi pi-arrow-left"
         severity="secondary"
         [text]="true"
@@ -31,14 +31,14 @@
         styleClass="mb-4"
       />
 
-      <!-- Título con número de orden -->
+      <!-- Título com número de pedido -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold text-gray-800 mb-2">
             {{ order.orderNumber }}
           </h1>
           <p class="text-gray-600">
-            Creada: {{ formatDateLong(order.createdAt) }}
+            Criado: {{ formatDateLong(order.createdAt) }}
           </p>
         </div>
 
@@ -58,16 +58,16 @@
       </div>
     </div>
 
-    <!-- Grid principal: Info + Productos -->
+    <!-- Grid principal: Info + Produtos -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-      <!-- Columna izquierda: Info Cliente + Dirección -->
+      <!-- Coluna esquerda: Info Cliente + Endereço -->
       <div class="lg:col-span-2 space-y-4">
-        <!-- Card: Información del Cliente -->
-        <p-card header="Información del Cliente">
+        <!-- Card: Informações do Cliente -->
+        <p-card header="Informações do Cliente">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="text-sm font-medium text-gray-600 block mb-1">
-                Nombre Completo
+                Nome Completo
               </label>
               <p class="text-gray-900 font-medium">
                 {{ order.shippingAddress.fullName }}
@@ -76,7 +76,7 @@
 
             <div>
               <label class="text-sm font-medium text-gray-600 block mb-1">
-                Email
+                E-mail
               </label>
               <p class="text-gray-900">
                 {{ order.shippingAddress.email }}
@@ -85,26 +85,26 @@
 
             <div>
               <label class="text-sm font-medium text-gray-600 block mb-1">
-                Teléfono
+                Telefone
               </label>
               <p class="text-gray-900">
                 {{ order.shippingAddress.phone }}
               </p>
             </div>
 
-            <!-- Tipo de orden + Botón ver perfil (solo si no es guest) -->
+            <!-- Tipo de pedido + Botão ver perfil (apenas se não for guest) -->
             <div>
               <label class="text-sm font-medium text-gray-600 block mb-1">
-                Tipo de Orden
+                Tipo de Pedido
               </label>
               <div class="flex items-center gap-2">
                 <p-tag
-                  [value]="order.isGuest ? 'Invitado' : 'Registrado'"
+                  [value]="order.isGuest ? 'Visitante' : 'Registrado'"
                   [severity]="order.isGuest ? 'secondary' : 'info'"
                 />
                 @if (!order.isGuest && order.userId) {
                   <p-button
-                    label="Ver perfil actual"
+                    label="Ver perfil atual"
                     icon="pi pi-user"
                     size="small"
                     [text]="true"
@@ -117,8 +117,8 @@
           </div>
         </p-card>
 
-        <!-- Card: Dirección de Envío -->
-        <p-card header="Dirección de Envío">
+        <!-- Card: Endereço de Entrega -->
+        <p-card header="Endereço de Entrega">
           <div class="space-y-2">
             <p class="text-gray-900 font-medium">
               {{ order.shippingAddress.fullName }}
@@ -139,10 +139,10 @@
         </p-card>
       </div>
 
-      <!-- Columna derecha: Totales + Acciones -->
+      <!-- Coluna direita: Totais + Ações -->
       <div class="space-y-4">
-        <!-- Card: Resumen de Totales -->
-        <p-card header="Resumen">
+        <!-- Card: Resumo de Totais -->
+        <p-card header="Resumo">
           <div class="space-y-3">
             <!-- Subtotal -->
             <div class="flex justify-between items-center pb-2">
@@ -150,9 +150,9 @@
               <span class="font-medium">{{ formatCurrency(order.subtotal) }}</span>
             </div>
 
-            <!-- Envío -->
+            <!-- Entrega -->
             <div class="flex justify-between items-center pb-2">
-              <span class="text-gray-600">Envío:</span>
+              <span class="text-gray-600">Entrega:</span>
               <span class="font-medium">{{ formatCurrency(order.shippingCost) }}</span>
             </div>
 
@@ -164,7 +164,7 @@
               </span>
             </div>
 
-            <!-- Método de pago -->
+            <!-- Método de pagamento -->
             <div class="pt-3 border-t border-gray-200">
               <div class="flex items-center gap-2">
                 <i [class]="'pi ' + getPaymentMethodIcon(order.paymentMethod) + ' text-gray-600'"></i>
@@ -174,22 +174,22 @@
               </div>
             </div>
 
-            <!-- Total de items -->
+            <!-- Total de itens -->
             <div class="pt-2">
               <div class="flex items-center gap-2 text-sm text-gray-600">
                 <i class="pi pi-shopping-cart"></i>
-                <span>{{ getTotalItems() }} producto(s)</span>
+                <span>{{ getTotalItems() }} produto(s)</span>
               </div>
             </div>
           </div>
         </p-card>
 
-        <!-- Card: Acciones Admin -->
-        <p-card header="Acciones Admin">
+        <!-- Card: Ações Admin -->
+        <p-card header="Ações Admin">
           <div class="space-y-3">
-            <div class="mb-2"> 
+            <div class="mb-2">
               <label for="status" class="text-sm font-medium text-gray-700 block mb-2">
-                Cambiar Estado
+                Alterar Estado
               </label>
               <p-select
                 id="status"
@@ -197,7 +197,7 @@
                 [(ngModel)]="selectedStatus"
                 optionLabel="label"
                 optionValue="value"
-                placeholder="Selecciona estado"
+                placeholder="Selecione estado"
                 [showClear]="false"
                 [disabled]="updatingStatus"
                 styleClass="w-full"
@@ -205,7 +205,7 @@
             </div>
 
             <p-button
-              label="Guardar Cambios"
+              label="Salvar Alterações"
               icon="pi pi-check"
               severity="success"
               (onClick)="changeStatus()"
@@ -218,8 +218,8 @@
       </div>
     </div>
 
-    <!-- Card: Productos -->
-    <p-card header="Productos ({{ order.items.length }} items)">
+    <!-- Card: Produtos -->
+    <p-card header="Produtos ({{ order.items.length }} itens)">
       <p-table
         [value]="order.items"
         [tableStyle]="{ 'min-width': '50rem' }"
@@ -227,18 +227,18 @@
       >
         <ng-template pTemplate="header">
           <tr>
-            <th class="font-semibold" style="width: 5rem">Imagen</th>
-            <th class="font-semibold" style="min-width: 15rem">Producto</th>
+            <th class="font-semibold" style="width: 5rem">Imagem</th>
+            <th class="font-semibold" style="min-width: 15rem">Produto</th>
             <th class="font-semibold" style="min-width: 10rem">Variante</th>
-            <th class="font-semibold text-center" style="width: 8rem">Cantidad</th>
-            <th class="font-semibold text-right" style="width: 10rem">Precio Unit.</th>
+            <th class="font-semibold text-center" style="width: 8rem">Quantidade</th>
+            <th class="font-semibold text-right" style="width: 10rem">Preço Un.</th>
             <th class="font-semibold text-right" style="width: 10rem">Subtotal</th>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="body" let-item>
           <tr>
-            <!-- Imagen -->
+            <!-- Imagem -->
             <td>
               @if (item.productImage) {
                 <img
@@ -253,32 +253,32 @@
               }
             </td>
 
-            <!-- Nombre del producto -->
+            <!-- Nome do produto -->
             <td>
               <span class="font-medium text-gray-900">{{ item.productName }}</span>
               <div class="text-xs text-gray-500 mt-1">SKU: {{ item.variantSKU }}</div>
             </td>
 
-            <!-- Variante (talla + color) -->
+            <!-- Variante (tamanho + cor) -->
             <td>
               <div class="space-y-1">
                 <div class="text-sm">
-                  <span class="text-gray-600">Talla:</span>
+                  <span class="text-gray-600">Tamanho:</span>
                   <span class="font-medium ml-1">{{ item.variantSize }}</span>
                 </div>
                 <div class="text-sm">
-                  <span class="text-gray-600">Color:</span>
+                  <span class="text-gray-600">Cor:</span>
                   <span class="font-medium ml-1">{{ item.variantColor }}</span>
                 </div>
               </div>
             </td>
 
-            <!-- Cantidad -->
+            <!-- Quantidade -->
             <td class="text-center">
               <span class="font-semibold text-lg">{{ item.quantity }}</span>
             </td>
 
-            <!-- Precio unitario -->
+            <!-- Preço unitário -->
             <td class="text-right">
               <span class="font-medium">{{ formatCurrency(item.price) }}</span>
             </td>
@@ -294,7 +294,7 @@
       </p-table>
     </p-card>
 
-    <!-- Notas (si existen) -->
+    <!-- Notas (se existirem) -->
     @if (order.notes) {
       <p-card header="Notas" styleClass="mt-4">
         <p class="text-gray-700 whitespace-pre-wrap">{{ order.notes }}</p>
@@ -303,7 +303,7 @@
   </div>
 }
 
-<!-- Modal de detalle del usuario (readonly) -->
+<!-- Modal de detalhe do usuário (readonly) -->
 <app-user-detail
   [user]="selectedUser()"
   [visible]="showUserDetail()"

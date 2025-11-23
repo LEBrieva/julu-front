@@ -38,14 +38,14 @@ import {
 import { PaginationInfo } from '../../../core/models/api-response.model';
 
 /**
- * AdminOrdersComponent - Lista de órdenes (Admin)
+ * AdminOrdersComponent - Lista de pedidos (Admin)
  *
  * Funcionalidades:
- * - DataTable con paginación server-side
- * - Búsqueda por número de orden
- * - Filtros: estado orden, estado pago, rango de fechas
- * - Cambio rápido de estado desde tabla
- * - Navegación a vista detalle
+ * - DataTable com paginação server-side
+ * - Busca por número de pedido
+ * - Filtros: estado do pedido, estado do pagamento, intervalo de datas
+ * - Mudança rápida de estado da tabela
+ * - Navegação para vista detalhada
  */
 @Component({
   selector: 'app-admin-orders',
@@ -90,8 +90,8 @@ export class AdminOrdersComponent implements OnInit {
   searchTerm = '';
   selectedStatus: OrderStatus | null = null;
   selectedPaymentStatus: PaymentStatus | null = null;
-  selectedOrderType: boolean | null = null; // null = todas, true = guest, false = registered
-  dateRange: Date[] | null = null; // [fechaDesde, fechaHasta]
+  selectedOrderType: boolean | null = null; // null = todos, true = guest, false = registered
+  dateRange: Date[] | null = null; // [dataDesde, dataAté]
 
   // Pagination
   totalRecords = 0;
@@ -129,7 +129,7 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Carga órdenes con paginación y filtros
+   * Carrega pedidos com paginação e filtros
    */
   loadOrders(page: number, rows: number): void {
     this.loading = true;
@@ -140,12 +140,12 @@ export class AdminOrdersComponent implements OnInit {
       limit: rows
     };
 
-    // Agregar búsqueda (solo si hay texto)
+    // Adicionar busca (só se houver texto)
     if (this.searchTerm.trim()) {
       filters.search = this.searchTerm.trim();
     }
 
-    // Agregar filtros de estado
+    // Adicionar filtros de estado
     if (this.selectedStatus) {
       filters.status = this.selectedStatus;
     }
@@ -153,14 +153,14 @@ export class AdminOrdersComponent implements OnInit {
       filters.paymentStatus = this.selectedPaymentStatus;
     }
 
-    // Agregar filtros de fecha (rango)
+    // Adicionar filtros de data (intervalo)
     if (this.dateRange && this.dateRange.length === 2 && this.dateRange[0] && this.dateRange[1]) {
-      // Convertir fechas a ISO strings (YYYY-MM-DD)
+      // Converter datas para ISO strings (YYYY-MM-DD)
       filters.dateFrom = this.dateRange[0].toISOString().split('T')[0];
       filters.dateTo = this.dateRange[1].toISOString().split('T')[0];
     }
 
-    // Agregar filtro de tipo de orden (guest vs registered)
+    // Adicionar filtro de tipo de pedido (guest vs registered)
     if (this.selectedOrderType !== null) {
       filters.isGuest = this.selectedOrderType;
     }
@@ -173,16 +173,16 @@ export class AdminOrdersComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error al cargar órdenes:', error);
+        console.error('Erro ao carregando pedidos:', error);
         this.loading = false;
-        // El error.interceptor ya muestra el toast de error
+        // O error.interceptor já mostra o toast de erro
       }
     });
   }
 
   /**
    * Handler de lazy loading de PrimeNG Table
-   * Se dispara automáticamente al cambiar página, ordenar, etc.
+   * Acionado automaticamente ao mudar página, ordenar, etc.
    */
   onLazyLoad(event: TableLazyLoadEvent): void {
     const page = event.first !== undefined && event.rows !== undefined && event.rows !== null
@@ -197,27 +197,27 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Handler de búsqueda (con debounce manual)
+   * Handler de busca (com debounce manual)
    */
   onSearch(): void {
-    // Resetear a página 1 y recargar
+    // Resetar para página 1 e recarregar
     this.first = 0;
     this.currentPage = 1;
     this.loadOrders(1, this.rowsPerPage);
   }
 
   /**
-   * Handler de cambio de filtros (status, paymentStatus, dateRange)
+   * Handler de mudança de filtros (status, paymentStatus, dateRange)
    */
   onFilterChange(): void {
-    // Resetear a página 1 y recargar
+    // Resetar para página 1 e recarregar
     this.first = 0;
     this.currentPage = 1;
     this.loadOrders(1, this.rowsPerPage);
   }
 
   /**
-   * Limpiar todos los filtros
+   * Limpar todos os filtros
    */
   clearFilters(): void {
     this.searchTerm = '';
@@ -231,25 +231,25 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Navega a la vista detalle de una orden
+   * Navega para a vista detalhada de um pedido
    */
   viewOrderDetail(orderId: string): void {
     this.router.navigate(['/admin/orders', orderId]);
   }
 
   /**
-   * Verifica si se puede editar el estado de una orden
-   * No se pueden editar órdenes canceladas o entregadas (estados finales)
+   * Verifica se o estado de um pedido pode ser editado
+   * Não é possível editar pedidos cancelados ou entregues (estados finais)
    */
   canEditStatus(order: OrderListItem): boolean {
     return order.status !== OrderStatus.CANCELLED && order.status !== OrderStatus.DELIVERED;
   }
 
   /**
-   * Inicia el modo de edición del estado de una orden
+   * Inicia o modo de edição do estado de um pedido
    */
   startEditOrderStatus(order: OrderListItem): void {
-    // Solo permitir edición si el estado no es final
+    // Apenas permitir edição se o estado não for final
     if (!this.canEditStatus(order)) {
       return;
     }
@@ -259,12 +259,12 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Maneja el cambio de estado cuando se selecciona un nuevo valor
+   * Manipula a mudança de estado quando um novo valor é selecionado
    */
   onOrderStatusChange(order: OrderListItem): void {
     const newStatus = order.status;
 
-    // Si es el mismo estado, cancelar
+    // Se for o mesmo estado, cancelar
     if (newStatus === this.originalStatus) {
       this.editingOrderId = null;
       this.originalStatus = null;
@@ -274,25 +274,25 @@ export class AdminOrdersComponent implements OnInit {
     const newStatusLabel = formatOrderStatus(newStatus);
     const currentStatusLabel = formatOrderStatus(this.originalStatus!);
 
-    // Guardar cambio pendiente para mostrar en el headless dialog
+    // Guardar mudança pendente para mostrar no diálogo headless
     this.pendingStatusChange = {
       from: currentStatusLabel,
       to: newStatusLabel
     };
 
-    // Mostrar confirmación con headless template
+    // Mostrar confirmação com template headless
     this.confirmationService.confirm({
       key: 'changeStatus',
-      message: `¿Desea cambiar el estado de la orden ${order.orderNumber}?`,
-      header: 'Confirmar Cambio de Estado',
+      message: `Deseja alterar o estado do pedido ${order.orderNumber}?`,
+      header: 'Confirmar Mudança de Estado',
       icon: 'pi pi-refresh',
-      acceptLabel: 'Sí, cambiar',
+      acceptLabel: 'Sim, alterar',
       rejectLabel: 'Cancelar',
       accept: () => {
         this.updateOrderStatus(order, newStatus);
       },
       reject: () => {
-        // Cancelar: resetear al estado original
+        // Cancelar: resetar para o estado original
         order.status = this.originalStatus!;
         this.editingOrderId = null;
         this.originalStatus = null;
@@ -301,14 +301,14 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Actualiza el estado de una orden en el backend
+   * Atualiza o estado de um pedido no backend
    */
   private updateOrderStatus(order: OrderListItem, newStatus: OrderStatus): void {
     this.loading = true;
 
     this.orderService.updateOrderStatus(order.id, { status: newStatus }).subscribe({
       next: (updatedOrder) => {
-        // Actualizar orden en la lista local
+        // Atualizar pedido na lista local
         const index = this.orders.findIndex(o => o.id === order.id);
         if (index !== -1) {
           this.orders[index] = {
@@ -319,8 +319,8 @@ export class AdminOrdersComponent implements OnInit {
 
         this.messageService.add({
           severity: 'success',
-          summary: 'Estado Actualizado',
-          detail: `Orden ${order.orderNumber} actualizada a ${formatOrderStatus(newStatus)}`
+          summary: 'Estado Atualizado',
+          detail: `Pedido ${order.orderNumber} atualizado para ${formatOrderStatus(newStatus)}`
         });
 
         this.loading = false;
@@ -328,19 +328,19 @@ export class AdminOrdersComponent implements OnInit {
         this.originalStatus = null;
       },
       error: (error) => {
-        console.error('Error al actualizar estado:', error);
-        // Resetear al estado original
+        console.error('Erro ao atualizar estado:', error);
+        // Resetar para o estado original
         order.status = this.originalStatus!;
         this.loading = false;
         this.editingOrderId = null;
         this.originalStatus = null;
-        // El error.interceptor ya muestra el toast de error
+        // O error.interceptor já mostra o toast de erro
       }
     });
   }
 
   /**
-   * Formatea una fecha a string corto (DD/MM/YYYY)
+   * Formata uma data para string curto (DD/MM/YYYY)
    */
   formatDate(date: Date): string {
     if (!date) return '-';
@@ -354,7 +354,7 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   /**
-   * Formatea un número a moneda (real brasileño)
+   * Formata um número para moeda (real brasileiro)
    */
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('pt-BR', {

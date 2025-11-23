@@ -28,13 +28,13 @@ import { ProductCardComponent } from '../../../shared/components/product-card/pr
 import { truncateDescription, buildPageUrl, getMetaTagDescription } from '../../../shared/utils/seo.util';
 
 /**
- * ProductDetailComponent - Página de detalle de producto
+ * ProductDetailComponent - Página de detalhes do produto
  *
- * FASE 8c Sprint 3: Diseño estilo Poseidon
- * - Thumbnails verticales a la izquierda
- * - Imagen principal grande en el centro
- * - Panel de info a la derecha (rating, color, size, quantity, add to cart)
- * - Tabs debajo (Details, Reviews, Shipping)
+ * FASE 8c Sprint 3: Design estilo Poseidon
+ * - Miniaturas verticais à esquerda
+ * - Imagem principal grande no centro
+ * - Painel de informações à direita (classificação, cor, tamanho, quantidade, adicionar ao carrinho)
+ * - Abas abaixo (Detalhes, Avaliações, Entrega)
  */
 @Component({
   selector: 'app-product-detail',
@@ -167,20 +167,20 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   getColorHex = getColorHex;
 
   ngOnInit(): void {
-    // Subscribe to route params to reload product if ID changes
+    // Inscrever-se aos parâmetros da rota para recarregar o produto se o ID mudar
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
         this.loadProduct(id);
       } else {
-        this.error.set('ID de producto no válido');
+        this.error.set('ID do produto inválido');
         this.loading.set(false);
       }
     });
   }
 
   /**
-   * Carga el producto desde el backend
+   * Carrega o produto desde o backend
    */
   private loadProduct(id: string): void {
     this.loading.set(true);
@@ -191,32 +191,32 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.product.set(product);
         this.loading.set(false);
 
-        // FASE 8c: Update meta tags with product information
+        // FASE 8c: Atualizar meta tags com informações do produto
         this.updatePageMetaTags(product);
 
-        // FASE 8c: Cargar productos relacionados después de cargar el producto principal
+        // FASE 8c: Carregar produtos relacionados depois de carregar o produto principal
         this.loadRelatedProducts(product.category, product.id);
       },
       error: (err) => {
-        console.error('Error loading product:', err);
+        console.error('Erro ao carregar o produto:', err);
         this.error.set(
           err.status === 404
-            ? 'Producto no encontrado'
-            : 'Error al cargar el producto. Por favor, intenta nuevamente.'
+            ? 'Produto não encontrado'
+            : 'Erro ao carregar o produto. Por favor, tente novamente.'
         );
         this.loading.set(false);
 
-        // FASE 8c: Reset meta tags on error
+        // FASE 8c: Resetar meta tags em caso de erro
         this.resetPageMetaTags();
       }
     });
   }
 
   /**
-   * Carga productos relacionados de la misma categoría (FASE 8c)
+   * Carrega produtos relacionados da mesma categoria (FASE 8c)
    *
-   * @param category Categoría del producto actual
-   * @param excludeId ID del producto actual (para excluirlo)
+   * @param category Categoria do produto atual
+   * @param excludeId ID do produto atual (para excluir)
    */
   private loadRelatedProducts(category: string, excludeId: string): void {
     this.relatedLoading.set(true);
@@ -228,22 +228,22 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.relatedLoading.set(false);
       },
       error: (err) => {
-        console.error('Error loading related products:', err);
-        this.relatedError.set('No se pudieron cargar productos relacionados');
+        console.error('Erro ao carregar produtos relacionados:', err);
+        this.relatedError.set('Não foi possível carregar produtos relacionados');
         this.relatedLoading.set(false);
       }
     });
   }
 
   /**
-   * Volver al catálogo
+   * Voltar ao catálogo
    */
   goBack(): void {
     this.router.navigate(['/products']);
   }
 
   /**
-   * Reintentar carga del producto
+   * Tentar novamente o carregamento do produto
    */
   retry(): void {
     const id = this.productId();
@@ -253,14 +253,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Seleccionar imagen de la galería
+   * Selecionar imagem da galeria
    */
   selectImage(index: number): void {
     this.currentImageIndex.set(index);
   }
 
   /**
-   * Agregar al carrito (FASE 9)
+   * Adicionar ao carrinho (FASE 9)
    */
   addToCart(): void {
     const variant = this.selectedVariant();
@@ -270,8 +270,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (!variant || !product) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Selección Incompleta',
-        detail: 'Por favor selecciona talla y color'
+        summary: 'Seleção Incompleta',
+        detail: 'Por favor selecione tamanho e cor'
       });
       return;
     }
@@ -279,8 +279,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (variant.stock < qty) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Stock Insuficiente',
-        detail: `Solo quedan ${variant.stock} unidades disponibles`
+        summary: 'Estoque Insuficiente',
+        detail: `Apenas ${variant.stock} unidades disponíveis`
       });
       return;
     }
@@ -304,39 +304,39 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.cartService.addItem(request, snapshot).subscribe({
       next: () => {
         this.addingToCart.set(false);
-        // El toast ya se muestra desde el CartService
-        // Reiniciar cantidad a 1 después de agregar
+        // O toast já é exibido desde o CartService
+        // Reiniciar quantidade para 1 depois de adicionar
         this.quantity.set(1);
       },
       error: () => {
         this.addingToCart.set(false);
-        // El error ya se maneja en el CartService
+        // O erro já é tratado no CartService
       }
     });
   }
 
   // ===========================
-  // SEO META TAGS (FASE 8c)
+  // META TAGS SEO (FASE 8c)
   // ===========================
 
   /**
-   * Update page meta tags with product information
-   * Called after successfully loading product
+   * Atualizar meta tags da página com informações do produto
+   * Chamado após carregar o produto com sucesso
    *
-   * @param product - Loaded product object
+   * @param product - Objeto do produto carregado
    */
   private updatePageMetaTags(product: Product): void {
-    // 1. PAGE TITLE
-    // Format: "Remera Oversize Negra - Tu Tienda"
-    const pageTitle = `${product.name} - Tu Tienda`;
+    // 1. TÍTULO DA PÁGINA
+    // Formato: "Camiseta Oversize Preta - Minha Loja"
+    const pageTitle = `${product.name} - Minha Loja`;
     this.titleService.setTitle(pageTitle);
 
-    // 2. META DESCRIPTION
-    // Use product description truncated to 160 chars
+    // 2. META DESCRIÇÃO
+    // Usar descrição do produto truncada para 160 caracteres
     const metaDescription = getMetaTagDescription(product.description, 160);
     this.updateMetaTag('name', 'description', metaDescription);
 
-    // 3. OPEN GRAPH TAGS (for social sharing)
+    // 3. TAGS OPEN GRAPH (para compartilhamento em redes sociais)
     const currentUrl = buildPageUrl(this.router.url);
     const featuredImage = this.getFeaturedImageUrl(product);
 
@@ -346,38 +346,38 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     // og:description
     this.updateMetaTag('property', 'og:description', metaDescription);
 
-    // og:image - Use featured/first image
+    // og:image - Usar imagem destacada/primeira
     this.updateMetaTag('property', 'og:image', featuredImage);
 
-    // og:url - Current page URL
+    // og:url - URL da página atual
     this.updateMetaTag('property', 'og:url', currentUrl);
 
-    // og:type - Type is "product"
+    // og:type - Tipo é "product"
     this.updateMetaTag('property', 'og:type', 'product');
 
-    // 4. TWITTER CARD TAGS
+    // 4. TAGS DO TWITTER CARD
     this.updateMetaTag('name', 'twitter:card', 'summary_large_image');
     this.updateMetaTag('name', 'twitter:title', pageTitle);
     this.updateMetaTag('name', 'twitter:description', metaDescription);
     this.updateMetaTag('name', 'twitter:image', featuredImage);
 
-    // 5. ADDITIONAL SEO TAGS (optional but recommended)
-    // Keywords (if available from tags)
+    // 5. TAGS SEO ADICIONAIS (opcional mas recomendado)
+    // Palavras-chave (se disponível das tags)
     if (product.tags && product.tags.length > 0) {
       const keywords = product.tags.join(', ');
       this.updateMetaTag('name', 'keywords', keywords);
     }
 
-    // Category in structured data format
+    // Categoria em formato de dados estruturados
     this.updateMetaTag('property', 'product:category', product.category);
   }
 
   /**
-   * Get the featured/first product image URL
-   * Falls back to placeholder if no images
+   * Obter a URL da imagem destaque/primeira do produto
+   * Volta para o placeholder se não houver imagens
    *
-   * @param product - Product object
-   * @returns URL of featured image
+   * @param product - Objeto do produto
+   * @returns URL da imagem destacada
    */
   private getFeaturedImageUrl(product: Product): string {
     if (!product.images || product.images.length === 0) {
@@ -389,22 +389,22 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Update or create a meta tag
-   * Handles both 'name' and 'property' attributes
+   * Atualizar ou criar uma meta tag
+   * Manipula ambos os atributos 'name' e 'property'
    *
-   * @param attrType - Either 'name' or 'property'
-   * @param attrName - Attribute name (e.g., 'description', 'og:title')
-   * @param value - Attribute value
+   * @param attrType - 'name' ou 'property'
+   * @param attrName - Nome do atributo (ex: 'description', 'og:title')
+   * @param value - Valor do atributo
    */
   private updateMetaTag(
     attrType: 'name' | 'property',
     attrName: string,
     value: string
   ): void {
-    // First, try to remove existing tag with same name/property
+    // Primeiro, tente remover a tag existente com o mesmo name/property
     this.metaService.removeTag(`${attrType}='${attrName}'`);
 
-    // Then add new tag
+    // Depois adicione a nova tag
     if (attrType === 'name') {
       this.metaService.addTag({ name: attrName, content: value });
     } else {
@@ -413,14 +413,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Reset meta tags to default/blank state
-   * Called on component destroy
+   * Resetar meta tags para estado padrão/em branco
+   * Chamado ao destruir o componente
    */
   private resetPageMetaTags(): void {
-    // Reset title to app default
-    this.titleService.setTitle('Tu Tienda - E-Commerce');
+    // Resetar título para o padrão da aplicação
+    this.titleService.setTitle('Minha Loja - E-Commerce');
 
-    // Remove dynamic meta tags
+    // Remover meta tags dinâmicas
     const metaTags = [
       'description',
       'og:title',
@@ -446,8 +446,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cleanup lifecycle hook
-   * Resets meta tags when leaving the component
+   * Hook do ciclo de vida para limpeza
+   * Reseta meta tags ao sair do componente
    */
   ngOnDestroy(): void {
     this.resetPageMetaTags();

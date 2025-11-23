@@ -1,7 +1,7 @@
-<!-- Toasts para notificaciones -->
+<!-- Toasts para notificações -->
 <p-toast></p-toast>
 
-<!-- Confirmación para activar/desactivar con template headless -->
+<!-- Confirmação para ativar/desativar com template headless -->
 <p-confirmDialog key="toggleStatus">
   <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
     <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
@@ -35,7 +35,7 @@
   </ng-template>
 </p-confirmDialog>
 
-<!-- Confirmación para destacar productos con template headless -->
+<!-- Confirmação para destacar produtos com template headless -->
 <p-confirmDialog key="destacado">
   <ng-template #headless let-message let-onAccept="onAccept" let-onReject="onReject">
     <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
@@ -47,7 +47,7 @@
 
       @if (showDestacadoNote) {
         <div class="destacado-note mt-4">
-          <p class="mb-0">Solo puede haber hasta 12 productos destacados. Si ya hay 12, debes desactivar otro primero.</p>
+          <p class="mb-0">Pode haver no máximo 12 produtos em destaque. Se já houver 12, você deve desativar outro primeiro.</p>
         </div>
       }
 
@@ -68,20 +68,20 @@
   </ng-template>
 </p-confirmDialog>
 
-<!-- Contenedor principal -->
+<!-- Container principal -->
 <div class="products-container">
-  <!-- Header con título y botón crear -->
+  <!-- Header com título e botão criar -->
   <div class="page-header">
     <div class="header-left">
       <h1 class="page-title">
         <i class="pi pi-box"></i>
-        Productos
+        Produtos
       </h1>
-      <p class="page-subtitle">Gestión de catálogo de productos</p>
+      <p class="page-subtitle">Gestão do catálogo de produtos</p>
     </div>
     <div class="header-right">
       <p-button
-        label="Nuevo Producto"
+        label="Novo Produto"
         icon="pi pi-plus"
         (onClick)="createProduct()"
         severity="success"
@@ -89,7 +89,7 @@
     </div>
   </div>
 
-  <!-- Filtros y búsqueda -->
+  <!-- Filtros e busca -->
   <div class="filters-section">
     <div class="search-container">
       <p-iconfield class="search-input">
@@ -99,7 +99,7 @@
           type="text"
           [(ngModel)]="searchTerm"
           (keyup.enter)="onSearch()"
-          placeholder="Buscar por nombre, código o descripción..."
+          placeholder="Buscar por nome, código ou descrição..."
           class="w-full"
         />
       </p-iconfield>
@@ -111,7 +111,7 @@
       ></p-button>
       @if (searchTerm) {
         <p-button
-          label="Limpiar"
+          label="Limpar"
           icon="pi pi-times"
           (onClick)="clearSearch()"
           severity="secondary"
@@ -121,7 +121,7 @@
     </div>
   </div>
 
-  <!-- Tabla de productos -->
+  <!-- Tabela de produtos -->
   <div class="table-container">
     <p-table
       [value]="products"
@@ -134,29 +134,29 @@
       (onLazyLoad)="onPageChange($event)"
       [rowsPerPageOptions]="[10, 25, 50]"
       [showCurrentPageReport]="true"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} produtos"
       responsiveLayout="scroll"
       styleClass="p-datatable-gridlines"
     >
-      <!-- Template cuando no hay datos -->
+      <!-- Template quando não há dados -->
       <ng-template pTemplate="emptymessage">
         <tr>
           <td colspan="10" class="text-center">
             <div class="empty-state">
               <i class="pi pi-inbox"></i>
               @if (searchTerm) {
-                <p>No se encontraron productos que coincidan con "{{ searchTerm }}"</p>
+                <p>Nenhum produto encontrado que corresponda a "{{ searchTerm }}"</p>
                 <p-button
-                  label="Limpiar búsqueda"
+                  label="Limpar busca"
                   icon="pi pi-times"
                   (onClick)="clearSearch()"
                   severity="secondary"
                   [text]="true"
                 ></p-button>
               } @else {
-                <p>No hay productos registrados</p>
+                <p>Nenhum produto registrado</p>
                 <p-button
-                  label="Crear primer producto"
+                  label="Criar primeiro produto"
                   icon="pi pi-plus"
                   (onClick)="createProduct()"
                   severity="success"
@@ -168,23 +168,23 @@
         </tr>
       </ng-template>
 
-      <!-- Columnas -->
+      <!-- Colunas -->
       <ng-template pTemplate="header">
         <tr>
           <th>Código</th>
-          <th>Nombre</th>
-          <th>Categoría</th>
+          <th>Nome</th>
+          <th>Categoria</th>
           <th>Estilo</th>
-          <th>Precio Base</th>
+          <th>Preço Base</th>
           <th class="text-center">Variantes</th>
-          <th class="text-center">Stock Total</th>
-          <th class="text-center">Destacado</th>
-          <th class="text-center">Estado</th>
-          <th class="text-center">Acciones</th>
+          <th class="text-center">Estoque Total</th>
+          <th class="text-center">Destaque</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Ações</th>
         </tr>
       </ng-template>
 
-      <!-- Rows -->
+      <!-- Linhas -->
       <ng-template pTemplate="body" let-product>
         <tr>
           <!-- Código -->
@@ -192,7 +192,7 @@
             <span class="font-semibold">{{ product.code }}</span>
           </td>
 
-          <!-- Nombre -->
+          <!-- Nome -->
           <td>
             <div class="product-name-cell">
               <span class="product-name">{{ product.name }}</span>
@@ -209,7 +209,7 @@
             </div>
           </td>
 
-          <!-- Categoría -->
+          <!-- Categoria -->
           <td>
             <span class="capitalize">{{ formatEnumValue(product.category || 'N/A') }}</span>
           </td>
@@ -219,7 +219,7 @@
             <span class="capitalize">{{ formatEnumValue(product.style || 'N/A') }}</span>
           </td>
 
-          <!-- Precio Base -->
+          <!-- Preço Base -->
           <td>
             <span class="price">{{ product.basePrice | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
           </td>
@@ -233,27 +233,27 @@
             ></p-tag>
           </td>
 
-          <!-- Stock Total -->
+          <!-- Estoque Total -->
           <td class="text-center">
             <span class="font-semibold" [class.text-danger]="product.totalStock === 0">
               {{ product.totalStock }}
             </span>
           </td>
 
-          <!-- Destacado -->
+          <!-- Destaque -->
           <td class="text-center">
             <p-tag
-              [value]="product.destacado ? 'Destacado' : 'Regular'"
+              [value]="product.destacado ? 'Destaque' : 'Regular'"
               [severity]="product.destacado ? 'warn' : 'secondary'"
               [icon]="product.destacado ? 'pi pi-star-fill' : 'pi pi-star'"
               class="cursor-pointer hover:scale-105 transition-transform"
               (click)="onToggleDestacado(product)"
-              pTooltip="Click para cambiar"
+              pTooltip="Clique para alterar"
               tooltipPosition="top"
             ></p-tag>
           </td>
 
-          <!-- Estado -->
+          <!-- Status -->
           <td class="text-center">
             <p-tag
               [value]="formatEnumValue(product.status)"
@@ -261,17 +261,17 @@
             ></p-tag>
           </td>
 
-          <!-- Acciones -->
+          <!-- Ações -->
           <td class="actions-cell">
             <div class="action-buttons">
-              <!-- Ver -->
+              <!-- Visualizar -->
               <p-button
                 icon="pi pi-eye"
                 [text]="true"
                 [rounded]="true"
                 severity="info"
                 (onClick)="viewProduct(product)"
-                pTooltip="Ver detalle"
+                pTooltip="Ver detalhes"
                 tooltipPosition="top"
               ></p-button>
 
@@ -286,7 +286,7 @@
                 tooltipPosition="top"
               ></p-button>
 
-              <!-- Toggle Estado (Activar/Desactivar) -->
+              <!-- Toggle Status (Ativar/Desativar) -->
               <p-button
                 [icon]="getToggleButtonIcon(product.status)"
                 [text]="true"

@@ -107,8 +107,8 @@ export class HomeComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error al cargar productos destacados:', err);
-        this.error.set('No se pudieron cargar los productos destacados');
+        console.error('Erro ao carregar produtos em destaque:', err);
+        this.error.set('Não foi possível carregar os produtos em destaque');
         this.loading.set(false);
       }
     });

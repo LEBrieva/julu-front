@@ -51,14 +51,14 @@ import {
 import { getErrorMessage } from '../../../../shared/utils/form-errors.util';
 
 /**
- * ProductFormComponent - Formulario de Producto (Crear/Editar)
+ * ProductFormComponent - Formulário de Produto (Criar/Editar)
  *
  * Funcionalidades:
- * - Modo crear: /admin/products/new
+ * - Modo criar: /admin/products/new
  * - Modo editar: /admin/products/:id/edit
- * - Validaciones con reactive forms
- * - Dropdown dinámico de estilos según categoría
- * - En modo simplificado: crea 1 variante por defecto (M, negro, stock 0)
+ * - Validações com reactive forms
+ * - Dropdown dinâmico de estilos conforme categoria
+ * - Em modo simplificado: cria 1 variante por padrão (M, preto, estoque 0)
  */
 @Component({
   selector: 'app-product-form',
@@ -135,13 +135,13 @@ export class ProductFormComponent implements OnInit {
     { label: 'GG', value: ProductSize.GG },
   ];
 
-  // Opciones de color en español
+  // Opções de cor em português
   colorOptions = [
-    { label: 'Negro', value: ProductColor.BLACK },
-    { label: 'Blanco', value: ProductColor.WHITE },
-    { label: 'Gris', value: ProductColor.GRAY },
-    { label: 'Azul Marino', value: ProductColor.NAVY },
-    { label: 'Rojo', value: ProductColor.RED },
+    { label: 'Preto', value: ProductColor.BLACK },
+    { label: 'Branco', value: ProductColor.WHITE },
+    { label: 'Cinza', value: ProductColor.GRAY },
+    { label: 'Azul Marinho', value: ProductColor.NAVY },
+    { label: 'Vermelho', value: ProductColor.RED },
     { label: 'Azul', value: ProductColor.BLUE }
   ];
 
@@ -186,11 +186,11 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Carga el producto para editar
+   * Carrega o produto para editar
    */
   private loadProduct(id: string): void {
     this.isLoading.set(true);
-    this.productImages.set([]); // Limpiar imágenes anteriores
+    this.productImages.set([]); // Limpar imagens anteriores
 
     this.productService.getProductById(id).subscribe({
       next: (product) => {
@@ -198,11 +198,11 @@ export class ProductFormComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error cargando producto:', error);
+        console.error('Erro ao carregar produto:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo cargar el producto. Intenta nuevamente.'
+          summary: 'Erro',
+          detail: 'Não foi possível carregar o produto. Tente novamente.'
         });
         this.isLoading.set(false);
         this.goBack();
@@ -211,7 +211,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Rellena el formulario con los datos del producto
+   * Preenche o formulário com os dados do produto
    */
   private populateForm(product: Product): void {
     this.currentProduct = product; // Guardar producto completo para acceso a variantes
@@ -228,21 +228,21 @@ export class ProductFormComponent implements OnInit {
       destacado: product.destacado || false
     });
 
-    // Inicializar imágenes (asegurar que sea un array válido)
+    // Inicializar imagens (assegurar que seja um array válido)
     this.productImages.set(Array.isArray(product.images) ? product.images : []);
 
-    // Inicializar índice de imagen destacada
+    // Inicializar índice de imagem em destaque
     this.productFeaturedIndex.set(product.featuredImageIndex ?? 0);
 
-    // Actualizar estilos disponibles según la categoría cargada
+    // Atualizar estilos disponíveis conforme a categoria carregada
     if (product.category) {
       this.onCategoryChange(product.category);
     }
   }
 
   /**
-   * Maneja el cambio de categoría
-   * Actualiza los estilos disponibles según la categoría seleccionada
+   * Trata a mudança de categoria
+   * Atualiza os estilos disponíveis conforme a categoria selecionada
    */
   private onCategoryChange(category: ProductCategory): void {
     if (!category) {
@@ -250,14 +250,14 @@ export class ProductFormComponent implements OnInit {
       return;
     }
 
-    // Obtener estilos válidos para esta categoría
+    // Obter estilos válidos para esta categoria
     const validStyles = CATEGORY_STYLE_MAP[category] || [];
     this.availableStyleOptions = validStyles.map((style) => ({
       label: this.formatEnumValue(style),
       value: style
     }));
 
-    // Limpiar el campo de estilo si ya no es válido para la nueva categoría
+    // Limpar o campo de estilo se não for mais válido para a nova categoria
     const currentStyle = this.productForm.get('style')?.value;
     if (currentStyle && !validStyles.includes(currentStyle)) {
       this.productForm.patchValue({ style: '' });
@@ -265,7 +265,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Formatea un valor de enum para mostrar en UI
+   * Formata um valor de enum para mostrar na UI
    */
   private formatEnumValue(value: string): string {
     return value
@@ -275,24 +275,24 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Getter para acceder fácilmente a los controles del formulario
+   * Getter para acessar facilmente os controles do formulário
    */
   get f() {
     return this.productForm.controls;
   }
 
   /**
-   * Maneja el submit del formulario
+   * Trata o submit do formulário
    */
   onSubmit(): void {
-    // Marcar todos los campos como touched para mostrar errores
+    // Marcar todos os campos como touched para mostrar erros
     this.productForm.markAllAsTouched();
 
     if (this.productForm.invalid) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Formulario Inválido',
-        detail: 'Por favor corrige los errores antes de continuar.'
+        summary: 'Formulário Inválido',
+        detail: 'Por favor corrija os erros antes de continuar.'
       });
       return;
     }
@@ -307,17 +307,17 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Crea un nuevo producto
+   * Cria um novo produto
    */
   private createProduct(): void {
     const formValue = this.productForm.value;
 
-    // Validar que haya al menos 1 variante
+    // Validar que haja pelo menos 1 variante
     if (this.variants.length === 0) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Variantes Requeridas',
-        detail: 'Debes agregar al menos una variante antes de crear el producto.'
+        summary: 'Variantes Necessárias',
+        detail: 'Você deve adicionar pelo menos uma variante antes de criar o produto.'
       });
       this.isLoading.set(false);
       return;
@@ -338,23 +338,23 @@ export class ProductFormComponent implements OnInit {
       next: (product) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Producto Creado',
-          detail: `El producto "${product.name}" fue creado correctamente con ${this.variants.length} variante(s).`
+          summary: 'Produto Criado',
+          detail: `O produto "${product.name}" foi criado com sucesso com ${this.variants.length} variante(s).`
         });
         this.isLoading.set(false);
-        // Esperar un momento para que el usuario vea el mensaje
+        // Aguardar um momento para que o usuário veja a mensagem
         setTimeout(() => this.goBack(), 1500);
       },
       error: (error) => {
-        console.error('Error creando producto:', error);
+        console.error('Erro ao criar produto:', error);
         this.isLoading.set(false);
-        // El error.interceptor ya mostró el toast, solo loggeamos
+        // O error.interceptor já mostrou o toast, apenas fazemos log
       }
     });
   }
 
   /**
-   * Actualiza un producto existente
+   * Atualiza um produto existente
    */
   private updateProduct(): void {
     if (!this.productId) return;
@@ -377,30 +377,30 @@ export class ProductFormComponent implements OnInit {
       next: (product) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Producto Actualizado',
-          detail: `El producto "${product.name}" fue actualizado correctamente.`
+          summary: 'Produto Atualizado',
+          detail: `O produto "${product.name}" foi atualizado com sucesso.`
         });
         this.isLoading.set(false);
-        // Esperar un momento para que el usuario vea el mensaje
+        // Aguardar um momento para que o usuário veja a mensagem
         setTimeout(() => this.goBack(), 1500);
       },
       error: (error) => {
-        console.error('Error actualizando producto:', error);
+        console.error('Erro ao atualizar produto:', error);
         this.isLoading.set(false);
-        // El error.interceptor ya mostró el toast, solo loggeamos
+        // O error.interceptor já mostrou o toast, apenas fazemos log
       }
     });
   }
 
   /**
-   * Vuelve a la lista de productos
+   * Volta para a lista de produtos
    */
   goBack(): void {
     this.router.navigate(['/admin/products']);
   }
 
   /**
-   * Resetea el formulario
+   * Reseta o formulário
    */
   resetForm(): void {
     this.productForm.reset({
@@ -412,44 +412,44 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Agrega un tag al array cuando se presiona Enter
+   * Adiciona uma tag ao array quando Enter é pressionado
    */
   addTag(event: Event): void {
-    event.preventDefault(); // Previene submit del formulario
+    event.preventDefault(); // Previne submit do formulário
     event.stopPropagation();
 
     const tag = this.tagInput.trim();
 
-    // Validar que no esté vacío
+    // Validar que não esteja vazio
     if (!tag) {
       return;
     }
 
-    // Obtener tags actuales
+    // Obter tags atuais
     const currentTags: string[] = this.productForm.get('tags')?.value || [];
 
-    // Validar que no exista ya (evitar duplicados)
+    // Validar que não exista já (evitar duplicados)
     if (currentTags.includes(tag)) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Tag Duplicado',
-        detail: 'Este tag ya fue agregado.'
+        summary: 'Tag Duplicada',
+        detail: 'Esta tag já foi adicionada.'
       });
       this.tagInput = '';
       return;
     }
 
-    // Agregar nuevo tag
+    // Adicionar nova tag
     this.productForm.patchValue({
       tags: [...currentTags, tag]
     });
 
-    // Limpiar input
+    // Limpar input
     this.tagInput = '';
   }
 
   /**
-   * Elimina un tag del array
+   * Remove uma tag do array
    */
   removeTag(index: number): void {
     const currentTags: string[] = this.productForm.get('tags')?.value || [];
@@ -461,35 +461,35 @@ export class ProductFormComponent implements OnInit {
   }
 
   // ===========================
-  // GESTIÓN DE VARIANTES (CREAR)
+  // GESTÃO DE VARIANTES (CRIAR)
   // ===========================
 
   /**
-   * Agrega una variante al array local (solo modo CREAR)
-   * Valida que la combinación size+color no exista
+   * Adiciona uma variante ao array local (apenas modo CRIAR)
+   * Valida que a combinação tamanho+cor não exista
    */
   addVariant(): void {
-    // Validar que size y color estén seleccionados
+    // Validar que tamanho e cor estejam selecionados
     if (!this.variantSize || !this.variantColor) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Datos Incompletos',
-        detail: 'Debes seleccionar tamaño y color para agregar una variante.'
+        summary: 'Dados Incompletos',
+        detail: 'Você deve selecionar tamanho e cor para adicionar uma variante.'
       });
       return;
     }
 
-    // Validar que stock sea >= 0
+    // Validar que estoque seja >= 0
     if (this.variantStock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'El stock debe ser mayor o igual a 0.'
+        detail: 'O estoque deve ser maior ou igual a 0.'
       });
       return;
     }
 
-    // Validar que la combinación size+color no exista
+    // Validar que a combinação tamanho+cor não exista
     const exists = this.variants.some(
       (v) => v.size === this.variantSize && v.color === this.variantColor
     );
@@ -498,12 +498,12 @@ export class ProductFormComponent implements OnInit {
       this.messageService.add({
         severity: 'warn',
         summary: 'Variante Duplicada',
-        detail: `Ya existe una variante con tamaño ${formatSize(this.variantSize)} y color ${formatColor(this.variantColor)}.`
+        detail: `Já existe uma variante com tamanho ${formatSize(this.variantSize)} e cor ${formatColor(this.variantColor)}.`
       });
       return;
     }
 
-    // Agregar variante al array local
+    // Adicionar variante ao array local
     const newVariant: CreateProductVariantDto = {
       size: this.variantSize,
       color: this.variantColor,
@@ -512,16 +512,16 @@ export class ProductFormComponent implements OnInit {
 
     this.variants.push(newVariant);
 
-    // Resetear inputs
+    // Resetar inputs
     this.variantSize = null;
     this.variantColor = null;
     this.variantStock = 0;
 
-    // No mostrar toast en modo CREAR (es solo array local)
+    // Não mostrar toast em modo CRIAR (é apenas array local)
   }
 
   /**
-   * Elimina una variante del array local (solo modo CREAR)
+   * Remove uma variante do array local (apenas modo CRIAR)
    */
   removeVariant(index: number): void {
     if (index < 0 || index >= this.variants.length) return;
@@ -532,23 +532,23 @@ export class ProductFormComponent implements OnInit {
   }
 
   // ===========================
-  // GESTIÓN DE VARIANTES (EDITAR)
+  // GESTÃO DE VARIANTES (EDITAR)
   // ===========================
 
   /**
-   * Inicia la edición de una variante (solo modo EDITAR)
+   * Inicia a edição de uma variante (apenas modo EDITAR)
    */
   startEditVariant(variant: ProductVariant): void {
     this.editingVariantSku = variant.sku;
-    this.originalVariant = { ...variant }; // Guardar copia para cancelar
+    this.originalVariant = { ...variant }; // Guardar cópia para cancelar
   }
 
   /**
-   * Cancela la edición de una variante
+   * Cancela a edição de uma variante
    */
   cancelEditVariant(): void {
     if (this.originalVariant && this.currentProduct) {
-      // Restaurar valores originales
+      // Restaurar valores originais
       const index = this.currentProduct.variants.findIndex(v => v.sku === this.editingVariantSku);
       if (index !== -1) {
         this.currentProduct.variants[index] = { ...this.originalVariant };
@@ -559,17 +559,17 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Guarda los cambios de una variante (solo modo EDITAR)
+   * Salva as alterações de uma variante (apenas modo EDITAR)
    */
   saveVariantChanges(variant: ProductVariant): void {
     if (!this.productId || !this.currentProduct) return;
 
-    // Validar cambios
+    // Validar alterações
     if (variant.stock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'El stock debe ser mayor o igual a 0.'
+        detail: 'O estoque deve ser maior ou igual a 0.'
       });
       this.cancelEditVariant();
       return;
@@ -583,32 +583,32 @@ export class ProductFormComponent implements OnInit {
 
     this.productService.updateVariant(this.productId, variant.sku, updateData).subscribe({
       next: (updatedProduct) => {
-        this.currentProduct = updatedProduct; // Actualizar producto completo
+        this.currentProduct = updatedProduct; // Atualizar produto completo
         this.messageService.add({
           severity: 'success',
-          summary: 'Variante Actualizada',
-          detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} actualizada correctamente.`
+          summary: 'Variante Atualizada',
+          detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} atualizada com sucesso.`
         });
         this.isLoading.set(false);
         this.editingVariantSku = null;
         this.originalVariant = null;
       },
       error: (error) => {
-        console.error('Error actualizando variante:', error);
-        this.cancelEditVariant(); // Restaurar valores originales
+        console.error('Erro ao atualizar variante:', error);
+        this.cancelEditVariant(); // Restaurar valores originais
         this.isLoading.set(false);
-        // El error.interceptor ya mostró el toast
+        // O error.interceptor já mostrou o toast
       }
     });
   }
 
   /**
-   * Muestra/oculta el formulario de agregar variante (solo modo EDITAR)
+   * Mostra/oculta o formulário de adicionar variante (apenas modo EDITAR)
    */
   toggleAddVariantForm(): void {
     this.showAddVariantForm = !this.showAddVariantForm;
 
-    // Si se cierra, resetear inputs
+    // Se fechar, resetar inputs
     if (!this.showAddVariantForm) {
       this.variantSize = null;
       this.variantColor = null;
@@ -617,32 +617,32 @@ export class ProductFormComponent implements OnInit {
   }
 
   /**
-   * Agrega una variante al producto existente (solo modo EDITAR)
+   * Adiciona uma variante ao produto existente (apenas modo EDITAR)
    */
   addVariantToProduct(): void {
     if (!this.productId || !this.currentProduct) return;
 
-    // Validar que size y color estén seleccionados
+    // Validar que tamanho e cor estejam selecionados
     if (!this.variantSize || !this.variantColor) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Datos Incompletos',
-        detail: 'Debes seleccionar tamaño y color para agregar una variante.'
+        summary: 'Dados Incompletos',
+        detail: 'Você deve selecionar tamanho e cor para adicionar uma variante.'
       });
       return;
     }
 
-    // Validar que stock sea >= 0
+    // Validar que estoque seja >= 0
     if (this.variantStock < 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valores Inválidos',
-        detail: 'El stock debe ser mayor o igual a 0.'
+        detail: 'O estoque deve ser maior ou igual a 0.'
       });
       return;
     }
 
-    // Validar que la combinación size+color no exista
+    // Validar que a combinação tamanho+cor não exista
     const exists = this.currentProduct.variants.some(
       (v) => v.size === this.variantSize && v.color === this.variantColor
     );
@@ -651,7 +651,7 @@ export class ProductFormComponent implements OnInit {
       this.messageService.add({
         severity: 'warn',
         summary: 'Variante Duplicada',
-        detail: `Ya existe una variante con tamaño ${formatSize(this.variantSize)} y color ${formatColor(this.variantColor)}.`
+        detail: `Já existe uma variante com tamanho ${formatSize(this.variantSize)} e cor ${formatColor(this.variantColor)}.`
       });
       return;
     }
@@ -666,58 +666,58 @@ export class ProductFormComponent implements OnInit {
 
     this.productService.addVariant(this.productId, newVariant).subscribe({
       next: (updatedProduct) => {
-        this.currentProduct = updatedProduct; // Actualizar producto completo
+        this.currentProduct = updatedProduct; // Atualizar produto completo
         this.messageService.add({
           severity: 'success',
-          summary: 'Variante Agregada',
-          detail: `Variante ${formatSize(newVariant.size)} - ${formatColor(newVariant.color)} agregada correctamente.`
+          summary: 'Variante Adicionada',
+          detail: `Variante ${formatSize(newVariant.size)} - ${formatColor(newVariant.color)} adicionada com sucesso.`
         });
         this.isLoading.set(false);
 
-        // Resetear formulario y ocultarlo
+        // Resetar formulário e ocultá-lo
         this.variantSize = null;
         this.variantColor = null;
         this.variantStock = 0;
         this.showAddVariantForm = false;
       },
       error: (error) => {
-        console.error('Error agregando variante:', error);
+        console.error('Erro ao adicionar variante:', error);
         this.isLoading.set(false);
-        // El error.interceptor ya mostró el toast
+        // O error.interceptor já mostrou o toast
       }
     });
   }
 
   /**
-   * Elimina una variante del producto existente (solo modo EDITAR)
+   * Remove uma variante do produto existente (apenas modo EDITAR)
    */
   deleteVariantFromProduct(variant: ProductVariant): void {
     if (!this.productId || !this.currentProduct) return;
 
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar la variante ${formatSize(variant.size)} - ${formatColor(variant.color)}?`,
-      header: 'Confirmar Eliminación',
+      message: `Tem certeza que deseja remover a variante ${formatSize(variant.size)} - ${formatColor(variant.color)}?`,
+      header: 'Confirmar Remoção',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, eliminar',
+      acceptLabel: 'Sim, remover',
       rejectLabel: 'Cancelar',
       accept: () => {
         this.isLoading.set(true);
 
         this.productService.deleteVariant(this.productId!, variant.sku).subscribe({
           next: (updatedProduct) => {
-            this.currentProduct = updatedProduct; // Actualizar producto completo
+            this.currentProduct = updatedProduct; // Atualizar produto completo
             this.messageService.add({
               severity: 'success',
-              summary: 'Variante Eliminada',
-              detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} eliminada correctamente.`
+              summary: 'Variante Removida',
+              detail: `Variante ${formatSize(variant.size)} - ${formatColor(variant.color)} removida com sucesso.`
             });
             this.isLoading.set(false);
           },
           error: (error) => {
-            console.error('Error eliminando variante:', error);
+            console.error('Erro ao remover variante:', error);
             this.isLoading.set(false);
-            // El error.interceptor ya mostró el toast
-            // Si el error es por órdenes asociadas, el mensaje vendrá del backend
+            // O error.interceptor já mostrou o toast
+            // Se o erro for por pedidos associados, a mensagem virá do backend
           }
         });
       }
@@ -725,20 +725,20 @@ export class ProductFormComponent implements OnInit {
   }
 
   // ===========================
-  // GESTIÓN DE IMÁGENES
+  // GESTÃO DE IMAGENS
   // ===========================
 
   /**
-   * Handler cuando cambian las imágenes del producto
-   * Actualiza el signal de imágenes para reflejar los cambios
+   * Handler quando as imagens do produto mudam
+   * Atualiza o signal de imagens para refletir as alterações
    */
   onImagesChanged(newImages: string[]): void {
     this.productImages.set(newImages);
   }
 
   /**
-   * Handler cuando cambia la imagen destacada del producto
-   * Actualiza el signal del índice de imagen destacada
+   * Handler quando a imagem em destaque do produto muda
+   * Atualiza o signal do índice de imagem em destaque
    */
   onFeaturedImageChanged(newIndex: number): void {
     this.productFeaturedIndex.set(newIndex);

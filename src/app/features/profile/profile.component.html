@@ -1,9 +1,9 @@
 <div class="container mx-auto px-4 py-8 max-w-6xl">
   <!-- Header con título y botón Volver -->
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Mi Perfil</h1>
+    <h1 class="text-3xl font-bold">Meu Perfil</h1>
     <p-button
-      label="Volver"
+      label="Voltar"
       icon="pi pi-arrow-left"
       severity="secondary"
       [outlined]="true"
@@ -27,7 +27,7 @@
           (click)="activeSection.set('personal')"
         >
           <i class="pi pi-user text-xl"></i>
-          <span>Información Personal</span>
+          <span>Informação Pessoal</span>
         </button>
 
         <button
@@ -42,7 +42,7 @@
           (click)="activeSection.set('security')"
         >
           <i class="pi pi-lock text-xl"></i>
-          <span>Seguridad</span>
+          <span>Segurança</span>
         </button>
 
         <button
@@ -57,7 +57,7 @@
           (click)="activeSection.set('orders')"
         >
           <i class="pi pi-shopping-cart text-xl"></i>
-          <span>Mis Órdenes</span>
+          <span>Meus Pedidos</span>
         </button>
       </nav>
     </aside>
@@ -71,37 +71,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- First Name -->
               <div class="flex flex-col gap-2">
-                <label for="firstName" class="font-semibold">Nombre</label>
+                <label for="firstName" class="font-semibold">Nome</label>
                 <input
                   id="firstName"
                   type="text"
                   pInputText
                   formControlName="firstName"
-                  placeholder="Tu nombre"
+                  placeholder="Seu nome"
                 />
                 @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
-                  <small class="text-red-500">Nombre requerido (mín 2 caracteres)</small>
+                  <small class="text-red-500">Nome obrigatório (mín 2 caracteres)</small>
                 }
               </div>
 
               <!-- Last Name -->
               <div class="flex flex-col gap-2">
-                <label for="lastName" class="font-semibold">Apellido</label>
+                <label for="lastName" class="font-semibold">Sobrenome</label>
                 <input
                   id="lastName"
                   type="text"
                   pInputText
                   formControlName="lastName"
-                  placeholder="Tu apellido"
+                  placeholder="Seu sobrenome"
                 />
                 @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
-                  <small class="text-red-500">Apellido requerido (mín 2 caracteres)</small>
+                  <small class="text-red-500">Sobrenome obrigatório (mín 2 caracteres)</small>
                 }
               </div>
 
               <!-- Email (disabled) -->
               <div class="flex flex-col gap-2">
-                <label for="email" class="font-semibold">Email</label>
+                <label for="email" class="font-semibold">E-mail</label>
                 <input
                   id="email"
                   type="email"
@@ -109,18 +109,18 @@
                   formControlName="email"
                   class="bg-gray-100"
                 />
-                <small class="text-gray-500">El email no se puede modificar</small>
+                <small class="text-gray-500">O e-mail não pode ser alterado</small>
               </div>
 
               <!-- Phone -->
               <div class="flex flex-col gap-2">
-                <label for="phone" class="font-semibold">Teléfono</label>
+                <label for="phone" class="font-semibold">Telefone</label>
                 <input
                   id="phone"
                   type="tel"
                   pInputText
                   formControlName="phone"
-                  placeholder="Tu teléfono (opcional)"
+                  placeholder="Seu telefone (opcional)"
                 />
               </div>
             </div>
@@ -129,7 +129,7 @@
             <div class="mt-6">
               <p-button
                 type="submit"
-                label="Guardar Cambios"
+                label="Salvar Alterações"
                 icon="pi pi-check"
                 [loading]="loadingProfile()"
                 [disabled]="profileForm.invalid || profileForm.pristine"
@@ -142,44 +142,44 @@
       <!-- ==================== SECCIÓN: SEGURIDAD ==================== -->
       @if (activeSection() === 'security') {
         <p-card>
-          <h3 class="text-xl font-bold mb-4">Cambiar Contraseña</h3>
+          <h3 class="text-xl font-bold mb-4">Alterar Senha</h3>
           <p class="text-gray-600 mb-6">
-            Al cambiar tu contraseña, cerrarás sesión en todos tus dispositivos.
+            Ao alterar sua senha, você será desconectado de todos os seus dispositivos.
           </p>
 
           <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
             <div class="flex flex-col gap-4 max-w-md">
               <!-- Current Password -->
               <div class="flex flex-col gap-2">
-                <label for="currentPassword" class="font-semibold">Contraseña Actual</label>
+                <label for="currentPassword" class="font-semibold">Senha Atual</label>
                 <p-password
                   id="currentPassword"
                   formControlName="currentPassword"
                   [feedback]="false"
                   [toggleMask]="true"
-                  placeholder="Tu contraseña actual"
+                  placeholder="Sua senha atual"
                   styleClass="w-full"
                   inputStyleClass="w-full"
                 />
                 @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
-                  <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
+                  <small class="text-red-500">Senha obrigatória (mín 6 caracteres)</small>
                 }
               </div>
 
               <!-- New Password -->
               <div class="flex flex-col gap-2">
-                <label for="newPassword" class="font-semibold">Nueva Contraseña</label>
+                <label for="newPassword" class="font-semibold">Nova Senha</label>
                 <p-password
                   id="newPassword"
                   formControlName="newPassword"
                   [feedback]="true"
                   [toggleMask]="true"
-                  placeholder="Tu nueva contraseña"
+                  placeholder="Sua nova senha"
                   styleClass="w-full"
                   inputStyleClass="w-full"
                 />
                 @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
-                  <small class="text-red-500">Contraseña requerida (mín 6 caracteres)</small>
+                  <small class="text-red-500">Senha obrigatória (mín 6 caracteres)</small>
                 }
               </div>
 
@@ -187,7 +187,7 @@
               <div class="mt-4">
                 <p-button
                   type="submit"
-                  label="Cambiar Contraseña"
+                  label="Alterar Senha"
                   icon="pi pi-lock"
                   severity="warn"
                   [loading]="loadingPassword()"
@@ -210,10 +210,10 @@
             <!-- Error State -->
             <div class="text-center py-12">
               <i class="pi pi-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-              <h3 class="text-xl font-semibold mb-2">Error al cargar órdenes</h3>
-              <p class="text-gray-600 mb-6">No se pudieron cargar tus órdenes. Por favor, intenta nuevamente.</p>
+              <h3 class="text-xl font-semibold mb-2">Erro ao carregar pedidos</h3>
+              <p class="text-gray-600 mb-6">Não foi possível carregar seus pedidos. Por favor, tente novamente.</p>
               <p-button
-                label="Reintentar"
+                label="Tentar Novamente"
                 icon="pi pi-refresh"
                 (onClick)="retryLoadOrders()"
               />
@@ -222,10 +222,10 @@
             <!-- Empty State -->
             <div class="text-center py-12">
               <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
-              <h3 class="text-xl font-semibold mb-2">No tienes órdenes aún</h3>
-              <p class="text-gray-600 mb-6">¡Explora nuestra tienda y realiza tu primera compra!</p>
+              <h3 class="text-xl font-semibold mb-2">Você ainda não fez nenhum pedido</h3>
+              <p class="text-gray-600 mb-6">Explore nossa loja e faça sua primeira compra!</p>
               <p-button
-                label="Ver Productos"
+                label="Ver Produtos"
                 icon="pi pi-shopping-bag"
                 routerLink="/products"
               />
@@ -239,11 +239,11 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Número de Orden</th>
-                  <th>Fecha</th>
+                  <th>Número do Pedido</th>
+                  <th>Data</th>
                   <th>Total</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>Status</th>
+                  <th>Ações</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-order>
@@ -259,7 +259,7 @@
                   </td>
                   <td>
                     <p-button
-                      label="Ver Detalle"
+                      label="Ver Detalhes"
                       icon="pi pi-eye"
                       size="small"
                       [text]="true"

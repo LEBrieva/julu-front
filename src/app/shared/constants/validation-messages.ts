@@ -1,14 +1,14 @@
 /**
- * Mensajes de validación centralizados
+ * Mensagens de validação centralizadas (pt-BR)
  *
- * Este archivo contiene todos los mensajes de error de validación
- * reutilizables en toda la aplicación.
+ * Este arquivo contém todas as mensagens de erro de validação
+ * reutilizáveis em toda a aplicação.
  *
- * VENTAJAS:
- * - Consistencia: Mismo mensaje para el mismo error en todos los formularios
- * - Mantenimiento: Cambiar un mensaje en un solo lugar
- * - i18n Ready: Fácil de integrar con un sistema de traducciones
- * - Reutilización: No repetir código en cada componente
+ * VANTAGENS:
+ * - Consistência: Mesma mensagem para o mesmo erro em todos os formulários
+ * - Manutenção: Alterar uma mensagem em um só lugar
+ * - i18n: Traduções centralizadas em português brasileiro
+ * - Reutilização: Não repetir código em cada componente
  *
  * USO:
  * import { VALIDATION_MESSAGES } from '@shared/constants/validation-messages';
@@ -16,63 +16,63 @@
  */
 
 /**
- * Interface para los mensajes de error que requieren parámetros
- * Ejemplo: minlength necesita saber cuál es el mínimo (minlength: 6)
+ * Interface para as mensagens de erro que requerem parâmetros
+ * Exemplo: minlength precisa saber qual é o mínimo (minlength: 6)
  */
 export interface ValidationMessage {
   (params?: any): string;
 }
 
 /**
- * Mensajes de validación por tipo de error
+ * Mensagens de validação por tipo de erro
  *
- * TIPOS DE ERRORES COMUNES:
- * - required: Campo obligatorio
+ * TIPOS DE ERROS COMUNS:
+ * - required: Campo obrigatório
  * - email: Email inválido
- * - minlength: Longitud mínima
- * - maxlength: Longitud máxima
+ * - minlength: Comprimento mínimo
+ * - maxlength: Comprimento máximo
  * - min: Valor mínimo (números)
  * - max: Valor máximo (números)
- * - pattern: Patrón regex no cumplido
- * - Custom: Validaciones personalizadas (ej: passwordMismatch)
+ * - pattern: Padrão regex não cumprido
+ * - Custom: Validações personalizadas (ex: passwordMismatch)
  */
 export const VALIDATION_MESSAGES: { [key: string]: ValidationMessage } = {
-  // Campo requerido
-  required: () => 'Este campo es requerido',
+  // Campo obrigatório
+  required: () => 'Este campo é obrigatório',
 
   // Email
-  email: () => 'Ingresa un email válido',
+  email: () => 'Digite um e-mail válido',
 
-  // Longitud de texto
+  // Comprimento de texto
   minlength: (params) =>
-    `Debe tener al menos ${params.requiredLength} caracteres`,
+    `Deve ter pelo menos ${params.requiredLength} caracteres`,
   maxlength: (params) =>
-    `No puede tener más de ${params.requiredLength} caracteres`,
+    `Não pode ter mais de ${params.requiredLength} caracteres`,
 
   // Valores numéricos
-  min: (params) => `El valor mínimo es ${params.min}`,
-  max: (params) => `El valor máximo es ${params.max}`,
+  min: (params) => `O valor mínimo é ${params.min}`,
+  max: (params) => `O valor máximo é ${params.max}`,
 
   // Pattern (regex)
-  pattern: () => 'El formato ingresado no es válido',
+  pattern: () => 'O formato digitado não é válido',
 
-  // Validaciones personalizadas comunes
-  passwordMismatch: () => 'Las contraseñas no coinciden',
-  whitespace: () => 'No puede contener solo espacios en blanco',
-  alphanumeric: () => 'Solo se permiten letras y números',
-  phone: () => 'Ingresa un número de teléfono válido',
-  url: () => 'Ingresa una URL válida',
-  date: () => 'Ingresa una fecha válida',
+  // Validações personalizadas comuns
+  passwordMismatch: () => 'As senhas não coincidem',
+  whitespace: () => 'Não pode conter apenas espaços em branco',
+  alphanumeric: () => 'Apenas letras e números são permitidos',
+  phone: () => 'Digite um número de telefone válido',
+  url: () => 'Digite uma URL válida',
+  date: () => 'Digite uma data válida',
   strongPassword: () =>
-    'La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales',
+    'A senha deve conter maiúsculas, minúsculas, números e caracteres especiais',
 
-  // Validaciones específicas de negocio (ejemplos)
-  uniqueEmail: () => 'Este email ya está registrado',
-  uniqueUsername: () => 'Este nombre de usuario no está disponible',
-  invalidCredentials: () => 'Email o contraseña incorrectos',
+  // Validações específicas de negócio
+  uniqueEmail: () => 'Este e-mail já está registrado',
+  uniqueUsername: () => 'Este nome de usuário não está disponível',
+  invalidCredentials: () => 'E-mail ou senha incorretos',
 
-  // Default para errores no mapeados
-  default: () => 'Este campo contiene un error'
+  // Default para erros não mapeados
+  default: () => 'Este campo contém um erro'
 };
 
 /**

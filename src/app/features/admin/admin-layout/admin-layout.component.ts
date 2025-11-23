@@ -10,17 +10,17 @@ import { AvatarModule } from 'primeng/avatar';
 import { MenuItem } from 'primeng/api';
 
 /**
- * Layout principal del panel de administración
+ * Layout principal do painel de administração
  *
  * ESTRUCTURA:
- * - Header: Logo, título, user menu con logout
- * - Sidebar: Navegación a Dashboard, Products, Orders, Users
+ * - Header: Logo, título, user menu com logout
+ * - Sidebar: Navegação para Painel, Produtos, Pedidos, Usuários
  * - Content: <router-outlet> para children routes
  *
  * CARACTERÍSTICAS:
- * - Sidebar colapsable (mobile-friendly)
- * - User menu con nombre y email del admin
- * - Logout con confirmación
+ * - Sidebar colapsável (mobile-friendly)
+ * - User menu com nome e email do admin
+ * - Logout com confirmação
  */
 @Component({
   selector: 'app-admin-layout',
@@ -51,7 +51,7 @@ export class AdminLayoutComponent {
       command: () => this.goToProfile()
     },
     {
-      label: 'Ir a Home',
+      label: 'Ir ao Início',
       icon: 'pi pi-home',
       command: () => this.goToHome()
     },
@@ -59,7 +59,7 @@ export class AdminLayoutComponent {
       separator: true
     },
     {
-      label: 'Cerrar Sesión',
+      label: 'Sair',
       icon: 'pi pi-sign-out',
       command: () => this.logout()
     }
@@ -68,24 +68,24 @@ export class AdminLayoutComponent {
   // Sidebar navigation items
   navItems: Array<{ label: string; icon: string; route: string; disabled?: boolean }> = [
     {
-      label: 'Dashboard',
+      label: 'Painel',
       icon: 'pi pi-th-large',
       route: '/admin/dashboard'
     },
     {
-      label: 'Productos',
+      label: 'Produtos',
       icon: 'pi pi-box',
       route: '/admin/products'
       // ✅ FASE 5 COMPLETADA
     },
     {
-      label: 'Órdenes',
+      label: 'Pedidos',
       icon: 'pi pi-shopping-cart',
       route: '/admin/orders'
       // ✅ FASE 6 COMPLETADA
     },
     {
-      label: 'Usuarios',
+      label: 'Usuários',
       icon: 'pi pi-users',
       route: '/admin/users'
       // ✅ FASE 7 COMPLETADA
@@ -93,14 +93,14 @@ export class AdminLayoutComponent {
   ];
 
   /**
-   * Toggle sidebar visibility (para mobile)
+   * Alternar visibilidade da barra lateral (para mobile)
    */
   toggleSidebar(): void {
     this.sidebarVisible.update(value => !value);
   }
 
   /**
-   * Ir al perfil del usuario (TODO: implementar)
+   * Ir ao perfil do usuário (TODO: implementar)
    */
   goToProfile(): void {
     // TODO: Implementar página de perfil
@@ -108,14 +108,14 @@ export class AdminLayoutComponent {
   }
 
   /**
-   * Navegar al home público del ecommerce (sin cerrar sesión)
+   * Navegar ao home público do ecommerce (sem fechar sessão)
    */
   goToHome(): void {
     this.router.navigate(['/']);
   }
 
   /**
-   * Logout del sistema
+   * Logout do sistema
    */
   logout(): void {
     this.authService.logout().subscribe({
@@ -124,14 +124,14 @@ export class AdminLayoutComponent {
       },
       error: (error) => {
         console.error('Error during logout:', error);
-        // Forzar logout local incluso si falla la petición
+        // Forçar logout local mesmo se a requisição falhar
         this.router.navigate(['/login']);
       }
     });
   }
 
   /**
-   * Obtener iniciales del usuario para el avatar
+   * Obter iniciais do usuário para o avatar
    */
   getUserInitials(): string {
     const user = this.currentUser();

@@ -1,0 +1,433 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "update": "Atualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "loading": "Carregando...",
+    "noResults": "Nenhum resultado encontrado",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "close": "Fechar",
+    "actions": "Ações",
+    "status": "Status",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "all": "Todos",
+    "view": "Visualizar",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "refresh": "Atualizar",
+    "apply": "Aplicar",
+    "reset": "Resetar",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "from": "De",
+    "to": "Até",
+    "date": "Data",
+    "code": "Código",
+    "name": "Nome",
+    "description": "Descrição",
+    "price": "Preço",
+    "quantity": "Quantidade",
+    "stock": "Estoque",
+    "category": "Categoria",
+    "image": "Imagem",
+    "images": "Imagens"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "email": "Digite um e-mail válido",
+    "minlength": "Deve ter pelo menos {{requiredLength}} caracteres",
+    "maxlength": "Não pode ter mais de {{requiredLength}} caracteres",
+    "min": "O valor mínimo é {{min}}",
+    "max": "O valor máximo é {{max}}",
+    "pattern": "O formato digitado não é válido",
+    "passwordMismatch": "As senhas não coincidem",
+    "whitespace": "Não pode conter apenas espaços em branco",
+    "alphanumeric": "Apenas letras e números são permitidos",
+    "phone": "Digite um número de telefone válido",
+    "url": "Digite uma URL válida",
+    "date": "Digite uma data válida",
+    "strongPassword": "A senha deve conter maiúsculas, minúsculas, números e caracteres especiais",
+    "uniqueEmail": "Este e-mail já está registrado",
+    "uniqueUsername": "Este nome de usuário não está disponível",
+    "invalidCredentials": "E-mail ou senha incorretos",
+    "default": "Este campo contém um erro"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "phone": "Telefone",
+    "forgotPassword": "Esqueceu a senha?",
+    "dontHaveAccount": "Não tem uma conta?",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "signInHere": "Entre aqui",
+    "signUpHere": "Cadastre-se aqui",
+    "welcomeBack": "Bem-vindo de volta!",
+    "createAccount": "Criar Conta",
+    "loginSuccess": "Bem-vindo, {{name}}!",
+    "logoutSuccess": "Até logo!",
+    "registerSuccess": "Conta criada com sucesso!",
+    "sessionExpired": "Sua sessão expirou. Por favor, entre novamente.",
+    "acceptTerms": "Aceito os termos e condições",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha"
+  },
+  "header": {
+    "home": "Início",
+    "products": "Produtos",
+    "cart": "Carrinho",
+    "profile": "Meu Perfil",
+    "orders": "Meus Pedidos",
+    "adminPanel": "Painel Admin",
+    "searchPlaceholder": "Buscar produtos...",
+    "loginButton": "Entrar",
+    "needLoginMessage": "Inicie sessão para acessar esta seção"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Painel Administrativo",
+      "welcome": "Bem-vindo ao painel",
+      "stats": {
+        "totalProducts": "Total de Produtos",
+        "totalOrders": "Total de Pedidos",
+        "totalUsers": "Total de Usuários",
+        "revenue": "Faturamento"
+      }
+    },
+    "products": {
+      "title": "Gestão de Produtos",
+      "newProduct": "Novo Produto",
+      "editProduct": "Editar Produto",
+      "deleteProduct": "Excluir Produto",
+      "productDetails": "Detalhes do Produto",
+      "basicInfo": "Informação Básica",
+      "variants": "Variantes",
+      "images": "Imagens",
+      "addVariant": "Adicionar Variante",
+      "noVariants": "Nenhuma variante adicionada",
+      "noImages": "Nenhuma imagem adicionada",
+      "uploadImages": "Enviar Imagens",
+      "featuredImage": "Imagem Destaque",
+      "featured": "Destacado",
+      "markAsFeatured": "Marcar como Destacado",
+      "removeFromFeatured": "Remover dos Destacados",
+      "confirmDelete": "Tem certeza que deseja excluir este produto?",
+      "confirmDeleteVariant": "Tem certeza que deseja excluir esta variante?",
+      "confirmDeleteImage": "Tem certeza que deseja excluir esta imagem?",
+      "productCreated": "Produto criado com sucesso",
+      "productUpdated": "Produto atualizado com sucesso",
+      "productDeleted": "Produto excluído com sucesso",
+      "variantAdded": "Variante adicionada com sucesso",
+      "variantUpdated": "Variante atualizada com sucesso",
+      "variantDeleted": "Variante excluída com sucesso",
+      "imageUploaded": "Imagem enviada com sucesso",
+      "imageDeleted": "Imagem excluída com sucesso",
+      "sku": "SKU",
+      "size": "Tamanho",
+      "color": "Cor",
+      "duplicateVariant": "Já existe uma variante com este tamanho e cor",
+      "minVariantRequired": "É necessário pelo menos uma variante",
+      "tags": "Tags",
+      "tagsPlaceholder": "Digite as tags separadas por vírgula",
+      "style": "Estilo",
+      "totalStock": "Estoque Total"
+    },
+    "orders": {
+      "title": "Gestão de Pedidos",
+      "orderDetails": "Detalhes do Pedido",
+      "orderNumber": "Pedido Nº",
+      "customer": "Cliente",
+      "orderDate": "Data do Pedido",
+      "totalAmount": "Valor Total",
+      "paymentStatus": "Status Pagamento",
+      "shippingAddress": "Endereço de Entrega",
+      "orderItems": "Itens do Pedido",
+      "updateStatus": "Atualizar Status",
+      "cancelOrder": "Cancelar Pedido",
+      "confirmStatusChange": "Tem certeza que deseja alterar o status para {{status}}?",
+      "confirmCancelOrder": "Tem certeza que deseja cancelar este pedido?",
+      "statusUpdated": "Status atualizado com sucesso",
+      "orderCancelled": "Pedido cancelado com sucesso",
+      "noOrders": "Nenhum pedido encontrado",
+      "filterByStatus": "Filtrar por Status",
+      "filterByPayment": "Filtrar por Pagamento",
+      "orderType": "Tipo de Pedido",
+      "guest": "Visitante",
+      "registered": "Registrado",
+      "viewCurrentProfile": "Ver perfil atual",
+      "loadingUser": "Carregando...",
+      "street": "Rua",
+      "city": "Cidade",
+      "state": "Estado",
+      "zipCode": "CEP",
+      "country": "País"
+    },
+    "users": {
+      "title": "Gestão de Usuários",
+      "userDetails": "Detalhes do Usuário",
+      "newUser": "Novo Usuário",
+      "editUser": "Editar Usuário",
+      "deleteUser": "Excluir Usuário",
+      "role": "Função",
+      "emailVerified": "E-mail Verificado",
+      "lastLogin": "Último Acesso",
+      "createdAt": "Cadastrado em",
+      "confirmDelete": "Tem certeza que deseja excluir este usuário?",
+      "confirmStatusChange": "Tem certeza que deseja alterar o status deste usuário?",
+      "userCreated": "Usuário criado com sucesso",
+      "userUpdated": "Usuário atualizado com sucesso",
+      "userDeleted": "Usuário excluído com sucesso",
+      "statusUpdated": "Status atualizado com sucesso",
+      "noUsers": "Nenhum usuário encontrado",
+      "filterByRole": "Filtrar por Função",
+      "filterByStatus": "Filtrar por Status",
+      "avatar": "Avatar",
+      "uploadAvatar": "Enviar Avatar",
+      "changeAvatar": "Alterar Avatar",
+      "saveChanges": "Salvar Alterações",
+      "hasUnsavedChanges": "Existem alterações não salvas"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Descubra a Moda que Combina com Você",
+      "subtitle": "Coleções exclusivas com qualidade e estilo",
+      "cta": "Ver Produtos"
+    },
+    "categories": {
+      "title": "Categorias",
+      "viewAll": "Ver Tudo"
+    },
+    "featured": {
+      "title": "Produtos em Destaque",
+      "badge": "Destaque"
+    }
+  },
+  "products": {
+    "catalog": {
+      "title": "Catálogo de Produtos",
+      "filters": "Filtros",
+      "applyFilters": "Aplicar Filtros",
+      "clearFilters": "Limpar Filtros",
+      "sortBy": "Ordenar por",
+      "gridView": "Grade",
+      "listView": "Lista",
+      "priceRange": "Faixa de Preço",
+      "sizes": "Tamanhos",
+      "colors": "Cores",
+      "styles": "Estilos",
+      "featuredOnly": "Apenas Destacados",
+      "noProductsFound": "Nenhum produto encontrado",
+      "showingResults": "Mostrando {{count}} produtos",
+      "activeFilters": "Filtros Ativos",
+      "sort": {
+        "newest": "Mais Recentes",
+        "priceAsc": "Menor Preço",
+        "priceDesc": "Maior Preço",
+        "nameAsc": "Nome A-Z",
+        "nameDesc": "Nome Z-A"
+      }
+    },
+    "detail": {
+      "code": "Código",
+      "category": "Categoria",
+      "style": "Estilo",
+      "tags": "Tags",
+      "selectColor": "Selecione a Cor",
+      "selectSize": "Selecione o Tamanho",
+      "availability": "Disponibilidade",
+      "inStock": "{{count}} em estoque",
+      "outOfStock": "Fora de estoque",
+      "addToCart": "Adicionar ao Carrinho",
+      "quantity": "Quantidade",
+      "relatedProducts": "Produtos Relacionados",
+      "tabs": {
+        "description": "Descrição",
+        "reviews": "Avaliações",
+        "shipping": "Entrega",
+        "returns": "Devoluções"
+      },
+      "breadcrumb": {
+        "home": "Início"
+      },
+      "selectVariant": "Selecione cor e tamanho",
+      "reviews": {
+        "title": "Avaliações de Clientes",
+        "noReviews": "Nenhuma avaliação ainda",
+        "averageRating": "Classificação Média",
+        "totalReviews": "{{count}} avaliações"
+      },
+      "shipping": {
+        "title": "Informações de Entrega",
+        "standardShipping": "Entrega Padrão: 5-7 dias úteis",
+        "expressShipping": "Entrega Expressa: 2-3 dias úteis",
+        "freeShipping": "Frete grátis em compras acima de R$ 200"
+      },
+      "returns": {
+        "title": "Política de Devolução",
+        "info": "Devoluções aceitas em até 30 dias após a compra. Produto deve estar em condições originais."
+      }
+    }
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "menu": {
+      "personalInfo": "Informação Pessoal",
+      "security": "Segurança",
+      "orders": "Meus Pedidos"
+    },
+    "personalInfo": {
+      "title": "Informação Pessoal",
+      "updateSuccess": "Perfil atualizado com sucesso",
+      "email": "E-mail",
+      "emailHint": "O e-mail não pode ser alterado",
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "phone": "Telefone"
+    },
+    "security": {
+      "title": "Alterar Senha",
+      "currentPassword": "Senha Atual",
+      "newPassword": "Nova Senha",
+      "confirmPassword": "Confirmar Nova Senha",
+      "changePassword": "Alterar Senha",
+      "passwordChangeSuccess": "Senha alterada com sucesso",
+      "confirmLogout": "Ao alterar a senha, você será desconectado de todos os dispositivos. Deseja continuar?",
+      "logoutWarning": "Você será desconectado automaticamente"
+    },
+    "orders": {
+      "title": "Histórico de Pedidos",
+      "noOrders": "Você ainda não fez nenhum pedido",
+      "viewProducts": "Ver Produtos",
+      "orderNumber": "Pedido",
+      "date": "Data",
+      "total": "Total",
+      "status": "Status",
+      "items": "{{count}} itens"
+    }
+  },
+  "cart": {
+    "title": "Carrinho de Compras",
+    "empty": "Seu carrinho está vazio",
+    "continueShopping": "Continuar Comprando",
+    "checkout": "Finalizar Compra",
+    "itemsCount": "{{count}} itens",
+    "removeItem": "Remover Item",
+    "confirmRemove": "Tem certeza que deseja remover este item?",
+    "updateQuantity": "Atualizar Quantidade",
+    "subtotal": "Subtotal",
+    "shipping": "Frete",
+    "total": "Total"
+  },
+  "order": {
+    "status": {
+      "pending": "Pendente",
+      "processing": "Processando",
+      "shipped": "Enviado",
+      "delivered": "Entregue",
+      "cancelled": "Cancelado"
+    },
+    "payment": {
+      "pending": "Pendente",
+      "paid": "Pago",
+      "failed": "Falhou",
+      "refunded": "Reembolsado"
+    }
+  },
+  "product": {
+    "category": {
+      "remera": "Camiseta",
+      "pantalon": "Calça",
+      "chaqueta": "Jaqueta",
+      "zapatillas": "Tênis",
+      "botas": "Botas",
+      "accesorios": "Acessórios"
+    },
+    "style": {
+      "regular": "Regular",
+      "oversize": "Oversize",
+      "slim_fit": "Slim Fit",
+      "straight": "Reta",
+      "skinny": "Skinny",
+      "relaxed": "Relaxada",
+      "tapered": "Afunilada",
+      "wide_leg": "Perna Larga",
+      "bootcut": "Bootcut",
+      "jogger": "Jogger"
+    },
+    "size": {
+      "P": "P",
+      "M": "M",
+      "G": "G",
+      "GG": "GG"
+    },
+    "color": {
+      "black": "Preto",
+      "white": "Branco",
+      "gray": "Cinza",
+      "navy": "Azul Marinho",
+      "red": "Vermelho",
+      "blue": "Azul",
+      "green": "Verde",
+      "brown": "Marrom",
+      "beige": "Bege",
+      "pink": "Rosa"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    }
+  },
+  "user": {
+    "role": {
+      "admin": "Administrador",
+      "user": "Usuário"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    }
+  },
+  "toast": {
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Aviso",
+    "info": "Informação"
+  },
+  "error": {
+    "generic": "Ocorreu um erro. Tente novamente.",
+    "network": "Erro de conexão. Verifique sua internet.",
+    "unauthorized": "Acesso não autorizado",
+    "forbidden": "Você não tem permissão para acessar este recurso",
+    "notFound": "Recurso não encontrado",
+    "conflict": "Este recurso já existe",
+    "validation": "Erro de validação. Verifique os dados.",
+    "server": "Erro no servidor. Tente novamente mais tarde.",
+    "rateLimitExceeded": "Muitas requisições. Tente novamente em {{seconds}} segundos."
+  },
+  "pagination": {
+    "first": "Primeiro",
+    "last": "Último",
+    "next": "Próximo",
+    "prev": "Anterior",
+    "showing": "Mostrando {{first}} a {{last}} de {{total}} resultados",
+    "rowsPerPage": "Linhas por página"
+  }
+}

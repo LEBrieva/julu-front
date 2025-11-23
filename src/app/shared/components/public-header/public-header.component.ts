@@ -21,15 +21,15 @@ import { Popover } from 'primeng/popover';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 /**
- * Header público de la tienda
+ * Header público da loja
  *
  * CARACTERÍSTICAS:
- * - Logo clickeable al home
- * - Navegación: Home, Productos
- * - Icono de carrito con badge (preparado para FASE 9)
- * - User menu si está logueado (avatar + dropdown)
- * - Botón "Iniciar Sesión" si NO está logueado
- * - Responsive con hamburger menu en mobile
+ * - Logo clicável para a página inicial
+ * - Navegação: Início, Produtos
+ * - Ícone de carrinho com badge (preparado para FASE 9)
+ * - Menu de usuário se está logado (avatar + dropdown)
+ * - Botão "Entrar" se NÃO está logado
+ * - Responsivo com menu hamburger em mobile
  */
 @Component({
   selector: 'app-public-header',
@@ -58,7 +58,7 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
 
-  // Public para acceso en template
+  // Público para acesso no template
   confirmationService = inject(ConfirmationService);
 
   // Signals
@@ -70,24 +70,24 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   searchResults = signal<ProductListItem[]>([]);
   searchLoading = signal(false);
 
-  // Badge del carrito (reactivo)
+  // Badge do carrinho (reativo)
   cartItemsCount = this.cartService.totalItems;
 
-  // Formularios
+  // Formulários
   loginForm: FormGroup;
   searchControl = new FormControl('');
 
-  // Subscripciones
+  // Inscrições
   private searchSubscription?: Subscription;
 
-  // ViewChild para el input de búsqueda
+  // ViewChild para o input de busca
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  // Helper para errores de validación
+  // Helper para erros de validação
   getErrorMessage = getErrorMessage;
 
   constructor() {
-    // Inicializar formulario de login
+    // Inicializar formulário de login
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -95,26 +95,26 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Configurar búsqueda en tiempo real con debounce
+    // Configurar busca em tempo real com debounce
     this.searchSubscription = this.searchControl.valueChanges
       .pipe(
         tap((query) => {
-          // Activar loading INMEDIATAMENTE si hay texto válido (antes del debounce)
+          // Ativar carregamento IMEDIATAMENTE se há texto válido (antes do debounce)
           if (query && query.trim().length > 0) {
             this.searchLoading.set(true);
           }
         }),
-        debounceTime(300), // Esperar 300ms después de que el usuario deje de escribir
-        distinctUntilChanged(), // Solo emitir si el valor cambió
+        debounceTime(300), // Aguardar 300ms após o usuário parar de digitar
+        distinctUntilChanged(), // Emitir apenas se o valor mudou
         switchMap((query) => {
-          // Si el query está vacío, limpiar resultados
+          // Se a query está vazia, limpar resultados
           if (!query || query.trim().length === 0) {
             this.searchResults.set([]);
             this.searchLoading.set(false);
             return of({ data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0 } });
           }
 
-          // Llamar al servicio de búsqueda (catálogo público)
+          // Chamar o serviço de busca (catálogo público)
           return this.productService.getPublicCatalog({
             search: query.trim(),
             page: 1,
@@ -128,26 +128,26 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
           this.searchLoading.set(false);
         },
         error: (error) => {
-          console.error('Error al buscar productos:', error);
+          console.error('Erro ao buscar produtos:', error);
           this.searchResults.set([]);
           this.searchLoading.set(false);
         }
       });
 
-    // Listener para cerrar modal con ESC
+    // Listener para fechar modal com ESC
     document.addEventListener('keydown', this.handleEscKey.bind(this));
   }
 
   ngOnDestroy(): void {
-    // Limpiar suscripción al destruir el componente
+    // Limpar inscrição ao destruir o componente
     this.searchSubscription?.unsubscribe();
 
-    // Limpiar listener de ESC
+    // Limpar listener de ESC
     document.removeEventListener('keydown', this.handleEscKey.bind(this));
   }
 
   /**
-   * Manejar tecla ESC para cerrar modal
+   * Lidar com a tecla ESC para fechar modal
    */
   private handleEscKey(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.searchVisible()) {
@@ -156,56 +156,56 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Navegar al perfil del usuario (FASE 11)
+   * Navegar para o perfil do usuário (FASE 11)
    */
   goToProfile(): void {
     this.router.navigate(['/profile']);
   }
 
   /**
-   * Navegar al tab de órdenes en el perfil del usuario
+   * Navegar para a aba de pedidos no perfil do usuário
    */
   goToOrders(): void {
     this.router.navigate(['/profile'], { queryParams: { tab: 'orders' } });
   }
 
   /**
-   * Navegar al panel admin (solo si es admin)
+   * Navegar para o painel admin (somente se é admin)
    */
   goToAdmin(): void {
     this.router.navigate(['/admin']);
   }
 
   /**
-   * Ir a la página de login
+   * Ir para a página de login
    */
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
 
   /**
-   * Abrir el drawer del carrito o navegar a /cart si ya estamos ahí
+   * Abrir o drawer do carrinho ou navegar para /cart se já estamos lá
    */
   goToCart(): void {
     const currentUrl = this.router.url;
-    
-    // Si ya estamos en /cart, no hacer nada (ya estamos viendo el carrito)
+
+    // Se já estamos em /cart, não fazer nada (já estamos vendo o carrinho)
     if (currentUrl.startsWith('/cart')) {
       return;
     }
-    
-    // Si estamos en checkout, navegar a /cart (no abrir drawer)
+
+    // Se estamos em checkout, navegar para /cart (não abrir drawer)
     if (currentUrl.startsWith('/checkout')) {
       this.router.navigate(['/cart']);
       return;
     }
-    
-    // En cualquier otra página, abrir el drawer
+
+    // Em qualquer outra página, abrir o drawer
     this.cartDrawerService.open();
   }
 
   /**
-   * Logout del sistema
+   * Logout do sistema
    */
   logout(): void {
     this.authService.logout().subscribe({
@@ -213,15 +213,15 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
         this.router.navigate(['/']);
       },
       error: (error) => {
-        console.error('Error during logout:', error);
-        // Forzar logout local incluso si falla la petición
+        console.error('Erro ao fazer logout:', error);
+        // Forçar logout local mesmo que a requisição falhe
         this.router.navigate(['/']);
       }
     });
   }
 
   /**
-   * Obtener iniciales del usuario para el avatar
+   * Obter iniciais do usuário para o avatar
    */
   getUserInitials(): string {
     const user = this.currentUser();
@@ -239,15 +239,15 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   openLoginPopup(event: Event): void {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: '', // Lo manejamos en el template custom
-      acceptVisible: false, // Ocultar botón de aceptar
-      rejectVisible: false, // Ocultar botón de rechazar
-      closable: true // Permitir cerrar con X o ESC
+      message: '', // Lidamos com isso no template customizado
+      acceptVisible: false, // Ocultar botão de aceitar
+      rejectVisible: false, // Ocultar botão de rejeitar
+      closable: true // Permitir fechar com X ou ESC
     });
   }
 
   /**
-   * Manejador del submit del formulario de login
+   * Manipulador do envio do formulário de login
    */
   onLoginSubmit(): void {
     if (this.loginForm.invalid) {
@@ -262,53 +262,53 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.loadingLogin.set(false);
 
-        // Cerrar popup
+        // Fechar popup
         this.confirmationService.close();
 
-        // Resetear formulario
+        // Resetar formulário
         this.loginForm.reset();
 
-        // Mostrar toast de bienvenida
+        // Mostrar toast de boas-vindas
         this.messageService.add({
           severity: 'success',
-          summary: 'Bienvenido',
-          detail: `Hola ${response.user.firstName}!`,
+          summary: 'Bem-vindo',
+          detail: `Olá ${response.user.firstName}!`,
           life: 3000
         });
 
-        // Permanecer en la página actual (NO redirigir)
+        // Permanecer na página atual (NÃO redirecionar)
       },
       error: (error) => {
         this.loadingLogin.set(false);
-        // El error.interceptor ya mostró el toast de error
+        // O error.interceptor já mostrou o toast de erro
       }
     });
   }
 
   /**
-   * Abrir modal de búsqueda y hacer focus en el input
+   * Abrir modal de busca e focar no input
    */
   openSearchModal(): void {
     this.searchVisible.set(true);
 
-    // Esperar a que el DOM se actualice y hacer focus en el input
+    // Aguardar a atualização do DOM e focar no input
     setTimeout(() => {
       this.searchInput?.nativeElement.focus();
     }, 0);
   }
 
   /**
-   * Cerrar modal de búsqueda y limpiar estado
+   * Fechar modal de busca e limpar estado
    */
   closeSearchModal(): void {
     this.searchVisible.set(false);
-    this.searchControl.setValue('', { emitEvent: false }); // No emitir evento para evitar búsqueda
+    this.searchControl.setValue('', { emitEvent: false }); // Não emitir evento para evitar busca
     this.searchResults.set([]);
     this.searchLoading.set(false);
   }
 
   /**
-   * Navegar a detalle de producto y cerrar modal
+   * Navegar para detalhe do produto e fechar modal
    */
   goToProduct(productId: string): void {
     this.closeSearchModal();
@@ -316,7 +316,7 @@ export class PublicHeaderComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Ver todos los resultados en /products con el término de búsqueda
+   * Ver todos os resultados em /products com o termo de busca
    */
   viewAllResults(): void {
     const searchTerm = this.searchControl.value;

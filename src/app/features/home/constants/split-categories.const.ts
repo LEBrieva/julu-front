@@ -5,12 +5,12 @@ import type { CompactCategoryConfig } from '../../../shared/components/compact-c
 export const HERO_CATEGORY: HeroCategoryConfig = {
   id: 'oversize',
   name: 'Oversize',
-  tagline: 'Lo más vendido',
-  description: 'Comodidad suprema con estilo urbano. El fit perfecto para quienes buscan libertad de movimiento sin sacrificar el look.',
+  tagline: 'Mais vendido',
+  description: 'Conforto supremo com estilo urbano. O ajuste perfeito para quem busca liberdade de movimento sem sacrificar o visual.',
   benefits: [
-    'Máxima comodidad y amplitud',
+    'Máximo conforto e amplitude',
     'Estilo streetwear moderno',
-    'Versátil para cualquier ocasión'
+    'Versátil para qualquer ocasião'
   ],
   image: '/assets/images/categories/oversize.jpg',
   queryParams: { style: 'oversize' }

@@ -95,7 +95,7 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Carga productos con paginación y filtros
+   * Carrega produtos com paginação e filtros
    */
   loadProducts(page: number, rows: number): void {
     this.loading = true;
@@ -114,11 +114,11 @@ export class AdminProductsComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error cargando productos:', error);
+        console.error('Erro ao carregar produtos:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar los productos. Intenta nuevamente.'
+          summary: 'Erro',
+          detail: 'Não foi possível carregar os produtos. Tente novamente.'
         });
         this.loading = false;
       }
@@ -126,15 +126,15 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Maneja el evento de lazy load de PrimeNG Table
-   * Este método se dispara automáticamente cuando:
-   * - La tabla se inicializa
-   * - Cambia la página
-   * - Cambia el número de filas por página
-   * - Se resetea la tabla (first cambia)
+   * Trata o evento de lazy load da PrimeNG Table
+   * Este método é disparado automaticamente quando:
+   * - A tabela é inicializada
+   * - Muda a página
+   * - Muda o número de linhas por página
+   * - A tabela é resetada (first muda)
    */
   onPageChange(event: any): void {
-    // Validar que event.page exista (puede ser undefined en la primera carga)
+    // Validar que event.page exista (pode ser undefined no primeiro carregamento)
     const page = (event.page !== undefined ? event.page : 0) + 1; // PrimeNG usa índice 0, backend usa 1
     const rows = event.rows || this.rowsPerPage;
     const first = event.first !== undefined ? event.first : 0;
@@ -147,8 +147,8 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Maneja la búsqueda por texto
-   * Resetea la paginación y fuerza recarga
+   * Trata a busca por texto
+   * Reseta a paginação e força recarga
    */
   onSearch(): void {
     this.first = 0;
@@ -157,7 +157,7 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Limpia el filtro de búsqueda
+   * Limpa o filtro de busca
    */
   clearSearch(): void {
     this.searchTerm = '';
@@ -167,36 +167,36 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Navega al formulario de crear producto
+   * Navega para o formulário de criar produto
    */
   createProduct(): void {
     this.router.navigate(['/admin/products/new']);
   }
 
   /**
-   * Navega al formulario de editar producto
+   * Navega para o formulário de editar produto
    */
   editProduct(product: ProductListItem): void {
     this.router.navigate(['/admin/products', product.id, 'edit']);
   }
 
   /**
-   * Ver detalle del producto (navega a modo vista)
+   * Ver detalhes do produto (navega para o modo visualização)
    */
   viewProduct(product: ProductListItem): void {
     this.router.navigate(['/admin/products', product.id]);
   }
 
   /**
-   * Toggle estado del producto (activar/desactivar)
-   * NOTA: No se eliminan productos, solo se cambia su estado
+   * Toggle status do produto (ativar/desativar)
+   * NOTA: Produtos não são deletados, apenas o status é alterado
    */
   toggleProductStatus(product: ProductListItem): void {
     const isActive = product.status === ProductStatus.ACTIVE;
-    const action = isActive ? 'desactivar' : 'activar';
-    const actionCaps = isActive ? 'Desactivar' : 'Activar';
+    const action = isActive ? 'desativar' : 'ativar';
+    const actionCaps = isActive ? 'Desativar' : 'Ativar';
 
-    // Guardar información del cambio para el headless dialog
+    // Guardar informação da alteração para o headless dialog
     this.pendingStatusChange = {
       productName: product.name,
       action: actionCaps
@@ -204,8 +204,8 @@ export class AdminProductsComponent implements OnInit {
 
     this.confirmationService.confirm({
       key: 'toggleStatus',
-      message: `¿Estás seguro que deseas ${action} el producto?`,
-      header: `${actionCaps} Producto`,
+      message: `Tem certeza que deseja ${action} o produto?`,
+      header: `${actionCaps} Produto`,
       icon: isActive ? 'pi pi-times-circle' : 'pi pi-check-circle',
       acceptLabel: actionCaps,
       rejectLabel: 'Cancelar',
@@ -220,18 +220,18 @@ export class AdminProductsComponent implements OnInit {
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Éxito',
-              detail: `Producto ${isActive ? 'desactivado' : 'activado'} correctamente`
+              summary: 'Sucesso',
+              detail: `Produto ${isActive ? 'desativado' : 'ativado'} com sucesso`
             });
-            // Recargar lista manteniendo paginación actual
+            // Recarregar lista mantendo paginação atual
             this.loadProducts(this.currentPage, this.rowsPerPage);
           },
           error: (error) => {
-            console.error('Error cambiando estado del producto:', error);
+            console.error('Erro ao alterar status do produto:', error);
             this.messageService.add({
               severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudo cambiar el estado del producto. Intenta nuevamente.'
+              summary: 'Erro',
+              detail: 'Não foi possível alterar o status do produto. Tente novamente.'
             });
             this.loading = false;
           }
@@ -241,20 +241,20 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Toggle estado de destacado del producto
-   * Valida que no se supere el límite de 12 productos destacados (validación server-side)
+   * Toggle status de destaque do produto
+   * Valida que o limite de 12 produtos em destaque não seja excedido (validação server-side)
    */
   onToggleDestacado(product: ProductListItem): void {
     const isDestacado = product.destacado;
-    const action = isDestacado ? 'quitar de destacados' : 'marcar como destacado';
-    const actionCaps = isDestacado ? 'Quitar de Destacados' : 'Marcar como Destacado';
+    const action = isDestacado ? 'remover dos destaques' : 'marcar como destaque';
+    const actionCaps = isDestacado ? 'Remover dos Destaques' : 'Marcar como Destaque';
 
-    // Mostrar nota solo cuando se está activando (marcar como destacado)
+    // Mostrar nota apenas quando se está ativando (marcar como destaque)
     this.showDestacadoNote = !isDestacado;
 
     this.confirmationService.confirm({
       key: 'destacado',
-      message: `¿Estás seguro que deseas ${action} el producto "${product.name}"?`,
+      message: `Tem certeza que deseja ${action} o produto "${product.name}"?`,
       header: actionCaps,
       icon: isDestacado ? 'pi pi-star-fill' : 'pi pi-star',
       acceptLabel: 'Confirmar',
@@ -265,25 +265,25 @@ export class AdminProductsComponent implements OnInit {
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Éxito',
-              detail: `Producto ${isDestacado ? 'quitado de destacados' : 'marcado como destacado'} correctamente`
+              summary: 'Sucesso',
+              detail: `Produto ${isDestacado ? 'removido dos destaques' : 'marcado como destaque'} com sucesso`
             });
-            // Recargar lista manteniendo paginación actual
+            // Recarregar lista mantendo paginação atual
             this.loadProducts(this.currentPage, this.rowsPerPage);
           },
           error: (error) => {
-            console.error('Error cambiando estado de destacado:', error);
+            console.error('Erro ao alterar status de destaque:', error);
 
-            // Manejo específico del error de límite alcanzado
+            // Tratamento específico do erro de limite alcançado
             const errorMessage = error.error?.message || error.message;
-            const isLimitError = errorMessage?.includes('Máximo de productos destacados alcanzado');
+            const isLimitError = errorMessage?.includes('Máximo de produtos em destaque alcançado');
 
             this.messageService.add({
               severity: 'error',
-              summary: isLimitError ? 'Límite Alcanzado' : 'Error',
+              summary: isLimitError ? 'Limite Alcançado' : 'Erro',
               detail: isLimitError
-                ? 'Ya hay 12 productos destacados. Desactiva otro producto primero.'
-                : 'No se pudo cambiar el estado de destacado. Intenta nuevamente.'
+                ? 'Já há 12 produtos em destaque. Desative outro produto primeiro.'
+                : 'Não foi possível alterar o status de destaque. Tente novamente.'
             });
             this.loading = false;
           }
@@ -293,21 +293,21 @@ export class AdminProductsComponent implements OnInit {
   }
 
   /**
-   * Determina si el botón de toggle debe mostrar "Activar" o "Desactivar"
+   * Determina se o botão de toggle deve mostrar "Ativar" ou "Desativar"
    */
   getToggleButtonLabel(status: string): string {
-    return status === ProductStatus.ACTIVE ? 'Desactivar' : 'Activar';
+    return status === ProductStatus.ACTIVE ? 'Desativar' : 'Ativar';
   }
 
   /**
-   * Determina el ícono del botón de toggle
+   * Determina o ícone do botão de toggle
    */
   getToggleButtonIcon(status: string): string {
     return status === ProductStatus.ACTIVE ? 'pi pi-times-circle' : 'pi pi-check-circle';
   }
 
   /**
-   * Determina la severidad del botón de toggle
+   * Determina a severidade do botão de toggle
    */
   getToggleButtonSeverity(status: string): 'success' | 'danger' {
     return status === ProductStatus.ACTIVE ? 'danger' : 'success';

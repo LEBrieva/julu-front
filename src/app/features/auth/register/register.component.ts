@@ -41,7 +41,7 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   loading = signal(false);
 
-  // Datos pre-llenados de la orden guest
+  // Dados pré-preenchidos do pedido guest
   prefilledData = signal<{
     email: string;
     firstName: string;
@@ -52,7 +52,7 @@ export class RegisterComponent implements OnInit {
   } | null>(null);
 
   ngOnInit() {
-    // Leer datos del router state
+    // Ler dados do router state
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras.state || history.state;
 
@@ -124,17 +124,17 @@ export class RegisterComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          // Auto-login después del registro
+          // Auto-login após o registro
           this.authService
             .login(formValue.email, formValue.password)
             .subscribe({
               next: () => {
                 this.messageService.add({
                   severity: 'success',
-                  summary: 'Cuenta Creada',
+                  summary: 'Conta Criada',
                   detail: prefilled?.orderId
-                    ? `Tu orden ${prefilled.orderNumber} ha sido vinculada a tu cuenta`
-                    : 'Bienvenido a nuestra tienda',
+                    ? `Seu pedido ${prefilled.orderNumber} foi vinculado à sua conta`
+                    : 'Bem-vindo à nossa loja',
                 });
                 this.router.navigate(['/products']);
               },
@@ -142,9 +142,9 @@ export class RegisterComponent implements OnInit {
                 this.loading.set(false);
                 this.messageService.add({
                   severity: 'warn',
-                  summary: 'Cuenta Creada',
+                  summary: 'Conta Criada',
                   detail:
-                    'Cuenta creada exitosamente. Por favor inicia sesión.',
+                    'Conta criada com sucesso. Por favor faça login.',
                 });
                 this.router.navigate(['/login']);
               },
@@ -154,15 +154,15 @@ export class RegisterComponent implements OnInit {
           this.loading.set(false);
           this.messageService.add({
             severity: 'error',
-            summary: 'Error al Registrarse',
-            detail: error.error?.message || 'No se pudo crear la cuenta',
+            summary: 'Erro ao Registrar',
+            detail: error.error?.message || 'Não foi possível criar a conta',
           });
         },
       });
   }
 
   /**
-   * Navegar a la página anterior
+   * Navegar para a página anterior
    */
   goBack(): void {
     this.location.back();

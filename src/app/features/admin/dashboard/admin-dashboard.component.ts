@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
- * AdminDashboardComponent - Panel de administración
+ * AdminDashboardComponent - Painel de administração
  *
- * NOTA: Este componente se renderiza dentro del AdminLayoutComponent,
- * por lo que NO necesita header ni logout (ya están en el layout)
+ * NOTA: Este componente se renderiza dentro do AdminLayoutComponent,
+ * por lo que NO necesita header ni logout (já estão no layout)
  *
- * PLACEHOLDER: Contenido real será implementado en fases futuras
+ * PLACEHOLDER: Conteúdo real será implementado em fases futuras
  */
 @Component({
   selector: 'app-admin-dashboard',
@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
       <div class="page-header">
         <h1 class="page-title">
           <i class="pi pi-th-large"></i>
-          Dashboard
+          Painel
         </h1>
       </div>
 
@@ -27,12 +27,12 @@ import { CommonModule } from '@angular/common';
       <div class="dashboard-content">
         <div class="placeholder-message">
           <i class="pi pi-cog"></i>
-          <h2>Panel de Administración</h2>
-          <p>El contenido del dashboard será implementado en próximas fases</p>
+          <h2>Painel de Administração</h2>
+          <p>O conteúdo do painel será implementado nas próximas fases</p>
         </div>
 
         <div class="roadmap-card">
-          <h3>Roadmap de Desarrollo</h3>
+          <h3>Roadmap de Desenvolvimento</h3>
           <ul class="roadmap-list">
             <li class="completed">
               <i class="pi pi-check-circle"></i>
@@ -40,20 +40,20 @@ import { CommonModule } from '@angular/common';
             </li>
             <li class="completed">
               <i class="pi pi-check-circle"></i>
-              <span>FASE 4: Admin Layout con Lazy Loading</span>
-            </li>
-            <li class="completed"> 
-              <i class="pi pi-check-circle"></i>
-              <span>FASE 5: CRUD de Productos</span>
-              <small class="text-red-400">(Faltan las imagenes, agregar más adelante)</small>
+              <span>FASE 4: Admin Layout com Lazy Loading</span>
             </li>
             <li class="completed">
               <i class="pi pi-check-circle"></i>
-              <span>FASE 6: Gestión de Órdenes</span>
+              <span>FASE 5: CRUD de Produtos</span>
+              <small class="text-red-400">(Faltam as imagens, adicionar mais tarde)</small>
             </li>
             <li class="completed">
               <i class="pi pi-check-circle"></i>
-              <span>FASE 7: Gestión de Usuarios</span>
+              <span>FASE 6: Gestão de Pedidos</span>
+            </li>
+            <li class="completed">
+              <i class="pi pi-check-circle"></i>
+              <span>FASE 7: Gestão de Usuários</span>
             </li>
             <li>
               <i class="pi pi-circle"></i>
@@ -61,7 +61,7 @@ import { CommonModule } from '@angular/common';
             </li>
             <li>
               <i class="pi pi-circle"></i>
-              <span>FASE 9: Carrito y Checkout</span>
+              <span>FASE 9: Carrinho e Checkout</span>
             </li>
           </ul>
         </div>
@@ -196,5 +196,5 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class AdminDashboardComponent {
-  // Sin lógica por ahora, solo un placeholder
+  // Sem lógica por enquanto, apenas um placeholder
 }

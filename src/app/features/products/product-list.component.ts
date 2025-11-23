@@ -26,17 +26,17 @@ import { FilterSidebarComponent } from './components/filter-sidebar/filter-sideb
 import { ActiveFiltersComponent } from '../../shared/components/active-filters/active-filters';
 
 /**
- * ProductListComponent - Catálogo público de productos con filtros avanzados
+ * ProductListComponent - Catálogo público de produtos com filtros avançados
  *
  * FASE 8b Features:
- * - Grid/List view toggle con PrimeNG DataView
- * - Sidebar de filtros avanzados (precio, tallas, colores, estilos, tags, destacados)
- * - Active filters chips (removibles)
- * - Sincronización con query params del router (URL compartible)
- * - Persistencia de preferencia de vista en localStorage
- * - Búsqueda con debounce (300ms)
- * - Paginación server-side
- * - Responsive (sidebar overlay en mobile)
+ * - Grid/List view toggle com PrimeNG DataView
+ * - Sidebar de filtros avançados (preço, tamanhos, cores, estilos, tags, destaques)
+ * - Active filters chips (removíveis)
+ * - Sincronização com query params do router (URL compartilhável)
+ * - Persistência de preferência de visualização em localStorage
+ * - Busca com debounce (300ms)
+ * - Paginação server-side
+ * - Responsivo (sidebar overlay em mobile)
  */
 @Component({
   selector: 'app-product-list',
@@ -84,14 +84,14 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   rowsPerPageOptions = [12, 24, 36];
   first = 0; // Para PrimeNG Paginator
 
-  // Ordenamiento
+  // Ordenamento
   sortBy = 'newest';
   sortOptions = [
-    { label: 'Más Nuevos', value: 'newest' },
-    { label: 'Precio: Menor a Mayor', value: 'price_asc' },
-    { label: 'Precio: Mayor a Menor', value: 'price_desc' },
-    { label: 'Nombre: A-Z', value: 'name_asc' },
-    { label: 'Nombre: Z-A', value: 'name_desc' }
+    { label: 'Mais Recentes', value: 'newest' },
+    { label: 'Preço: Menor a Maior', value: 'price_asc' },
+    { label: 'Preço: Maior a Menor', value: 'price_desc' },
+    { label: 'Nome: A-Z', value: 'name_asc' },
+    { label: 'Nome: Z-A', value: 'name_desc' }
   ];
 
   // Filtros activos (sincronizados con query params)
@@ -121,42 +121,42 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    // Cargar preferencia de vista desde localStorage
+    // Carregar preferência de visualização desde localStorage
     const savedViewMode = localStorage.getItem('catalogViewMode') as 'grid' | 'list' | null;
     if (savedViewMode) {
       this.viewMode.set(savedViewMode);
     }
 
-    // Procesar query params iniciales
+    // Processar query params iniciais
     const initialParams = this.activatedRoute.snapshot.queryParams;
     const initialFilters = this.parseQueryParamsToFilters(initialParams);
     this.activeFilters.set(initialFilters);
 
-    // Cargar sortBy desde query params
+    // Carregar sortBy desde query params
     this.sortBy = initialParams['sortBy'] || 'newest';
 
-    // Suscribirse a cambios en query params (para futuros cambios)
+    // Inscrever-se a mudanças em query params (para futuras mudanças)
     this.activatedRoute.queryParams.subscribe((params) => {
       const filters = this.parseQueryParamsToFilters(params);
       this.activeFilters.set(filters);
 
-      // Actualizar sortBy
+      // Atualizar sortBy
       this.sortBy = params['sortBy'] || 'newest';
 
-      // Resetear paginación al cambiar filtros
+      // Resetar paginação ao alterar filtros
       this.currentPage = 1;
       this.first = 0;
 
-      // Recargar productos con nuevos filtros
+      // Recarregar produtos com novos filtros
       this.loadProducts();
     });
 
-    // Cargar productos inicialmente
+    // Carregar produtos inicialmente
     this.loadProducts();
   }
 
   ngAfterViewInit(): void {
-    // Obtener la posición inicial y altura del header
+    // Obter a posição inicial e altura do header
     if (this.catalogHeader) {
       setTimeout(() => {
         const headerElement = this.catalogHeader?.nativeElement;
@@ -169,18 +169,18 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // No hay subscriptions manuales para completar
+    // Não há subscriptions manuais para completar
   }
 
   /**
-   * Detecta scroll para hacer el header sticky
+   * Detecta scroll para fazer o header sticky
    */
   @HostListener('window:scroll', [])
   onWindowScroll(): void {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
     const shouldBeSticky = scrollPosition >= this.headerOffsetTop;
 
-    // Actualizar altura si el header cambió (ej: responsive, filtros aplicados)
+    // Atualizar altura se o header mudou (ex: responsivo, filtros aplicados)
     if (this.catalogHeader?.nativeElement && !shouldBeSticky) {
       const currentHeight = this.catalogHeader.nativeElement.offsetHeight;
       if (currentHeight !== this.headerHeight()) {
@@ -192,7 +192,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Carga productos desde el backend con filtros activos
+   * Carrega produtos desde o backend com filtros ativos
    */
   loadProducts(): void {
     this.loading.set(true);
@@ -212,22 +212,22 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('No se pudieron cargar los productos. Intenta nuevamente.');
+        this.error.set('Não foi possível carregar os produtos. Tente novamente.');
         this.loading.set(false);
       }
     });
   }
 
   /**
-   * Aplica filtros desde el sidebar
+   * Aplica filtros desde a sidebar
    */
   onFiltersApplied(filters: FilterProductDto): void {
     this.updateQueryParams(filters);
-    this.sidebarVisible.set(false); // Cerrar sidebar en mobile
+    this.sidebarVisible.set(false); // Fechar sidebar em mobile
   }
 
   /**
-   * Limpia todos los filtros
+   * Limpa todos os filtros
    */
   onFiltersClear(): void {
     this.sortBy = 'newest';
@@ -236,12 +236,12 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Remueve un filtro individual desde ActiveFiltersComponent
+   * Remove um filtro individual desde ActiveFiltersComponent
    */
   onFilterRemoved(filterKey: string): void {
     const currentFilters = { ...this.activeFilters() };
 
-    // Remover el filtro específico
+    // Remover o filtro específico
     switch (filterKey) {
       case 'search':
         delete currentFilters.search;
@@ -265,7 +265,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Maneja el cambio de ordenamiento
+   * Maneja a mudança de ordenamento
    */
   onSortChange(event: any): void {
     const currentFilters = { ...this.activeFilters() };
@@ -274,18 +274,18 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Maneja el cambio de página del paginador
+   * Maneja a mudança de página do paginador
    */
   onPageChange(event: any): void {
     this.currentPage = event.page + 1; // PrimeNG usa índice 0, backend usa 1
     this.rowsPerPage = event.rows;
     this.first = event.first;
     this.loadProducts();
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll para o topo
   }
 
   /**
-   * Toggle view mode (Grid / List)
+   * Toggle de modo de visualização (Grade / Lista)
    */
   toggleViewMode(): void {
     const newMode = this.viewMode() === 'grid' ? 'list' : 'grid';
@@ -299,8 +299,8 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleSidebar(): void {
     const newVisibility = !this.sidebarVisible();
     this.sidebarVisible.set(newVisibility);
-    
-    // Si se está abriendo el drawer, resetear el acordeón después de un pequeño delay
+
+    // Se o drawer está sendo aberto, resetar o acordeão depois de um pequeno delay
     if (newVisibility) {
       setTimeout(() => {
         this.filterSidebar?.resetAccordion();
@@ -309,7 +309,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Actualiza query params del router (sincronización URL)
+   * Atualiza query params do router (sincronização URL)
    */
   private updateQueryParams(filters: Partial<FilterProductDto>): void {
     const queryParams: any = {};
@@ -318,52 +318,52 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (filters.search) queryParams.search = filters.search;
     if (filters.sortBy && filters.sortBy !== 'newest') queryParams.sortBy = filters.sortBy;
 
-    // Filtros avanzados (arrays a CSV)
+    // Filtros avançados (arrays para CSV)
     if (filters.styles?.length) queryParams.styles = filters.styles.join(',');
     if (filters.sizes?.length) queryParams.sizes = filters.sizes.join(',');
     if (filters.colors?.length) queryParams.colors = filters.colors.join(',');
 
-    // Rango de precios
+    // Intervalo de preços
     if (filters.minPrice !== undefined) queryParams.minPrice = filters.minPrice;
     if (filters.maxPrice !== undefined) queryParams.maxPrice = filters.maxPrice;
 
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
       queryParams,
-      // NO usar 'merge' para evitar mantener filtros viejos
+      // NÃO usar 'merge' para evitar manter filtros antigos
     });
   }
 
   /**
-   * Parsea query params a FilterProductDto
+   * Parseia query params para FilterProductDto
    */
   private parseQueryParamsToFilters(params: any): FilterProductDto {
     const filters: FilterProductDto = {};
 
-    // Búsqueda (ahora viene del FilterSidebar)
+    // Busca (agora vem do FilterSidebar)
     if (params['search']) {
       filters.search = params['search'];
     }
 
-    // Ordenamiento
+    // Ordenamento
     if (params['sortBy']) filters.sortBy = params['sortBy'];
 
-    // Estilos (CSV a array)
+    // Estilos (CSV para array)
     if (params['styles']) {
       filters.styles = params['styles'].split(',');
     }
 
-    // Tallas (CSV a array)
+    // Tamanhos (CSV para array)
     if (params['sizes']) {
       filters.sizes = params['sizes'].split(',');
     }
 
-    // Colores (CSV a array)
+    // Cores (CSV para array)
     if (params['colors']) {
       filters.colors = params['colors'].split(',');
     }
 
-    // Rango de precios
+    // Intervalo de preços
     if (params['minPrice']) filters.minPrice = Number(params['minPrice']);
     if (params['maxPrice']) filters.maxPrice = Number(params['maxPrice']);
 
@@ -371,7 +371,7 @@ export class ProductListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Retry al fallar la carga
+   * Tentar novamente ao falhar o carregamento
    */
   retryLoad(): void {
     this.loadProducts();

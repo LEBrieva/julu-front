@@ -122,8 +122,8 @@ export class ProfileComponent implements OnInit {
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: 'Perfil Actualizado',
-            detail: 'Tus datos se actualizaron correctamente',
+            summary: 'Perfil Atualizado',
+            detail: 'Seus dados foram atualizados com sucesso',
           });
           this.profileForm.markAsPristine();
           this.loadingProfile.set(false);
@@ -132,8 +132,8 @@ export class ProfileComponent implements OnInit {
           this.loadingProfile.set(false);
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: error.error?.message || 'No se pudo actualizar el perfil',
+            summary: 'Erro',
+            detail: error.error?.message || 'Não foi possível atualizar o perfil',
           });
         },
       });
@@ -160,18 +160,18 @@ export class ProfileComponent implements OnInit {
     if (formValue.newPassword === formValue.currentPassword) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Contraseñas Iguales',
-        detail: 'La nueva contraseña debe ser diferente de la actual',
+        summary: 'Senhas Iguais',
+        detail: 'A nova senha deve ser diferente da senha atual',
       });
       return;
     }
 
     // Confirmación con Dialog
     this.confirmationService.confirm({
-      header: '¿Cambiar Contraseña?',
-      message: 'Se cerrará tu sesión en todos los dispositivos. Deberás iniciar sesión nuevamente.',
+      header: 'Alterar Senha?',
+      message: 'Você será desconectado de todos os seus dispositivos. Precisará fazer login novamente.',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, Cambiar',
+      acceptLabel: 'Sim, Alterar',
       rejectLabel: 'Cancelar',
       accept: () => {
         this.loadingPassword.set(true);
@@ -188,15 +188,15 @@ export class ProfileComponent implements OnInit {
                 next: () => {
                   this.messageService.add({
                     severity: 'success',
-                    summary: 'Contraseña Actualizada',
-                    detail: 'Por favor inicia sesión con tu nueva contraseña',
+                    summary: 'Senha Atualizada',
+                    detail: 'Por favor, faça login com sua nova senha',
                   });
-                  this.router.navigate(['/login']);
+                  this.router.navigate(['/']);
                 },
                 error: () => {
                   // Si falla el logout, limpiar sesión manualmente y redirect
                   localStorage.removeItem('accessToken');
-                  this.router.navigate(['/login']);
+                  this.router.navigate(['/']);
                 },
               });
             },
@@ -204,10 +204,10 @@ export class ProfileComponent implements OnInit {
               this.loadingPassword.set(false);
               this.messageService.add({
                 severity: 'error',
-                summary: 'Error',
+                summary: 'Erro',
                 detail:
                   error.error?.message ||
-                  'No se pudo cambiar la contraseña',
+                  'Não foi possível alterar a senha',
               });
             },
           });
@@ -237,7 +237,7 @@ export class ProfileComponent implements OnInit {
           this.ordersError.set(false);
         },
         error: (error) => {
-          console.error('Error al cargar órdenes:', error);
+          console.error('Erro ao carregar pedidos:', error);
           this.loadingOrders.set(false);
           this.ordersError.set(true);
 
@@ -245,8 +245,8 @@ export class ProfileComponent implements OnInit {
           if (error.status !== 429) {
             this.messageService.add({
               severity: 'error',
-              summary: 'Error',
-              detail: 'No se pudieron cargar las órdenes',
+              summary: 'Erro',
+              detail: 'Não foi possível carregar os pedidos',
             });
           }
         },
@@ -274,8 +274,8 @@ export class ProfileComponent implements OnInit {
         this.loadingOrderDetail.set(false);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error al Cargar Orden',
-          detail: error.error?.message || 'No se pudo cargar el detalle de la orden',
+          summary: 'Erro ao Carregar Pedido',
+          detail: error.error?.message || 'Não foi possível carregar o detalhe do pedido',
         });
       },
     });
@@ -310,10 +310,10 @@ export class ProfileComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      pending: 'Pendiente',
-      processing: 'Procesando',
+      pending: 'Pendente',
+      processing: 'Processando',
       shipped: 'Enviado',
-      delivered: 'Entregado',
+      delivered: 'Entregue',
       cancelled: 'Cancelado',
     };
     return labels[status] || status;
