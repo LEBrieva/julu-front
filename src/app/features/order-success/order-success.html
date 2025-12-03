@@ -13,21 +13,21 @@
       </div>
 
       <h1 class="text-3xl font-bold mb-4 text-gray-800">
-        ¡Orden Confirmada!
+        Pedido Confirmado!
       </h1>
       <p class="text-xl text-gray-600 mb-2">
-        Tu orden
-        <strong class="text-blue-600">{{ order()!.orderNumber }}</strong> fue
-        procesada exitosamente.
+        Seu pedido
+        <strong class="text-blue-600">{{ order()!.orderNumber }}</strong> foi
+        processado com sucesso.
       </p>
       <p class="text-gray-600 mb-8">
-        Recibirás un email de confirmación en breve con los detalles de tu
+        Você receberá um email de confirmação em breve com os detalhes do seu
         pedido.
       </p>
 
       <!-- Card con detalles de la orden -->
       <p-card styleClass="text-left max-w-2xl mx-auto mb-8">
-        <h2 class="text-lg font-bold mb-4">Detalles de tu Pedido</h2>
+        <h2 class="text-lg font-bold mb-4">Detalhes do seu Pedido</h2>
 
         <!-- Items -->
         <div class="space-y-3 mb-4">
@@ -38,12 +38,12 @@
               <div class="flex-1">
                 <p class="font-semibold">{{ item.productName }}</p>
                 <p class="text-sm text-gray-600">
-                  {{ item.variantSize }} • {{ item.variantColor }} • Cantidad:
+                  {{ item.variantSize }} • {{ item.variantColor }} • Quantidade:
                   {{ item.quantity }}
                 </p>
               </div>
               <p class="font-semibold">
-                ${{ item.subtotal | number: '1.2-2' }}
+                R$ {{ item.subtotal | number: '1.2-2' }}
               </p>
             </div>
           }
@@ -55,16 +55,16 @@
         <div class="space-y-2 mb-4">
           <div class="flex justify-between text-gray-700">
             <span>Subtotal</span>
-            <span>${{ order()!.subtotal | number: '1.2-2' }}</span>
+            <span>R$ {{ order()!.subtotal | number: '1.2-2' }}</span>
           </div>
           <div class="flex justify-between text-gray-700">
-            <span>Envío</span>
-            <span>${{ order()!.shippingCost | number: '1.2-2' }}</span>
+            <span>Envio</span>
+            <span>R$ {{ order()!.shippingCost | number: '1.2-2' }}</span>
           </div>
           <div class="flex justify-between font-bold text-lg">
             <span>Total</span>
             <span class="text-blue-600"
-              >${{ order()!.total | number: '1.2-2' }}</span
+              >R$ {{ order()!.total | number: '1.2-2' }}</span
             >
           </div>
         </div>
@@ -73,7 +73,7 @@
 
         <!-- Dirección de envío -->
         <div class="mt-4">
-          <h3 class="font-semibold mb-2">Dirección de Envío</h3>
+          <h3 class="font-semibold mb-2">Endereço de Entrega</h3>
           <p class="text-sm text-gray-700">
             {{ order()!.shippingAddress.fullName }}
           </p>
@@ -92,26 +92,54 @@
 
         <!-- Método de pago -->
         <div class="mt-4">
-          <h3 class="font-semibold mb-2">Método de Pago</h3>
+          <h3 class="font-semibold mb-2">Método de Pagamento</h3>
           <p class="text-sm text-gray-700">
             {{ getPaymentMethodLabel(order()!.paymentMethod) }}
           </p>
         </div>
+
+        <!-- Información de Mercado Pago (si existe) -->
+        @if (mpReturnParams()) {
+          <p-divider />
+          <div class="mt-4">
+            <h3 class="font-semibold mb-2">Informações de Pagamento</h3>
+
+            @if (mpReturnParams()!.status === 'approved') {
+              <div class="flex items-center gap-2 text-green-600 mb-2">
+                <i class="pi pi-check-circle text-xl"></i>
+                <span class="font-semibold">Pagamento Aprovado</span>
+              </div>
+            }
+
+            <div class="space-y-1 text-sm text-gray-700">
+              @if (mpReturnParams()!.payment_id) {
+                <p>
+                  <span class="font-semibold">ID do Pagamento:</span>
+                  <span class="font-mono ml-2">{{ mpReturnParams()!.payment_id }}</span>
+                </p>
+              }
+              <p>
+                <span class="font-semibold">Status:</span>
+                <span class="ml-2">{{ mpReturnParams()!.status }}</span>
+              </p>
+            </div>
+          </div>
+        }
       </p-card>
 
       <!-- Información adicional -->
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
         <p class="text-sm text-blue-800">
           <i class="pi pi-info-circle mr-2"></i>
-          Te notificaremos cuando tu pedido esté en camino. Puedes consultar el
-          estado de tu orden en cualquier momento desde tu perfil.
+          Notificaremos você quando seu pedido estiver a caminho. Você pode consultar
+          o status do seu pedido a qualquer momento no seu perfil.
         </p>
       </div>
 
       <!-- Botones de acción -->
       <div class="flex flex-col sm:flex-row justify-center gap-4">
         <p-button
-          label="Ver Mis Órdenes"
+          label="Ver Meus Pedidos"
           icon="pi pi-list"
           severity="secondary"
           [outlined]="true"

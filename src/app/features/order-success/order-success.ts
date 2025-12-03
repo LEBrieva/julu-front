@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../core/services/order.service';
 import { Order, PaymentMethod } from '../../core/models/order.model';
+import { MercadoPagoReturnParams } from '../../core/models/payment.model';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
@@ -28,8 +29,15 @@ export class OrderSuccessComponent implements OnInit {
 
   order = signal<Order | null>(null);
   loading = signal(true);
+  mpReturnParams = signal<MercadoPagoReturnParams | null>(null);
 
   ngOnInit() {
+    // Extraer query params de Mercado Pago (si existen)
+    const queryParams = this.route.snapshot.queryParams as MercadoPagoReturnParams;
+    if (queryParams.payment_id) {
+      this.mpReturnParams.set(queryParams);
+    }
+
     const orderId = this.route.snapshot.paramMap.get('id');
     if (!orderId) {
       this.router.navigate(['/products']);
@@ -60,9 +68,9 @@ export class OrderSuccessComponent implements OnInit {
 
   getPaymentMethodLabel(method: PaymentMethod): string {
     const labels: Record<PaymentMethod, string> = {
-      [PaymentMethod.CASH]: 'Efectivo al recibir',
-      [PaymentMethod.CREDIT_CARD]: 'Tarjeta de Crédito',
-      [PaymentMethod.DEBIT_CARD]: 'Tarjeta de Débito',
+      [PaymentMethod.CASH]: 'Dinheiro ao receber',
+      [PaymentMethod.CREDIT_CARD]: 'Cartão de Crédito',
+      [PaymentMethod.DEBIT_CARD]: 'Cartão de Débito',
       [PaymentMethod.MERCADO_PAGO]: 'Mercado Pago',
       [PaymentMethod.PIX]: 'PIX'
     };

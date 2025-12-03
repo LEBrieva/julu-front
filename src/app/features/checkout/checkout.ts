@@ -5,8 +5,16 @@ import { Router } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { AddressService } from '../../core/services/address.service';
 import { OrderService, CreateOrderDto } from '../../core/services/order.service';
+import { PaymentService } from '../../core/services/payment.service';
 import { Address } from '../../core/models/address.model';
 import { formatColor, formatSize } from '../../core/models/product.model';
+import {
+  PaymentMethodOption,
+  PAYMENT_METHOD_OPTIONS,
+  calcularTotalConRecargo,
+  calcularMontoRecargo,
+  PaymentMethodType
+} from '../../core/models/payment.model';
 
 // PrimeNG imports
 import { StepsModule } from 'primeng/steps';
@@ -41,6 +49,7 @@ export class CheckoutComponent implements OnInit {
   private cartService = inject(CartService);
   private addressService = inject(AddressService);
   private orderService = inject(OrderService);
+  private paymentService = inject(PaymentService);
   private router = inject(Router);
   private messageService = inject(MessageService);
 
@@ -48,7 +57,25 @@ export class CheckoutComponent implements OnInit {
   subtotal = this.cartService.subtotal;
 
   readonly SHIPPING_COST = 1500;
-  total = computed(() => this.subtotal() + this.SHIPPING_COST);
+
+  // Signal para método de pago seleccionado (por defecto: PIX)
+  selectedPaymentMethod = signal<PaymentMethodOption>(PAYMENT_METHOD_OPTIONS[0]);
+
+  // Opciones de métodos de pago disponibles
+  paymentMethods = PAYMENT_METHOD_OPTIONS;
+
+  // Computed para recargo
+  montoRecargo = computed(() =>
+    calcularMontoRecargo(this.subtotal(), this.SHIPPING_COST, this.selectedPaymentMethod().surchargeRate)
+  );
+
+  // Computed para total con recargo
+  total = computed(() =>
+    calcularTotalConRecargo(this.subtotal(), this.SHIPPING_COST, this.selectedPaymentMethod().surchargeRate)
+  );
+
+  // Loading state para creación de preference de MP
+  creatingPreference = signal(false);
 
   currentStep = signal(0);
   loading = signal(false);
@@ -60,10 +87,10 @@ export class CheckoutComponent implements OnInit {
   formatSize = formatSize;
 
   steps: MenuItem[] = [
-    { label: 'Revisión' },
-    { label: 'Dirección' },
-    { label: 'Pago' },
-    { label: 'Confirmación' },
+    { label: 'Revisão' },
+    { label: 'Endereço' },
+    { label: 'Pagamento' },
+    { label: 'Confirmação' },
   ];
 
   addressForm = this.fb.group({
@@ -147,17 +174,23 @@ export class CheckoutComponent implements OnInit {
   }
 
   completeOrder() {
-    this.loading.set(true);
+    // Detectar si es Mercado Pago (todos los métodos excepto cash que ya no existe)
+    // Todos los métodos ahora son MP: PIX, CREDIT_CARD, DEBIT_CARD
+    this.redirectToMercadoPago();
+  }
 
-    // Si está creando nueva dirección, crearla primero
+  private redirectToMercadoPago() {
+    this.creatingPreference.set(true);
+
+    // Primero crear dirección si es nueva
     if (this.creatingNewAddress()) {
       if (this.addressForm.invalid) {
         this.addressForm.markAllAsTouched();
-        this.loading.set(false);
+        this.creatingPreference.set(false);
         this.messageService.add({
           severity: 'warn',
-          summary: 'Formulario Inválido',
-          detail: 'Completa todos los campos',
+          summary: 'Formulário Inválido',
+          detail: 'Complete todos os campos',
         });
         return;
       }
@@ -166,10 +199,10 @@ export class CheckoutComponent implements OnInit {
         .createAddress(this.addressForm.value as any)
         .subscribe({
           next: (address) => {
-            this.createOrder(address.id);
+            this.createOrderAndRedirectToMP(address.id);
           },
           error: () => {
-            this.loading.set(false);
+            this.creatingPreference.set(false);
           },
         });
     } else {
@@ -177,40 +210,64 @@ export class CheckoutComponent implements OnInit {
       if (!addressId) {
         this.messageService.add({
           severity: 'warn',
-          summary: 'Error',
-          detail: 'Selecciona una dirección',
+          summary: 'Erro',
+          detail: 'Selecione um endereço',
         });
-        this.loading.set(false);
+        this.creatingPreference.set(false);
         return;
       }
-      this.createOrder(addressId);
+      this.createOrderAndRedirectToMP(addressId);
     }
   }
 
-  private createOrder(addressId: string) {
+  private createOrderAndRedirectToMP(addressId: string) {
+    const selectedMethod = this.selectedPaymentMethod();
+
     const orderData: CreateOrderDto = {
       addressId,
       shippingCost: this.SHIPPING_COST,
-      paymentMethod: 'cash', // Por ahora solo efectivo
+      paymentMethod: selectedMethod.value as any,
       notes: '',
     };
 
     this.orderService.createOrder(orderData).subscribe({
       next: (order) => {
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Orden Creada',
-          detail: `Tu orden ${order.orderNumber} fue creada exitosamente`,
-          life: 5000,
+        // Orden creada, ahora crear preference en MP
+        this.paymentService.createPreference({
+          orderId: order.id,
+          paymentMethod: selectedMethod.value as PaymentMethodType
+        }).subscribe({
+          next: (response) => {
+            this.creatingPreference.set(false);
+
+            // Toast informativo
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Redirecionando',
+              detail: 'Você será redirecionado para o Mercado Pago...',
+              life: 3000
+            });
+
+            // Redirect a Mercado Pago (salida a dominio externo)
+            setTimeout(() => {
+              window.location.href = response.checkoutUrl;
+            }, 1000);
+          },
+          error: () => {
+            this.creatingPreference.set(false);
+            // Error interceptor ya mostró toast
+          }
         });
-        this.router.navigate(['/order-success', order.id]);
       },
-      error: (error) => {
-        this.loading.set(false);
-        console.error('Error creating order:', error);
+      error: () => {
+        this.creatingPreference.set(false);
+        // Error interceptor ya mostró toast
       },
     });
+  }
+
+  selectPaymentMethod(method: PaymentMethodOption) {
+    this.selectedPaymentMethod.set(method);
   }
 
   getFieldError(fieldName: string): string | null {

@@ -19,7 +19,15 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   pending: 'Pendente',
   completed: 'Pago',
   failed: 'Falhou',
-  refunded: 'Reembolsado'
+  refunded: 'Reembolsado',
+  // Estados adicionales de Mercado Pago
+  approved: 'Aprovado',
+  authorized: 'Autorizado',
+  in_process: 'Em Processamento',
+  in_mediation: 'Em Mediação',
+  rejected: 'Rejeitado',
+  cancelled: 'Cancelado',
+  charged_back: 'Estornado'
 };
 
 /**
@@ -60,5 +68,13 @@ export const PAYMENT_STATUS_SEVERITY: Record<PaymentStatus, 'success' | 'info' |
   pending: 'warning',
   completed: 'success',
   failed: 'danger',
-  refunded: 'info'
+  refunded: 'info',
+  // Estados adicionales de Mercado Pago
+  approved: 'success',
+  authorized: 'info',
+  in_process: 'info',
+  in_mediation: 'warning',
+  rejected: 'danger',
+  cancelled: 'info',
+  charged_back: 'danger'
 };

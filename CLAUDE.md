@@ -897,3 +897,487 @@ Ver `../ecommerce-back/CLAUDE.md` para detalles del backend:
 - **UX optimizada**: Sin persistencia en router state (decisión arquitectónica), registro inmediato post-compra
 
 **FASE 8c** - Página de detalle de producto completa con galería de imágenes, selector inteligente de variantes, breadcrumbs, tabs informativos con PrimeNG v20, carousel de productos relacionados de la misma categoría, y sistema completo de meta tags SEO dinámicos con Open Graph y Twitter Cards. Implementado `seo.util.ts` reutilizable con helpers de truncado, sanitización y construcción de URLs.
+
+---
+
+## 🚀 FASES EN DESARROLLO (Roadmap 2025)
+
+### FASE 12: Mercado Pago - Checkout Pro (Prioridad Alta) 🔄
+
+**Objetivo**: Integrar pasarela de pagos para habilitar transacciones reales con PIX, tarjetas de crédito/débito y boleto bancário.
+
+**Documentación**: Ver `docs/MERCADO_PAGO_INTEGRATION.md` para guía completa de integración.
+
+#### Backend (NestJS + Mongoose)
+
+**Módulo de Pagos** (`src/payment/`):
+- [ ] **Payment Schema** (Mongoose):
+  - Campos: `mercadoPagoId`, `preferenceId`, `orderId`, `status`, `amount`, `paymentMethod`, `paymentTypeId`, `statusDetail`, `metadata`, `paidAt`
+  - Enum `PaymentStatus`: `pending`, `approved`, `authorized`, `in_process`, `in_mediation`, `rejected`, `cancelled`, `refunded`, `charged_back`
+  - Relación `@Prop({ type: Types.ObjectId, ref: 'Order' })` con Order
+  - Índices: `mercadoPagoId` (único), `preferenceId` (único), `orderId`
+
+- [ ] **MercadoPagoService**:
+  - SDK: `npm install mercadopago` (v2.0+)
+  - `createPreference(order)`: Genera preference con items, payer, back_urls, notification_url, metadata
+  - `getPayment(paymentId)`: Busca detalles de pago en MP API
+  - `validateWebhookSignature(headers, body)`: HMAC-SHA256 para verificar autenticidad del webhook
+
+- [ ] **PaymentService**:
+  - `createPaymentPreference(orderId)`: Crea preference y salva Payment con status PENDING
+  - `processWebhook(webhookData)`: Procesa notificación de MP, actualiza Payment y Order status
+  - `getPaymentStatus(orderId)`: Verifica status manualmente (fallback si webhook falla)
+  - Idempotencia: Verificar si webhook ya fue procesado (prevenir duplicados)
+
+- [ ] **Endpoints**:
+  - `POST /payments/create-preference` (body: `{ orderId }`) - Retorna `{ preferenceId, initPoint }`
+  - `POST /webhooks/mercadopago` (sin auth, signature validation) - Recibe notificaciones de MP
+  - `GET /payments/:orderId/status` (auth required) - Status manual
+
+- [ ] **Actualización Order Schema**:
+  - Agregar: `@Prop({ type: [{ type: Types.ObjectId, ref: 'Payment' }] }) payments: Types.ObjectId[]`
+  - Agregar: `@Prop() lastWebhookProcessedAt?: Date`
+  - Mantener: `paymentStatus` (enum existente actualizado con valores de MP)
+
+- [ ] **Variables de Entorno** (`.env`):
+  ```env
+  MP_PUBLIC_KEY=TEST-xxxxxxxx (test) / APP_USR-xxxxxxxx (prod)
+  MP_ACCESS_TOKEN=TEST-xxxxxxxx (test) / APP_USR-xxxxxxxx (prod)
+  MP_WEBHOOK_SECRET=xxxxxxxx
+  MP_SUCCESS_URL=http://localhost:4200/order-success
+  MP_FAILURE_URL=http://localhost:4200/order-failure
+  MP_PENDING_URL=http://localhost:4200/order-pending
+  ```
+
+**Testing Backend**:
+- [ ] Credenciais test do painel MP
+- [ ] Cartões de teste (aprovado, rejeitado, fundos insuficientes)
+- [ ] ngrok para expor localhost aos webhooks
+- [ ] Validar signature com MP_WEBHOOK_SECRET de teste
+
+#### Frontend (Angular)
+
+**PaymentService** (`core/services/payment.service.ts`):
+- [ ] `createPreference(orderId): Observable<{ preferenceId, initPoint }>`
+- [ ] `getPaymentStatus(orderId): Observable<PaymentStatusResponse>`
+- [ ] Interfaces: `PreferenceResponse`, `PaymentStatusResponse`
+
+**CheckoutComponent** (atualizado):
+- [ ] Botão "Pagar com Mercado Pago" (PrimeNG Button)
+- [ ] Loading state durante criação de preference
+- [ ] Toast informativo: "Redirecionando para pagamento seguro..."
+- [ ] `window.location.href = initPoint` (redirect para MP)
+
+**Páginas de Retorno**:
+
+1. **OrderSuccessComponent** (`/order-success`):
+   - Extrai query params: `payment_id`, `status`, `external_reference` (order ID)
+   - Toast de sucesso com número da ordem
+   - Verifica status no backend (fallback se webhook atrasou)
+   - Mostra método de pagamento usado
+   - CTA: "Ver Meus Pedidos" → `/profile?tab=orders`
+
+2. **OrderFailureComponent** (`/order-failure`):
+   - Extrai `status_detail` para mostrar razão da rejeição
+   - Mensagens amigáveis: "Saldo insuficiente", "Código de segurança inválido", etc.
+   - Botões: "Tentar Novamente" (volta ao checkout) / "Voltar ao Carrinho"
+
+3. **OrderPendingComponent** (`/order-pending`):
+   - Para PIX: "Escaneie o QR code ou copie o código"
+   - Para Boleto: "Pague até a data de vencimento"
+   - Aviso: "Você receberá email quando pagamento for confirmado"
+   - CTA: "Acompanhar Pedido" → `/profile?tab=orders`
+
+**Rutas** (`app.routes.ts`):
+```typescript
+{ path: 'order-success', loadComponent: () => import('./features/checkout/order-success/order-success.component') },
+{ path: 'order-failure', loadComponent: () => import('./features/checkout/order-failure/order-failure.component') },
+{ path: 'order-pending', loadComponent: () => import('./features/checkout/order-pending/order-pending.component') }
+```
+
+#### Produção
+
+**Checklist Go-Live**:
+- [ ] Criar conta Mercado Pago Brasil (mercadopago.com.br)
+- [ ] Verificação de identidade (CPF pessoa física / CNPJ pessoa jurídica)
+- [ ] Registrar chave PIX (obrigatório para aceitar PIX)
+- [ ] Cadastrar conta bancária para receber fundos
+- [ ] Obter credenciais de produção (diferentes das de teste!)
+- [ ] Configurar webhook URL com HTTPS (certificado SSL obrigatório)
+- [ ] Passar no Integration Quality Check do MP (ferramenta de certificação)
+- [ ] Teste real com valor mínimo (R$ 0,01)
+
+**Fees Mercado Pago (2025)**:
+- PIX: ~0,99% - 1,99%
+- Cartão Crédito: ~3,99% + taxa fixa
+- Cartão Débito: ~2,99% + taxa fixa
+- Boleto: Taxa fixa (~R$ 3,49) + percentual
+
+**Tempo estimado**: 7-10 dias (desenvolvimento 5 dias + aprovação MP 2-5 dias)
+
+---
+
+### FASE 13: CEP API - Busca Automática de Endereço (Prioridade Média)
+
+**Objetivo**: Auto-preenchimento de endereço no checkout com busca por CEP (Código de Endereçamento Postal).
+
+**Documentação**: Ver `docs/CEP_API_INTEGRATION.md` para detalhes de implementação.
+
+#### Backend (NestJS)
+
+**CepModule** (`src/cep/`):
+- [ ] **CepService**:
+  - `findByCep(cep: string): Promise<CepResponse>`
+  - Estratégia dual com fallback:
+    1. **ViaCEP** (primário): `https://viacep.com.br/ws/{cep}/json` (grátis, CORS habilitado)
+    2. **BrasilAPI** (fallback): `https://brasilapi.com.br/api/cep/v2/{cep}` (CDN global, coordenadas GPS)
+  - Timeout: 5 segundos por API
+  - Sanitização: Remover não-numéricos, validar 8 dígitos
+  - Error handling: 404 se CEP não encontrado, 503 se APIs indisponíveis
+
+- [ ] **CepController**:
+  - `GET /cep/:cep` → `CepResponse`
+  - Throttling: 20 requests/minuto (prevenir abuso)
+
+- [ ] **Redis Caching**:
+  - TTL: 30 dias (CEPs são dados estáveis)
+  - Chave: `cep:{cleanCep}` (ex: `cep:01001000`)
+  - Max entries: 10.000 - 50.000 CEPs
+  - Cache hit rate esperado: > 80%
+
+**Instalação**:
+```bash
+npm install @nestjs/axios axios
+npm install @nestjs/cache-manager cache-manager cache-manager-redis-store
+```
+
+**Interface CepResponse**:
+```typescript
+{
+  cep: string;
+  street: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  ibge?: string;
+  latitude?: string;  // Apenas BrasilAPI V2
+  longitude?: string; // Apenas BrasilAPI V2
+  provider: 'ViaCEP' | 'BrasilAPI';
+  fromCache?: boolean;
+}
+```
+
+#### Frontend (Angular)
+
+**CepService** (`core/services/cep.service.ts`):
+- [ ] `findByCep(cep: string): Observable<CepResponse>`
+- [ ] Sanitização: `cep.replace(/\D/g, '')` (remove hífen)
+
+**CheckoutComponent** (atualizado):
+- [ ] **Campo CEP**:
+  - `<p-inputMask mask="99999-999" placeholder="00000-000" />`
+  - Validação: 8 dígitos obrigatórios
+  - `valueChanges` pipe: `debounceTime(500)` → `filter(8 digits)` → `switchMap(cepService.findByCep)`
+
+- [ ] **Auto-preenchimento**:
+  - Preencher automaticamente: `street`, `neighborhood`, `city`, `state`
+  - Desabilitar campos preenchidos (fundo cinza, `{ value: '', disabled: true }`)
+  - Usuário digita apenas: CEP → Número → Complemento (opcional)
+  - Auto-focus no campo "Número" após auto-preenchimento
+
+- [ ] **Loading State**:
+  - Signal: `loadingCep = signal(false)`
+  - Spinner: `<p-button icon="pi pi-spin pi-spinner" [disabled]="true" />` ao lado do input
+
+- [ ] **Feedback Visual**:
+  - Toast Success: "CEP encontrado - São Paulo - SP" (3s)
+  - Toast Warn: "CEP não encontrado - Preencha manualmente" (5s)
+  - Toast Error: "Erro ao buscar CEP - Tente novamente" (5s)
+
+- [ ] **Fallback Manual**:
+  - Se CEP não encontrado, habilitar todos os campos para input manual
+  - Não bloquear checkout (CEPs novos podem não existir nas APIs)
+
+**UX Best Practices**:
+- Debounce 500ms: Evita requisição a cada dígito digitado
+- Auto-focus: Move cursor para campo "Número" após auto-fill
+- Input mask: Hífen automático no formato 00000-000
+- Campos desabilitados: Indica dados auto-preenchidos (confiáveis)
+
+**Tempo estimado**: 3 dias (backend 1 dia + frontend 1 dia + testes 1 dia)
+
+---
+
+### FASE 14: LGPD Compliance - Conformidade Legal (Prioridade Alta)
+
+**Objetivo**: Cumprir Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) para evitar multas (até 2% do faturamento, máx R$ 50 milhões).
+
+**Documentação**: Ver `docs/LGPD_COMPLIANCE.md` para checklist completo.
+
+#### Páginas Legais (Frontend)
+
+- [ ] **PrivacyPolicyComponent** (`/privacy-policy`):
+  - Seções obrigatórias:
+    - Quais dados coletamos (nome, email, CPF, endereço, histórico de compras)
+    - Finalidade de cada coleta (entrega, nota fiscal, marketing)
+    - Base legal (execução de contrato, consentimento, obrigação legal)
+    - Com quem compartilhamos (Mercado Pago, Cloudinary, Correios)
+    - Prazo de retenção (5 anos para dados fiscais)
+    - Direitos do titular (acesso, correção, portabilidade, eliminação)
+    - Contato do DPO: `dpo@suaempresa.com.br`
+    - Data da última atualização
+
+- [ ] **TermsOfServiceComponent** (`/terms`):
+  - Condições de uso da plataforma
+  - Política de devolução/reembolso
+  - Garantias de produtos
+  - Limitações de responsabilidade
+  - Lei aplicável (Brasil) e foro (jurisdição)
+
+- [ ] **Links no Footer** (todas as páginas):
+  - "Política de Privacidade" → `/privacy-policy`
+  - "Termos de Serviço" → `/terms`
+
+#### Sistema de Consentimento
+
+**RegisterComponent** (atualizado):
+- [ ] Checkbox obrigatório: "Li e aceito a Política de Privacidade e Termos de Serviço" (links clicáveis)
+- [ ] Checkbox opcional: "Aceito receber emails com ofertas e novidades" (marketing)
+
+**CheckoutComponent** (guest):
+- [ ] Checkbox obrigatório: "Li e aceito os Termos de Serviço"
+- [ ] Checkbox pré-marcado (pode desmarcar): "Aceito receber emails sobre meu pedido"
+
+**CPF opcional** (se FASE 15 implementada):
+- [ ] Checkbox: "Autorizo armazenamento do meu CPF para emissão de nota fiscal (retenção: 5 anos)"
+- [ ] Texto explicativo abaixo do checkbox
+
+**Cookie Banner**:
+- [ ] Banner na primeira visita (bottom fixo)
+- [ ] Opções: "Aceitar Todos" / "Apenas Essenciais" / "Personalizar"
+- [ ] Link: "Política de Cookies"
+
+#### Direitos dos Titulares (Backend + Frontend)
+
+1. **Direito de Acesso** ✅ (já implementado parcialmente no perfil)
+   - [ ] Endpoint: `GET /users/me/data` (JSON completo)
+   - [ ] Incluir: Dados cadastrais, endereços, pedidos, consentimentos, logs de acesso
+
+2. **Direito de Correção** ✅ (já implementado no ProfileComponent)
+   - [ ] Formulário editável no perfil
+
+3. **Direito de Portabilidade**:
+   - [ ] Endpoint: `GET /users/me/export`
+   - [ ] Formato: JSON (machine-readable)
+   - [ ] Frontend: Botão "Baixar Meus Dados" no perfil
+   - [ ] Inclui TUDO: Dados pessoais + histórico completo de pedidos/pagamentos
+
+4. **Direito de Eliminação (Esquecimento)**:
+   - [ ] Endpoint: `DELETE /users/me`
+   - [ ] Frontend: Botão "Excluir Minha Conta" (seção Segurança no perfil)
+   - [ ] ConfirmDialog: "Esta ação é irreversível. Seus dados serão anonimizados."
+   - [ ] Estratégia: **Soft delete + anonimização** (manter pedidos por 5 anos para obrigação fiscal)
+     - Anonimizar: `email = 'deleted_${userId}@anonymized.local'`, `name = 'Usuário Excluído'`, `cpf = null`, `phone = null`
+     - Manter pedidos: Converter `customerName` → "Cliente Excluído", `customerEmail` → `deleted_${userId}@...`
+
+5. **Direito de Oposição** (marketing):
+   - [ ] Checkbox no perfil: "Desejo receber emails marketing" (pode desmarcar)
+   - [ ] Link "Descadastrar" em todos os emails marketing
+   - [ ] Endpoint: `POST /users/me/unsubscribe`
+
+6. **Revogação de Consentimento**:
+   - [ ] Seção "Gerenciar Consentimentos" no ProfileComponent
+   - [ ] Lista com toggles:
+     - "Receber emails marketing"
+     - "Armazenar meu CPF para nota fiscal" (se FASE 15)
+   - [ ] Endpoint: `POST /users/me/consents/:type/revoke`
+
+#### Registro de Consentimentos (Backend)
+
+**UserConsent Schema** (Mongoose):
+```typescript
+{
+  userId: Types.ObjectId (ref 'User'),
+  consentType: string, // 'privacy_policy', 'marketing_emails', 'cpf_storage'
+  granted: boolean,
+  ipAddress: string,  // Prova de onde foi dado
+  userAgent: string,  // Browser/dispositivo
+  grantedAt: Date,
+  revokedAt?: Date
+}
+```
+
+#### Vendor Management (DPAs)
+
+**Data Processing Agreements** a assinar:
+- [ ] Mercado Pago
+- [ ] Cloudinary
+- [ ] Hosting Provider (AWS/Vercel/etc.)
+- [ ] Email Service (SendGrid/etc.)
+- [ ] Google Analytics (se usar, com IP anonimizado)
+
+**Documentar em Privacy Policy**: Lista de vendors e finalidade
+
+#### Segurança
+
+**Já implementado**:
+- ✅ HTTPS (SSL/TLS)
+- ✅ Senhas hasheadas com bcrypt
+- ✅ JWT + refresh tokens (httpOnly cookies)
+- ✅ Rate limiting (Throttler)
+
+**Adicionar**:
+- [ ] CPF criptografado (AES-256) se armazenado (FASE 15)
+- [ ] Audit logs (`AuditLog` schema):
+  ```typescript
+  {
+    userId, action, resourceType, resourceId, ipAddress, userAgent, timestamp
+  }
+  ```
+- [ ] Logs de acesso: Quem acessou quais dados e quando
+
+#### Plano de Resposta a Incidentes
+
+**Procedimento obrigatório**:
+1. Detectar: Monitoramento alerta anomalias
+2. Conter: Isolar sistemas afetados imediatamente
+3. Avaliar: Gravidade (quantos afetados, tipo de dados)
+4. **Notificar ANPD**: Prazo razoável (~72h)
+5. **Notificar Titulares**: Se risco relevante a direitos/liberdades
+6. Documentar: Relatório completo do incidente
+7. Mitigar: Corrigir vulnerabilidade, reforçar segurança
+
+**Template de email**: Ver `docs/LGPD_COMPLIANCE.md` seção 9
+
+#### Política de Retenção
+
+| Tipo de Dado | Prazo | Base Legal |
+|-------------|-------|-----------|
+| Dados cadastrais | Conta ativa + 5 anos | Obrigação fiscal |
+| Histórico de pedidos | 5 anos | Obrigação fiscal (Receita Federal) |
+| CPF (nota fiscal) | 5 anos | Obrigação fiscal |
+| Logs de acesso | 6-12 meses | Segurança da informação |
+| Emails marketing | Até revogação | Consentimento |
+
+**Auto-delete cron job**:
+- [ ] Deletar contas inativas há mais de 5 anos
+- [ ] Deletar logs de acesso antigos (1 ano)
+- [ ] Executar diariamente às 2 AM
+
+**Tempo estimado**: 1-2 semanas (páginas legais 2 dias + consentimentos 2 dias + direitos 5 dias + auditoría 3 dias)
+
+---
+
+### FASE 15: CPF Opcional para Nota Fiscal (Prioridade Baixa)
+
+**Objetivo**: Permitir que clientes forneçam CPF para geração de Nota Fiscal Eletrônica (NF-e), cumprindo obrigação fiscal brasileira.
+
+**⚠️ IMPORTANTE**: CPF **NÃO** deve ser obrigatório (LGPD). Apenas opcional com consentimento explícito.
+
+#### Backend
+
+**User Schema** (atualizado):
+- [ ] `@Prop({ type: String, required: false }) cpfEncrypted?: string` (AES-256)
+- [ ] Não armazenar CPF em texto plano (violação LGPD)
+
+**Order Schema** (atualizado):
+- [ ] `@Prop() cpf?: string` (opcional, para vincular à NF-e)
+
+**CpfService** (`src/cpf/cpf.service.ts`):
+- [ ] `encryptCpf(cpf: string): string` (AES-256 com IV)
+- [ ] `decryptCpf(encrypted: string): string`
+- [ ] `validateCpf(cpf: string): boolean` (validação de dígitos verificadores)
+
+**Instalação**:
+```bash
+npm install cpf-cnpj-validator
+```
+
+**Endpoints**:
+- [ ] `PATCH /users/me/cpf` (body: `{ cpf, consent: boolean }`)
+  - Validar CPF com `cpf-cnpj-validator`
+  - Criptografar antes de salvar
+  - Registrar consentimento em `UserConsent`
+
+**Política de Retenção**:
+- [ ] Auto-delete após 5 anos (obrigação fiscal brasileira - Receita Federal)
+- [ ] Cron job diário
+
+#### Frontend
+
+**CheckoutComponent** (atualizado):
+- [ ] **Campo CPF** (opcional):
+  - `<p-inputMask mask="999.999.999-99" placeholder="000.000.000-00" />`
+  - Label: "CPF (opcional - para nota fiscal)"
+  - Validação: Usar `@fnando/cpf` (npm)
+
+- [ ] **Consentimento LGPD**:
+  - Checkbox: "Autorizo o armazenamento do meu CPF para emissão de nota fiscal (retenção: 5 anos)"
+  - Obrigatório marcar se preencheu CPF
+
+**ProfileComponent** (atualizado):
+- [ ] Adicionar campo CPF em tab "Informações Pessoais"
+- [ ] Mostrar parcialmente mascarado: `***. 456.789-**`
+- [ ] Permitir edição/remoção
+
+**Instalação**:
+```bash
+npm install @fnando/cpf
+```
+
+**Validação customizada**:
+```typescript
+import { isValid as isValidCpf } from '@fnando/cpf';
+
+private cpfValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value?.replace(/\D/g, '');
+  if (!value) return null; // Campo opcional
+  if (!isValidCpf(value)) {
+    return { invalidCpf: 'CPF inválido' };
+  }
+  return null;
+}
+```
+
+#### Nota Fiscal (Futuro)
+
+**Integração com proveedores NF-e**:
+- [ ] NFe.io
+- [ ] Nota Fiscal Paulista (se São Paulo)
+- [ ] ENotas
+- [ ] Bling
+
+**Geração automática**:
+- [ ] Webhook MP: Quando `payment.status === 'approved'` → gerar NF-e se CPF fornecido
+- [ ] Email com PDF da NF-e para cliente
+
+**Tempo estimado**: 3 dias (backend 1 dia + frontend 1 dia + testes 1 dia)
+
+---
+
+## 📊 Resumo de Prioridades
+
+| Fase | Nome | Prioridade | Tempo | Impacto |
+|------|------|-----------|-------|---------|
+| **FASE 12** | Mercado Pago Checkout Pro | 🔴 **ALTA** | 7-10 dias | Habilita pagamentos reais (receita) |
+| **FASE 13** | CEP API Auto-fill | 🟡 **MÉDIA** | 3 dias | Melhora UX checkout (conversão) |
+| **FASE 14** | LGPD Compliance | 🔴 **ALTA** | 1-2 semanas | Evita multas legais (obrigatório) |
+| **FASE 15** | CPF Nota Fiscal | 🟢 **BAIXA** | 3 dias | Nice-to-have (diferencial) |
+
+**Ordem recomendada**: FASE 12 → FASE 14 → FASE 13 → FASE 15
+
+**Tempo total**: 4-6 semanas para completar todas as fases
+
+---
+
+## 📚 Documentação Adicional
+
+Consulte os guias detalhados em `/docs`:
+- **`MERCADO_PAGO_INTEGRATION.md`**: Setup completo de pagamentos (testing, produção, troubleshooting)
+- **`CEP_API_INTEGRATION.md`**: Comparação de APIs, caching, UX patterns
+- **`LGPD_COMPLIANCE.md`**: Checklist legal, templates de políticas, DPAs, penalidades
+
+---
+
+**Última atualização**: 2025-11-23

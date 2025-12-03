@@ -18,7 +18,7 @@
         <!-- STEP 0: Revisión de productos -->
         @if (currentStep() === 0) {
           <div class="space-y-4">
-            <h2 class="text-xl font-bold mb-4">Revisa tu pedido</h2>
+            <h2 class="text-xl font-bold mb-4">Revise seu pedido</h2>
 
             @for (item of cartItems(); track $index) {
               <div
@@ -35,11 +35,11 @@
                     {{ formatSize(item.variantSize) }} •
                     {{ formatColor(item.variantColor) }}
                   </p>
-                  <p class="text-sm text-gray-600">Cantidad: {{ item.quantity }}</p>
+                  <p class="text-sm text-gray-600">Quantidade: {{ item.quantity }}</p>
                 </div>
                 <div class="text-right">
                   <p class="font-bold text-lg">
-                    ${{ (item.priceAtAdd * item.quantity) | number: '1.2-2' }}
+                    R$ {{ (item.priceAtAdd * item.quantity) | number: '1.2-2' }}
                   </p>
                 </div>
               </div>
@@ -59,7 +59,7 @@
         <!-- STEP 1: Dirección de envío -->
         @if (currentStep() === 1) {
           <div>
-            <h2 class="text-xl font-bold mb-4">Dirección de Envío</h2>
+            <h2 class="text-xl font-bold mb-4">Endereço de Entrega</h2>
 
             @if (!creatingNewAddress()) {
               <!-- Lista de direcciones existentes -->
@@ -91,7 +91,7 @@
                           <span
                             class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded mt-1 inline-block"
                           >
-                            Predeterminada
+                            Padrão
                           </span>
                         }
                       </div>
@@ -101,7 +101,7 @@
               </div>
 
               <p-button
-                label="Agregar Nueva Dirección"
+                label="Adicionar Novo Endereço"
                 icon="pi pi-plus"
                 severity="secondary"
                 [outlined]="true"
@@ -113,14 +113,14 @@
               <form [formGroup]="addressForm" class="space-y-4">
                 <div>
                   <label for="fullName" class="block text-sm font-medium mb-2">
-                    Nombre Completo *
+                    Nome Completo *
                   </label>
                   <input
                     pInputText
                     id="fullName"
                     formControlName="fullName"
                     class="w-full"
-                    placeholder="Juan Pérez"
+                    placeholder="João Silva"
                   />
                   @if (getFieldError('fullName')) {
                     <small class="text-red-500">{{ getFieldError('fullName') }}</small>
@@ -129,14 +129,14 @@
 
                 <div>
                   <label for="street" class="block text-sm font-medium mb-2">
-                    Calle y Número *
+                    Rua e Número *
                   </label>
                   <input
                     pInputText
                     id="street"
                     formControlName="street"
                     class="w-full"
-                    placeholder="Av. Corrientes 1234"
+                    placeholder="Av. Paulista 1000"
                   />
                   @if (getFieldError('street')) {
                     <small class="text-red-500">{{ getFieldError('street') }}</small>
@@ -146,14 +146,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label for="city" class="block text-sm font-medium mb-2">
-                      Ciudad *
+                      Cidade *
                     </label>
                     <input
                       pInputText
                       id="city"
                       formControlName="city"
                       class="w-full"
-                      placeholder="Buenos Aires"
+                      placeholder="São Paulo"
                     />
                     @if (getFieldError('city')) {
                       <small class="text-red-500">{{ getFieldError('city') }}</small>
@@ -162,14 +162,14 @@
 
                   <div>
                     <label for="state" class="block text-sm font-medium mb-2">
-                      Provincia *
+                      Estado *
                     </label>
                     <input
                       pInputText
                       id="state"
                       formControlName="state"
                       class="w-full"
-                      placeholder="CABA"
+                      placeholder="SP"
                     />
                     @if (getFieldError('state')) {
                       <small class="text-red-500">{{ getFieldError('state') }}</small>
@@ -180,7 +180,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label for="zipCode" class="block text-sm font-medium mb-2">
-                      Código Postal *
+                      CEP *
                     </label>
                     <p-inputMask
                       id="zipCode"
@@ -196,13 +196,13 @@
 
                   <div>
                     <label for="phone" class="block text-sm font-medium mb-2">
-                      Teléfono *
+                      Telefone *
                     </label>
                     <p-inputMask
                       id="phone"
                       formControlName="phone"
                       mask="9999999999"
-                      placeholder="1134567890"
+                      placeholder="11987654321"
                       styleClass="w-full"
                     />
                     @if (getFieldError('phone')) {
@@ -226,7 +226,7 @@
               </form>
 
               <p-button
-                label="Volver a Direcciones"
+                label="Voltar para Endereços"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 [text]="true"
@@ -237,7 +237,7 @@
 
             <div class="flex justify-between mt-6">
               <p-button
-                label="Volver"
+                label="Voltar"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 [outlined]="true"
@@ -256,32 +256,87 @@
         <!-- STEP 2: Método de pago -->
         @if (currentStep() === 2) {
           <div>
-            <h2 class="text-xl font-bold mb-4">Método de Pago</h2>
+            <h2 class="text-xl font-bold mb-4">Método de Pagamento</h2>
 
-            <div
-              class="p-6 border-2 border-blue-500 bg-blue-50 rounded-lg mb-4"
-            >
-              <div class="flex items-center gap-3">
-                <i class="pi pi-money-bill text-2xl text-blue-600"></i>
-                <div>
-                  <h3 class="font-semibold">Pago en Efectivo</h3>
-                  <p class="text-sm text-gray-600">
-                    Pagarás al recibir tu pedido
-                  </p>
+            <!-- Opciones de pago -->
+            <div class="space-y-3 mb-6">
+              @for (method of paymentMethods; track method.value) {
+                <div
+                  class="p-4 border-2 rounded-lg cursor-pointer transition hover:bg-gray-50"
+                  [class.border-blue-500]="selectedPaymentMethod().value === method.value"
+                  [class.bg-blue-50]="selectedPaymentMethod().value === method.value"
+                  [class.border-gray-200]="selectedPaymentMethod().value !== method.value"
+                  (click)="selectPaymentMethod(method)"
+                >
+                  <div class="flex items-center gap-4">
+                    <!-- Radio button -->
+                    <p-radioButton
+                      [value]="method"
+                      [(ngModel)]="selectedPaymentMethod"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+
+                    <!-- Icono -->
+                    <div
+                      class="flex items-center justify-center w-12 h-12 rounded-full"
+                      [ngClass]="{
+                        'bg-blue-100': selectedPaymentMethod().value === method.value,
+                        'bg-gray-100': selectedPaymentMethod().value !== method.value
+                      }"
+                    >
+                      <i
+                        [class]="'pi ' + method.icon + ' text-2xl'"
+                        [ngClass]="{
+                          'text-blue-600': selectedPaymentMethod().value === method.value,
+                          'text-gray-600': selectedPaymentMethod().value !== method.value
+                        }"
+                      ></i>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-lg">{{ method.label }}</h3>
+                      <p class="text-sm text-gray-600">{{ method.description }}</p>
+                    </div>
+
+                    <!-- Badge de recargo -->
+                    @if (method.surchargeRate > 0) {
+                      <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
+                        +{{ (method.surchargeRate * 100) }}%
+                      </span>
+                    } @else {
+                      <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
+                        Grátis
+                      </span>
+                    }
+                  </div>
                 </div>
-              </div>
+              }
             </div>
 
-            <div
-              class="p-4 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700"
-            >
-              <i class="pi pi-info-circle mr-2"></i>
-              Otros métodos de pago estarán disponibles próximamente.
-            </div>
+            <!-- Información adicional según método -->
+            @if (selectedPaymentMethod().value === 'pix') {
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                <p class="text-sm text-blue-800">
+                  <i class="pi pi-info-circle mr-2"></i>
+                  Você será redirecionado para o Mercado Pago para escanear o QR code.
+                  A aprovação é instantânea.
+                </p>
+              </div>
+            }
+
+            @if (selectedPaymentMethod().value === 'credit_card') {
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                <p class="text-sm text-blue-800">
+                  <i class="pi pi-info-circle mr-2"></i>
+                  Parcelamento em até 6x sem juros. Você será redirecionado para o Mercado Pago.
+                </p>
+              </div>
+            }
 
             <div class="flex justify-between mt-6">
               <p-button
-                label="Volver"
+                label="Voltar"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 [outlined]="true"
@@ -300,12 +355,12 @@
         <!-- STEP 3: Confirmación -->
         @if (currentStep() === 3) {
           <div>
-            <h2 class="text-xl font-bold mb-4">Confirmación</h2>
+            <h2 class="text-xl font-bold mb-4">Confirmação</h2>
 
             <div class="space-y-4">
               <!-- Resumen de dirección -->
               <div class="p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-semibold mb-2">Dirección de Envío</h3>
+                <h3 class="font-semibold mb-2">Endereço de Entrega</h3>
                 @if (!creatingNewAddress() && selectedAddressId()) {
                   @for (address of addresses(); track address.id) {
                     @if (address.id === selectedAddressId()) {
@@ -337,34 +392,34 @@
 
               <!-- Resumen de método de pago -->
               <div class="p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-semibold mb-2">Método de Pago</h3>
-                <p class="text-sm text-gray-700">Pago en Efectivo al recibir</p>
+                <h3 class="font-semibold mb-2">Método de Pagamento</h3>
+                <p class="text-sm text-gray-700">{{ selectedPaymentMethod().label }}</p>
               </div>
 
               <!-- Términos y condiciones -->
               <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p class="text-sm text-gray-700">
                   <i class="pi pi-info-circle text-blue-600 mr-2"></i>
-                  Al confirmar tu pedido, aceptas nuestros términos y condiciones
-                  de venta.
+                  Ao confirmar seu pedido, você aceita nossos termos e condições
+                  de venda.
                 </p>
               </div>
             </div>
 
             <div class="flex justify-between mt-6">
               <p-button
-                label="Volver"
+                label="Voltar"
                 icon="pi pi-arrow-left"
                 severity="secondary"
                 [outlined]="true"
                 (onClick)="prevStep()"
-                [disabled]="loading()"
+                [disabled]="creatingPreference()"
               />
               <p-button
                 label="Confirmar Pedido"
                 icon="pi pi-check"
                 iconPos="right"
-                [loading]="loading()"
+                [loading]="creatingPreference()"
                 (onClick)="completeOrder()"
               />
             </div>
@@ -376,42 +431,47 @@
     <!-- Sidebar con resumen -->
     <div class="lg:col-span-1">
       <p-card>
-        <h2 class="text-lg font-bold mb-4">Resumen del Pedido</h2>
+        <h2 class="text-lg font-bold mb-4">Resumo do Pedido</h2>
 
         <div class="space-y-3 mb-6">
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">Subtotal</span>
-            <span class="font-semibold"
-              >${{ subtotal() | number: '1.2-2' }}</span
-            >
+            <span class="font-semibold">R$ {{ subtotal() | number: '1.2-2' }}</span>
           </div>
           <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Envío</span>
-            <span class="font-semibold"
-              >${{ SHIPPING_COST | number: '1.2-2' }}</span
-            >
+            <span class="text-gray-600">Envio</span>
+            <span class="font-semibold">R$ {{ SHIPPING_COST | number: '1.2-2' }}</span>
           </div>
+
+          <!-- Mostrar recargo si aplica -->
+          @if (montoRecargo() > 0) {
+            <div class="flex justify-between text-sm text-yellow-700">
+              <span>Acréscimo ({{ (selectedPaymentMethod().surchargeRate * 100) }}%)</span>
+              <span class="font-semibold">R$ {{ montoRecargo() | number: '1.2-2' }}</span>
+            </div>
+          }
+
           <p-divider />
           <div class="flex justify-between">
             <span class="font-bold">Total</span>
-            <span class="font-bold text-xl text-blue-600"
-              >${{ total() | number: '1.2-2' }}</span
-            >
+            <span class="font-bold text-xl text-blue-600">
+              R$ {{ total() | number: '1.2-2' }}
+            </span>
           </div>
         </div>
 
         <div class="space-y-2 text-sm text-gray-600">
           <p>
             <i class="pi pi-shield text-green-600 mr-2"></i>
-            Compra segura y protegida
+            Compra segura e protegida
           </p>
           <p>
             <i class="pi pi-truck text-blue-600 mr-2"></i>
-            Envío a todo el país
+            Entrega em todo o país
           </p>
           <p>
             <i class="pi pi-replay text-purple-600 mr-2"></i>
-            Devolución gratuita
+            Devolução gratuita
           </p>
         </div>
       </p-card>

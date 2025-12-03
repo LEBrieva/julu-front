@@ -1,16 +1,25 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
+import { PaymentService } from '../../core/services/payment.service';
 import { formatColor, formatSize } from '../../core/models/product.model';
 import { CreateGuestOrderDto } from '../../core/models/guest-order.model';
+import {
+  PaymentMethodOption,
+  PAYMENT_METHOD_OPTIONS,
+  calcularTotalConRecargo,
+  calcularMontoRecargo,
+  PaymentMethodType
+} from '../../core/models/payment.model';
 
 // PrimeNG imports
 import { StepsModule } from 'primeng/steps';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { MessageService, MenuItem } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
@@ -21,11 +30,13 @@ import { InputMaskModule } from 'primeng/inputmask';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule,
     StepsModule,
     ButtonModule,
     InputTextModule,
+    RadioButtonModule,
     CardModule,
     DividerModule,
     InputMaskModule,
@@ -38,6 +49,7 @@ export class GuestCheckoutComponent implements OnInit {
   private fb = inject(FormBuilder);
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
+  private paymentService = inject(PaymentService);
   private router = inject(Router);
   private messageService = inject(MessageService);
 
@@ -45,7 +57,25 @@ export class GuestCheckoutComponent implements OnInit {
   subtotal = this.cartService.subtotal;
 
   readonly SHIPPING_COST = 1500;
-  total = computed(() => this.subtotal() + this.SHIPPING_COST);
+
+  // Signal para método de pago seleccionado (por defecto: PIX)
+  selectedPaymentMethod = signal<PaymentMethodOption>(PAYMENT_METHOD_OPTIONS[0]);
+
+  // Opciones de métodos de pago disponibles
+  paymentMethods = PAYMENT_METHOD_OPTIONS;
+
+  // Computed para recargo
+  montoRecargo = computed(() =>
+    calcularMontoRecargo(this.subtotal(), this.SHIPPING_COST, this.selectedPaymentMethod().surchargeRate)
+  );
+
+  // Computed para total con recargo
+  total = computed(() =>
+    calcularTotalConRecargo(this.subtotal(), this.SHIPPING_COST, this.selectedPaymentMethod().surchargeRate)
+  );
+
+  // Loading state para creación de preference de MP
+  creatingPreference = signal(false);
 
   currentStep = signal(0);
   loading = signal(false);
@@ -55,8 +85,9 @@ export class GuestCheckoutComponent implements OnInit {
 
   steps: MenuItem[] = [
     { label: 'Email' },
-    { label: 'Dirección' },
-    { label: 'Confirmación' },
+    { label: 'Endereço' },
+    { label: 'Pagamento' },
+    { label: 'Confirmação' },
   ];
 
   // Formulario de email
@@ -96,8 +127,8 @@ export class GuestCheckoutComponent implements OnInit {
         this.emailForm.markAllAsTouched();
         this.messageService.add({
           severity: 'warn',
-          summary: 'Email Requerido',
-          detail: 'Ingresa un email válido para continuar',
+          summary: 'Email Obrigatório',
+          detail: 'Informe um email válido para continuar',
         });
         return;
       }
@@ -109,8 +140,8 @@ export class GuestCheckoutComponent implements OnInit {
         this.addressForm.markAllAsTouched();
         this.messageService.add({
           severity: 'warn',
-          summary: 'Formulario Inválido',
-          detail: 'Completa todos los campos requeridos',
+          summary: 'Formulário Inválido',
+          detail: 'Complete todos os campos obrigatórios',
         });
         return;
       }
@@ -128,16 +159,32 @@ export class GuestCheckoutComponent implements OnInit {
   }
 
   completeOrder() {
+    // Detectar si es Mercado Pago (todos los métodos excepto cash que ya no existe)
+    // Todos los métodos ahora son MP: PIX, CREDIT_CARD, DEBIT_CARD
+    this.redirectToMercadoPago();
+  }
+
+  private redirectToMercadoPago() {
+    this.creatingPreference.set(true);
+
+    // Validar formularios antes de continuar
     if (this.emailForm.invalid || this.addressForm.invalid) {
+      this.emailForm.markAllAsTouched();
+      this.addressForm.markAllAsTouched();
+      this.creatingPreference.set(false);
       this.messageService.add({
         severity: 'warn',
-        summary: 'Formulario Inválido',
-        detail: 'Completa todos los campos requeridos',
+        summary: 'Formulário Inválido',
+        detail: 'Complete todos os campos',
       });
       return;
     }
 
-    this.loading.set(true);
+    this.createOrderAndRedirectToMP();
+  }
+
+  private createOrderAndRedirectToMP() {
+    const selectedMethod = this.selectedPaymentMethod();
 
     // Construir DTO para orden guest
     const guestOrderDto: CreateGuestOrderDto = {
@@ -149,7 +196,7 @@ export class GuestCheckoutComponent implements OnInit {
       })),
       shippingAddress: {
         fullName: this.addressForm.value.fullName!,
-        email: this.emailForm.value.email!, // Incluir email en shipping address
+        email: this.emailForm.value.email!,
         street: this.addressForm.value.street!,
         city: this.addressForm.value.city!,
         state: this.addressForm.value.state!,
@@ -157,35 +204,52 @@ export class GuestCheckoutComponent implements OnInit {
         country: this.addressForm.value.country!,
         phone: this.addressForm.value.phone!,
       },
-      paymentMethod: 'cash',
+      paymentMethod: selectedMethod.value as any,
       shippingCost: this.SHIPPING_COST,
       notes: '',
     };
 
     this.orderService.createGuestOrder(guestOrderDto).subscribe({
       next: (order) => {
-        this.loading.set(false);
+        // Orden creada, ahora crear preference en MP
+        this.paymentService.createPreference({
+          orderId: order.id,
+          paymentMethod: selectedMethod.value as PaymentMethodType
+        }).subscribe({
+          next: (response) => {
+            this.creatingPreference.set(false);
 
-        // Limpiar carrito guest (localStorage)
-        this.cartService.clearCart().subscribe();
+            // Limpiar carrito guest (localStorage)
+            this.cartService.clearCart().subscribe();
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Orden Creada',
-          detail: `Tu orden ${order.orderNumber} fue creada exitosamente`,
-          life: 5000,
-        });
+            // Toast informativo
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Redirecionando',
+              detail: 'Você será redirecionado para o Mercado Pago...',
+              life: 3000
+            });
 
-        // Navegar a order-success guest con la orden en el state
-        this.router.navigate(['/order-success-guest', order.id], {
-          state: { order },
+            // Redirect a Mercado Pago (salida a dominio externo)
+            setTimeout(() => {
+              window.location.href = response.checkoutUrl;
+            }, 1000);
+          },
+          error: () => {
+            this.creatingPreference.set(false);
+            // Error interceptor ya mostró toast
+          }
         });
       },
       error: () => {
-        this.loading.set(false);
-        // El error.interceptor ya muestra el toast
+        this.creatingPreference.set(false);
+        // Error interceptor ya mostró toast
       },
     });
+  }
+
+  selectPaymentMethod(method: PaymentMethodOption) {
+    this.selectedPaymentMethod.set(method);
   }
 
   goBackToCart() {
@@ -195,7 +259,7 @@ export class GuestCheckoutComponent implements OnInit {
   getFieldError(fieldName: string, form: any = this.addressForm): string | null {
     const field = form.get(fieldName);
     if (field?.invalid && field?.touched) {
-      if (field.errors?.['required']) return 'Este campo es requerido';
+      if (field.errors?.['required']) return 'Este campo é obrigatório';
       if (field.errors?.['email']) return 'Email inválido';
       if (field.errors?.['minlength'])
         return `Mínimo ${field.errors?.['minlength'].requiredLength} caracteres`;

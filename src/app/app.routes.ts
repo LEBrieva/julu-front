@@ -133,6 +133,26 @@ export const routes: Routes = [
       )
   },
 
+  // ========== MERCADO PAGO - RUTAS DE RETORNO (FASE 12) ==========
+
+  // Order Failure (FASE 12) - Pago rechazado por MP (público)
+  {
+    path: 'order-failure',
+    loadComponent: () =>
+      import('./features/order-failure/order-failure').then(
+        (m) => m.OrderFailureComponent
+      )
+  },
+
+  // Order Pending (FASE 12) - Pago pendiente (PIX) (público)
+  {
+    path: 'order-pending',
+    loadComponent: () =>
+      import('./features/order-pending/order-pending').then(
+        (m) => m.OrderPendingComponent
+      )
+  },
+
   // ========== WILDCARD (404) ==========
 
   {

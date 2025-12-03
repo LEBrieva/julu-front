@@ -22,7 +22,15 @@ export enum PaymentStatus {
   PENDING = 'pending',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  REFUNDED = 'refunded'
+  REFUNDED = 'refunded',
+  // Estados adicionales de Mercado Pago
+  APPROVED = 'approved',
+  AUTHORIZED = 'authorized',
+  IN_PROCESS = 'in_process',
+  IN_MEDIATION = 'in_mediation',
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
+  CHARGED_BACK = 'charged_back'
 }
 
 export enum PaymentMethod {
@@ -166,14 +174,21 @@ export function getOrderStatusSeverity(
 }
 
 /**
- * Formatea el enum de PaymentStatus a texto legible
+ * Formatea el enum de PaymentStatus a texto legible (pt-BR)
  */
 export function formatPaymentStatus(status: PaymentStatus): string {
   const statusMap: Record<PaymentStatus, string> = {
-    [PaymentStatus.PENDING]: 'Pendiente',
+    [PaymentStatus.PENDING]: 'Pendente',
     [PaymentStatus.COMPLETED]: 'Completado',
-    [PaymentStatus.FAILED]: 'Fallido',
-    [PaymentStatus.REFUNDED]: 'Reembolsado'
+    [PaymentStatus.FAILED]: 'Falhou',
+    [PaymentStatus.REFUNDED]: 'Reembolsado',
+    [PaymentStatus.APPROVED]: 'Aprovado',
+    [PaymentStatus.AUTHORIZED]: 'Autorizado',
+    [PaymentStatus.IN_PROCESS]: 'Em Processamento',
+    [PaymentStatus.IN_MEDIATION]: 'Em Mediação',
+    [PaymentStatus.REJECTED]: 'Rejeitado',
+    [PaymentStatus.CANCELLED]: 'Cancelado',
+    [PaymentStatus.CHARGED_BACK]: 'Estornado'
   };
   return statusMap[status] || status;
 }
@@ -188,7 +203,14 @@ export function getPaymentStatusSeverity(
     [PaymentStatus.PENDING]: 'warn',
     [PaymentStatus.COMPLETED]: 'success',
     [PaymentStatus.FAILED]: 'danger',
-    [PaymentStatus.REFUNDED]: 'secondary'
+    [PaymentStatus.REFUNDED]: 'secondary',
+    [PaymentStatus.APPROVED]: 'success',
+    [PaymentStatus.AUTHORIZED]: 'info',
+    [PaymentStatus.IN_PROCESS]: 'info',
+    [PaymentStatus.IN_MEDIATION]: 'warn',
+    [PaymentStatus.REJECTED]: 'danger',
+    [PaymentStatus.CANCELLED]: 'secondary',
+    [PaymentStatus.CHARGED_BACK]: 'danger'
   };
   return severityMap[status] || 'secondary';
 }
